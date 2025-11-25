@@ -5,7 +5,7 @@ namespace Logic;
 public static class LogicStartUp
 {
     /// <summary>
-    /// Добавление логики пользователей
+    /// Добавление сервисов
     /// </summary>
     public static IServiceCollection AddLogic(this IServiceCollection services)
     {
