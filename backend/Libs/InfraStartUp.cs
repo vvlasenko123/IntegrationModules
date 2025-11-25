@@ -15,7 +15,6 @@ public static class InfraStartUp
     /// </summary>
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
-        services.AddSwaggerDocumentation();
         services.AddMinioStorage();
         services.AddPostgres();
         return services;
