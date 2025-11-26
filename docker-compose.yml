@@ -40,29 +40,33 @@ services:
     volumes:
       - redis_data:/data
 
-#  backend:
-#    build:
-#      context: .
-#      dockerfile: backend/Apps/IntegrationApi/Api/Dockerfile
-#      args:
-#        - BUILD_CONFIGURATION=Release
-#    restart: unless-stopped
-#    environment:
-#      - ASPNETCORE_ENVIRONMENT=Development
-#      - ASPNETCORE_URLS=http://+:8080
-#      - PostgresOptions__ConnectionString=Host=postgres;Port=5432;Username=postgres;Password=postgres;Database=postgres;Include Error Detail=true
-#      - MinioOptions__Endpoint=minio:9000
-#      - MinioOptions__AccessKey=minio
-#      - MinioOptions__SecretKey=minio123
-#      - MinioOptions__BucketName=modules
-#      - MinioOptions__UseSsl=false
-#    ports:
-#      - "8000:8080"
-#    depends_on:
-#      postgres:
-#        condition: service_healthy
-#      minio:
-#        condition: service_started
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Apps/IntegrationApi/Api/Dockerfile
+      args:
+        - BUILD_CONFIGURATION=Release
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - PostgresOptions__ConnectionString=Host=postgres;Port=5432;Username=postgres;Password=postgres;Database=integration-api;Include Error Detail=true
+      - MinioOptions__Endpoint=minio:9000
+      - MinioOptions__AccessKey=minio
+      - MinioOptions__SecretKey=minio123
+      - MinioOptions__BucketName=stickers
+      - MinioOptions__UseSsl=false
+      - RedisOptions__Configuration=redis:6379
+      - RedisOptions__InstanceName=integration-api
+    ports:
+      - "8000:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+      redis:
+        condition: service_started
 #
 #  frontend:
 #    build:
