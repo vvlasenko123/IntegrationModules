@@ -40,6 +40,7 @@ public class Startup
             });
         });
 
+        services.AddSwaggerDocumentation();
         services.AddInfrastructure();
     }
 

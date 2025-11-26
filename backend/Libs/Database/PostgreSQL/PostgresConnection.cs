@@ -63,7 +63,7 @@ public sealed class PostgresConnection : IDbConnection
             _inner = new NpgsqlConnection(_connectionString);
         }
 
-        if (_inner.State != ConnectionState.Open)
+        if (_inner.State is not ConnectionState.Open)
         {
             _inner.Open();
         }

@@ -1,6 +1,6 @@
 using InfraLib.MinIO.Options;
+using InfraLib.MinIO.Storage;
 using InfraLib.Validation.Options;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Minio;
@@ -38,8 +38,7 @@ public static class MinioStartUp
             return client.Build();
         });
 
-        // TODO подключить стикеры и эмодзи в DI
-        //services.AddSingleton<IStickerImage, MinioImageStorage>();
+        services.AddSingleton<MinioImageStorage>();
 
         return services;
     }

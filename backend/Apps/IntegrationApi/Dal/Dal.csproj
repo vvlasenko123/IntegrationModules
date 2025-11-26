@@ -12,9 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Migrations\" />
-    <Folder Include="Models\" />
-    <Folder Include="Repository\" />
+    <ProjectReference Include="..\..\..\Libs\InfraLib.csproj" />
   </ItemGroup>
 
 </Project>

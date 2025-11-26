@@ -1,5 +1,6 @@
 ﻿using InfraLib.Database;
 using InfraLib.Minio;
+using InfraLib.Redis;
 using InfraLib.Swagger;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,6 +18,7 @@ public static class InfraStartUp
     {
         services.AddMinioStorage();
         services.AddPostgres();
+        services.AddRedis();
         return services;
     }
 }

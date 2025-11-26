@@ -4,9 +4,9 @@ services:
     container_name: postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: integration-api
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
+      POSTGRES_DB: integration-api
     ports:
       - "5432:5432"
     volumes:
@@ -30,6 +30,15 @@ services:
       - "9001:9001"
     volumes:
       - minio_data:/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
 
 #  backend:
 #    build:
@@ -67,3 +76,4 @@ services:
 volumes:
   postgres_data:
   minio_data:
+  redis_data:
