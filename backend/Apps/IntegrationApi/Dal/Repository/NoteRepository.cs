@@ -86,4 +86,34 @@ FROM notes;
 
         return result.AsList();
     }
+
+    /// <inheritdoc />
+    public async Task<Note?> UpdateContentAsync(Guid id, string content, CancellationToken token)
+    {
+        if (_connection.State is not ConnectionState.Open)
+        {
+            _connection.Open();
+        }
+
+        const string sql = @"
+UPDATE notes
+SET content = @Content
+WHERE id = @Id;
+
+SELECT id,
+       content,
+       color
+FROM notes
+WHERE id = @Id;
+";
+
+        return await _connection.QuerySingleOrDefaultAsync<Note>(new CommandDefinition(
+            sql,
+            new
+            {
+                Id = id,
+                Content = content
+            },
+            cancellationToken: token));
+    }
 }

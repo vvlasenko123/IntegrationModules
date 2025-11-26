@@ -53,7 +53,7 @@ export const Board = forwardRef(function Board(_, ref) {
             }
 
             const nextZ = (topZ || 1) + 1
-            addSticker({ x, y, color, width: defaultW, height: defaultH, text: opts.text ?? '', zIndex: nextZ })
+            addSticker({ id: opts.id, x, y, color, width: defaultW, height: defaultH, text: opts.text ?? '', zIndex: nextZ })
         }
     }), [addSticker, stickers, topZ])
 

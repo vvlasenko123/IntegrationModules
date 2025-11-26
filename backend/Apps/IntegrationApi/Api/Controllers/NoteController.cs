@@ -33,19 +33,14 @@ public class NoteController : ControllerBase
             return BadRequest("Тело запроса не задано");
         }
 
-        if (string.IsNullOrWhiteSpace(request.Content))
-        {
-            return BadRequest("Поле content не задано");
-        }
-
-        if (string.IsNullOrWhiteSpace(request.Color))
+        if (request.Color is null || string.IsNullOrWhiteSpace(request.Color))
         {
             return BadRequest("Поле color не задано");
         }
 
         var note = new Note
         {
-            Content = request.Content,
+            Content = request.Content ?? string.Empty,
             Color = request.Color
         };
 
@@ -98,5 +93,34 @@ public class NoteController : ControllerBase
         }).ToList();
 
         return Ok(result);
+    }
+    
+    /// <summary>
+    /// Обновление текста заметки
+    /// </summary>
+    [HttpPatch("{id:guid}/content")]
+    public async Task<ActionResult<NoteResponse>> UpdateContentAsync(
+        [FromRoute] Guid id,
+        [FromBody] NoteUpdateContentRequest request,
+        CancellationToken token)
+    {
+        if (request is null)
+        {
+            return BadRequest("Тело запроса не задано");
+        }
+
+        var updated = await _noteRepository.UpdateContentAsync(id, request.Content ?? string.Empty, token);
+
+        if (updated is null)
+        {
+            return NotFound("Заметка не найдена");
+        }
+
+        return Ok(new NoteResponse
+        {
+            Id = updated.Id,
+            Content = updated.Content,
+            Color = updated.Color
+        });
     }
 }

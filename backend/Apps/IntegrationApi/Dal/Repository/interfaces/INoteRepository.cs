@@ -21,4 +21,9 @@ public interface INoteRepository
     /// Получение списка заметок
     /// </summary>
     Task<IReadOnlyCollection<Note>> GetAllAsync(CancellationToken token);
+    
+    /// <summary>
+    /// обновление текста
+    /// </summary>
+    Task<Note?> UpdateContentAsync(Guid id, string content, CancellationToken token);
 }

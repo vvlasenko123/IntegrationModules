@@ -2,52 +2,104 @@ import React, { useEffect, useRef, useState } from 'react'
 import { LeftToolbar } from './LeftToolbar'
 import { Board } from './Board'
 import { useStickersStore } from '../../../entities/stickers/model/useStickersStore'
+import { notesApi } from '../../../shared/api/notesApi'
 
 const SafeFallbackWidget = ({ children }) => <div>{children}</div>
 
-/**
- * StickerBoardWidget — теперь использует Board (реф) для добавления стикеров в центр.
- * LeftToolbar получает onPick, который вызывает boardRef.current.addStickerAtCenter.
- */
-
 export const StickerBoardWidget = () => {
-    const reset = useStickersStore(state => state.reset)
+    const reset = useStickersStore((state) => state.reset)
+    const addSticker = useStickersStore((state) => state.addSticker)
+    const setStickers = useStickersStore((state) => state.setStickers)
+
     const boardRef = useRef(null)
     const [WidgetComp, setWidgetComp] = useState(() => SafeFallbackWidget)
 
     useEffect(() => {
+        const loadNotes = async () => {
+            try {
+                const notes = await notesApi.getAll()
+
+                let x = 30
+                let y = 30
+
+                const mapped = notes.map((n) => {
+                    const item = {
+                        id: n.id,
+                        x,
+                        y,
+                        color: n.color,
+                        width: 160,
+                        height: 160,
+                        text: n.content ?? '',
+                        zIndex: 1
+                    }
+
+                    x += 24
+                    y += 24
+
+                    return item
+                })
+
+                setStickers(mapped)
+            } catch (e) {
+                console.warn('Не удалось загрузить заметки:', e)
+            }
+        }
+
+        loadNotes()
+    }, [setStickers])
+
+    useEffect(() => {
         let mounted = true
+
         import('@xyflow/react')
-            .then(mod => {
-                console.info('[StickerBoardWidget] @xyflow/react exports:', mod)
-                if (!mounted) return
+            .then((mod) => {
+                if (!mounted) {
+                    return
+                }
+
                 const candidate =
                     (mod && (mod.Widget || mod.default || mod?.widget || mod?.XyflowWidget)) ?? null
 
                 if (typeof candidate === 'function' || React.isValidElement(candidate)) {
                     setWidgetComp(() => candidate)
                 } else {
-                    console.warn('[StickerBoardWidget] @xyflow/react export is not a component — using fallback.')
                     setWidgetComp(() => SafeFallbackWidget)
                 }
             })
-            .catch(err => {
-                console.warn('[StickerBoardWidget] Failed to import @xyflow/react — using fallback. Error:', err)
-                if (mounted) setWidgetComp(() => SafeFallbackWidget)
+            .catch(() => {
+                if (mounted) {
+                    setWidgetComp(() => SafeFallbackWidget)
+                }
             })
 
-        return () => { mounted = false }
+        return () => {
+            mounted = false
+        }
     }, [])
 
     const Wrapper = WidgetComp || SafeFallbackWidget
 
-    // Передаём функцию в LeftToolbar: при выборе цвета будет вызвана addStickerAtCenter
-    const handlePick = (color) => {
-        if (boardRef.current && typeof boardRef.current.addStickerAtCenter === 'function') {
-            boardRef.current.addStickerAtCenter(color)
-        } else {
-            // fallback: используем Zustand addSticker напрямую
-            useStickersStore.getState().addSticker({ x: 260, y: 120, color, width: 160, height: 160, text: '' })
+    const handlePick = async (color) => {
+        try {
+            const created = await notesApi.create(color)
+
+            if (boardRef.current && typeof boardRef.current.addStickerAtCenter === 'function') {
+                boardRef.current.addStickerAtCenter(color, { id: created.id, text: created.content ?? '' })
+                return
+            }
+
+            addSticker({
+                id: created.id,
+                x: 260,
+                y: 120,
+                color,
+                width: 160,
+                height: 160,
+                text: created.content ?? ''
+            })
+        } catch (e) {
+            console.warn('Не удалось создать заметку:', e)
         }
     }
 

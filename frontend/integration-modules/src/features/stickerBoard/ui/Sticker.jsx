@@ -3,6 +3,7 @@ import { Resizable } from 're-resizable'
 import { useStickersStore } from '../../../entities/stickers/model/useStickersStore'
 import { BoardContext } from './Board'
 import './sticker.css'
+import { notesApi } from '../../../shared/api/notesApi'
 
 export const Sticker = ({ id }) => {
     const sticker = useStickersStore(state => state.stickers.find(s => s.id === id))
@@ -146,12 +147,17 @@ export const Sticker = ({ id }) => {
 
     const onContentPointerDown = (e) => {
         e.stopPropagation()
+
+        console.log('Sticker id:', id) // вот твой id
         setEditing(true)
+
         setTimeout(() => {
             const el = contentRef.current
-            if (!el) return
+            if (!el) {
+                return
+            }
+
             el.focus()
-            // move caret to end
             const range = document.createRange()
             range.selectNodeContents(el)
             range.collapse(false)
@@ -211,10 +217,20 @@ export const Sticker = ({ id }) => {
         removeSticker(id)
     }
 
-    const onContentBlur = () => {
-        // exit editing mode and ensure spellcheck disabled to remove red underlines
+    const onContentBlur = async () => {
         setEditing(false)
-        try { if (contentRef.current) contentRef.current.spellcheck = false } catch (e) {}
+
+        try {
+            if (contentRef.current) {
+                contentRef.current.spellcheck = false
+            }
+        } catch (e) {}
+
+        try {
+            await notesApi.updateContent(id, sticker.text || '')
+        } catch (e) {
+            console.warn('Не удалось сохранить текст заметки:', e)
+        }
     }
 
     return (

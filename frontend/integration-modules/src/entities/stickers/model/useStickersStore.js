@@ -1,84 +1,102 @@
 import { create } from 'zustand'
 
-/**
- * Zustand store для управления стикерами.
- * Каждый стикер:
- * { id, x, y, width, height, color, text, zIndex }
- *
- * Теперь есть topZ — инкрементируемое значение для корректного наложения.
- */
-
-let idCounter = 1
-const nextId = () => String(idCounter++)
-
-export const useStickersStore = create((set, get) => ({
+export const useStickersStore = create((set) => ({
     stickers: [],
-    draggingId: null,
-    topZ: 1, // текущее значение z-index для верхнего элемента
+    topZ: 1,
 
-    addSticker: (opts = {}) => {
-        const {
-            x = 200,
-            y = 100,
-            color = '#FFD966',
-            width = 160,
-            height = 160,
-            text = '',
-            zIndex
-        } = opts
+    addSticker: (payload) => {
+        set((state) => {
+            const id = payload && payload.id ? String(payload.id) : crypto.randomUUID()
+            const zIndex = payload && payload.zIndex ? payload.zIndex : (state.topZ || 1) + 1
 
-        const z = typeof zIndex === 'number' ? zIndex : get().topZ + 1
+            const sticker = {
+                id,
+                x: payload.x,
+                y: payload.y,
+                color: payload.color,
+                width: payload.width,
+                height: payload.height,
+                text: payload.text ?? '',
+                zIndex
+            }
 
-        const s = {
-            id: nextId(),
-            x,
-            y,
-            width,
-            height,
-            color,
-            text,
-            zIndex: z
-        }
-
-        set(state => ({
-            stickers: [...state.stickers, s],
-            topZ: Math.max(state.topZ, z)
-        }))
-
-        return s.id
+            return {
+                stickers: [...state.stickers, sticker],
+                topZ: Math.max(state.topZ || 1, zIndex)
+            }
+        })
     },
 
-    updateSticker: (id, patch) => {
-        set(state => ({
-            stickers: state.stickers.map(s => (s.id === id ? { ...s, ...patch } : s))
+    setStickers: (stickers) => {
+        set(() => ({
+            stickers,
+            topZ: stickers.reduce((acc, x) => Math.max(acc, x.zIndex || 1), 1)
         }))
     },
 
-    removeSticker: (id) => {
-        set(state => ({ stickers: state.stickers.filter(s => s.id !== id) }))
+    reset: () => {
+        set({
+            stickers: [],
+            topZ: 1
+        })
     },
 
     setPosition: (id, x, y) => {
-        get().updateSticker(id, { x, y })
+        set((state) => ({
+            stickers: state.stickers.map((s) => {
+                if (s.id === id) {
+                    return { ...s, x, y }
+                }
+
+                return s
+            })
+        }))
     },
 
     setSize: (id, width, height) => {
-        get().updateSticker(id, { width, height })
-    },
+        set((state) => ({
+            stickers: state.stickers.map((s) => {
+                if (s.id === id) {
+                    return { ...s, width, height }
+                }
 
-    bringToFront: (id) => {
-        const newZ = get().topZ + 1
-        get().updateSticker(id, { zIndex: newZ })
-        set({ topZ: newZ })
+                return s
+            })
+        }))
     },
 
     setText: (id, text) => {
-        get().updateSticker(id, { text })
+        set((state) => ({
+            stickers: state.stickers.map((s) => {
+                if (s.id === id) {
+                    return { ...s, text }
+                }
+
+                return s
+            })
+        }))
     },
 
-    startDragging: (id) => set({ draggingId: id }),
-    stopDragging: () => set({ draggingId: null }),
+    bringToFront: (id) => {
+        set((state) => {
+            const nextZ = (state.topZ || 1) + 1
 
-    // Сброс состояния (только для теста)
-    reset: () => set({ stickers: [], topZ: 1 })
+            return {
+                stickers: state.stickers.map((s) => {
+                    if (s.id === id) {
+                        return { ...s, zIndex: nextZ }
+                    }
+
+                    return s
+                }),
+                topZ: nextZ
+            }
+        })
+    },
+
+    removeSticker: (id) => {
+        set((state) => ({
+            stickers: state.stickers.filter((s) => s.id !== id)
+        }))
+    }
 }))
