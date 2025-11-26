@@ -147,8 +147,6 @@ export const Sticker = ({ id }) => {
 
     const onContentPointerDown = (e) => {
         e.stopPropagation()
-
-        console.log('Sticker id:', id) // вот твой id
         setEditing(true)
 
         setTimeout(() => {
