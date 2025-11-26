@@ -11,7 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Libs\InfraLib.csproj" />
     <ProjectReference Include="..\..\..\Libs\InfraLib\InfraLib.csproj" />
     <ProjectReference Include="..\Dal\Dal.csproj" />
     <ProjectReference Include="..\Logic\Logic.csproj" />
