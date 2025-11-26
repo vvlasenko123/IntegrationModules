@@ -17,7 +17,8 @@ export const useStickersStore = create((set) => ({
                 width: payload.width,
                 height: payload.height,
                 text: payload.text ?? '',
-                zIndex
+                zIndex,
+                imageUrl: payload.imageUrl
             }
 
             return {

@@ -84,4 +84,23 @@ public sealed class MinioImageStorage
 
         await _client.MakeBucketAsync(makeBucketArgs, cancellationToken);
     }
+    
+    /// <summary>
+    /// Удаление файла из MinIO по имени объекта
+    /// </summary>
+    public async Task RemoveAsync(string objectName, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(objectName))
+        {
+            throw new ArgumentException("Не задан путь объекта", nameof(objectName));
+        }
+
+        await EnsureBucketExistsAsync(cancellationToken);
+
+        var args = new RemoveObjectArgs()
+            .WithBucket(_options.BucketName)
+            .WithObject(objectName);
+
+        await _client.RemoveObjectAsync(args, cancellationToken);
+    }
 }

@@ -2,6 +2,19 @@
     touch-action: none;
 }
 
+.resizable-sticker-wrapper--image {
+    overflow: visible;
+}
+
+.resizable-sticker-wrapper--image-active::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(59,130,246,0.95);
+    border-radius: 2px;
+    pointer-events: none;
+}
+
 .sticker-root {
     position: relative;
     width: 100%;
@@ -35,9 +48,6 @@
     mix-blend-mode: screen;
 }
 
-/* removed sticker-handle styles (drag handle is gone) */
-
-/* content area with padding */
 .sticker-content {
     flex: 1 1 auto;
     padding: 22px 18px;
@@ -47,7 +57,6 @@
     min-height: 48px;
 }
 
-/* editable text */
 .sticker-text {
     width: 100%;
     min-height: 24px;
@@ -59,7 +68,71 @@
     caret-color: #111;
 }
 
-/* context menu */
+.sticker-root--image {
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    overflow: visible;
+    transform: none;
+}
+
+.sticker-root--image:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.sticker-root--image::before {
+    display: none;
+}
+
+.sticker-content--image {
+    padding: 0;
+    min-height: 0;
+    align-items: stretch;
+    justify-content: stretch;
+}
+
+.sticker-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    user-select: none;
+    pointer-events: none;
+}
+
+.resizable-sticker-wrapper--image-active::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border: 1px solid rgba(59,130,246,0.95);
+    border-radius: 2px;
+    pointer-events: none;
+}
+
+.sticker-resize-handle {
+    box-sizing: border-box;
+    border-radius: 999px;
+    background: #ffffff;
+    border: 1px solid rgba(59,130,246,0.95);
+    opacity: 0;
+    transform: scale(0.96);
+    transition: opacity .10s ease, transform .10s ease;
+    pointer-events: none;
+}
+
+.sticker-resize-handle__dot {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.resizable-sticker-wrapper--image-active .sticker-resize-handle {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+}
+
 .sticker-context-menu {
     width: 140px;
     background: #fff;
@@ -87,7 +160,6 @@
     background: rgba(0,0,0,0.04);
 }
 
-/* editing state */
 .sticker-root--editing {
     box-shadow:
             0 32px 60px rgba(13, 30, 56, 0.12),

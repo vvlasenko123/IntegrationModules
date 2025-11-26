@@ -1,28 +1,49 @@
 import React from 'react'
-import './stickerPalette.css'
+
+const DND_NOTE = 'application/x-integration-note'
 
 const COLORS = [
-    '#FFF9C4', '#FFD7A6', '#FFCCF2', '#FFB3E6',
-    '#C8F3FF', '#9FD0FF', '#D9E6FF', '#D6C7FF',
-    '#A6FFD6', '#8AF2A3', '#FFFFFF', '#222222'
+    '#FFF9C4',
+    '#C8E6C9',
+    '#BBDEFB',
+    '#FFCCBC',
+    '#E1BEE7',
+    '#CFD8DC',
+    '#222222',
+    '#FFFFFF'
 ]
 
-/**
- * Увеличенная двухколоночная палитра.
- * onPick(color) — вызывается при выборе цвета.
- */
 export const ColorPalette = ({ onPick }) => {
+    const onSwatchClick = (color) => () => {
+        if (onPick) {
+            onPick(color)
+        }
+    }
+
+    const onSwatchDragStart = (color) => (e) => {
+        e.stopPropagation()
+
+        try {
+            e.dataTransfer.setData(DND_NOTE, JSON.stringify({ color }))
+            e.dataTransfer.effectAllowed = 'copy'
+        } catch (err) {
+            console.warn('Не удалось начать перенос заметки:', err)
+        }
+    }
+
     return (
-        <div className="palette-panel palette-panel--large">
+        <div className="palette-panel--large" role="dialog" aria-label="Палитра">
             <div className="palette-grid">
-                {COLORS.map(c => (
+                {COLORS.map((c) => (
                     <button
                         key={c}
-                        onClick={() => onPick ? onPick(c) : null}
-                        aria-label={`color-${c}`}
-                        title={c}
+                        type="button"
                         className="color-swatch color-swatch--large"
+                        title={c}
                         style={{ background: c }}
+                        onClick={onSwatchClick(c)}
+                        draggable
+                        onDragStart={onSwatchDragStart(c)}
                     />
                 ))}
             </div>

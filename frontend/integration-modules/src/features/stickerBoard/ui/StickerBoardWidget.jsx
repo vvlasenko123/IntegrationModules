@@ -3,6 +3,7 @@ import { LeftToolbar } from './LeftToolbar'
 import { Board } from './Board'
 import { useStickersStore } from '../../../entities/stickers/model/useStickersStore'
 import { notesApi } from '../../../shared/api/notesApi'
+import { stickersApi } from '../../../shared/api/stickerApi'
 
 const SafeFallbackWidget = ({ children }) => <div>{children}</div>
 
@@ -17,13 +18,17 @@ export const StickerBoardWidget = () => {
     useEffect(() => {
         const loadNotes = async () => {
             try {
-                const notes = await notesApi.getAll()
+                const [notes, boardEmojis] = await Promise.all([
+                    notesApi.getAll(),
+                    stickersApi.getBoard()
+                ])
 
                 let x = 30
                 let y = 30
+                const items = []
 
-                const mapped = notes.map((n) => {
-                    const item = {
+                for (const n of notes) {
+                    items.push({
                         id: n.id,
                         x,
                         y,
@@ -32,17 +37,30 @@ export const StickerBoardWidget = () => {
                         height: 160,
                         text: n.content ?? '',
                         zIndex: 1
-                    }
-
+                    })
                     x += 24
                     y += 24
+                }
 
-                    return item
-                })
+                for (const e of boardEmojis) {
+                    items.push({
+                        id: e.id,
+                        x,
+                        y,
+                        color: 'transparent',
+                        width: 91,
+                        height: 84,
+                        text: '',
+                        zIndex: 1,
+                        imageUrl: e.url
+                    })
+                    x += 24
+                    y += 24
+                }
 
-                setStickers(mapped)
+                setStickers(items)
             } catch (e) {
-                console.warn('Не удалось загрузить заметки:', e)
+                console.warn('Не удалось загрузить доску:', e)
             }
         }
 
@@ -111,7 +129,7 @@ export const StickerBoardWidget = () => {
                 <div className="p-4">
                     <div className="mt-3">
                         <button
-                            onClick={() => reset()}
+                            onClick={() => { reset() }}
                             className="px-3 py-1 rounded bg-red-500 text-white text-sm"
                         >
                             Сбросить

@@ -3,6 +3,7 @@ using Dal.Models.Stickers;
 using Dal.Repository.interfaces;
 using Dapper;
 using InfraLib.MinIO.Storage;
+using InfraLib.Redis.Models;
 using Microsoft.AspNetCore.Http;
 
 namespace Dal.Repository;
@@ -76,6 +77,74 @@ FROM stickers;
 ";
 
         var result = await _connection.QueryAsync<Stickers>(new CommandDefinition(
+            sql,
+            cancellationToken: token));
+
+        return result.AsList();
+    }
+  
+    /// <inheritdoc />
+    public async Task<int> DeleteByIdAsync(Guid id, CancellationToken token)
+    {
+        if (_connection.State is not ConnectionState.Open)
+        {
+            _connection.Open();
+        }
+
+        const string sql = @"
+DELETE FROM stickers
+WHERE id = @Id;
+";
+
+        return await _connection.ExecuteAsync(new CommandDefinition(
+            sql,
+            new { Id = id },
+            cancellationToken: token));
+    }
+
+    /// <inheritdoc />
+    public async Task<BoardSticker> AddToBoardAsync(Guid stickerId, CancellationToken token)
+    {
+        if (_connection.State is not ConnectionState.Open)
+        {
+            _connection.Open();
+        }
+
+        const string sql = @"
+INSERT INTO board_stickers (id, sticker_id)
+VALUES (@Id, @StickerId);
+";
+
+        var entity = new BoardSticker
+        {
+            Id = Guid.NewGuid(),
+            StickerId = stickerId
+        };
+
+        await _connection.ExecuteAsync(new CommandDefinition(
+            sql,
+            entity,
+            cancellationToken: token));
+
+        return entity;
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyCollection<BoardSticker>> GetBoardAsync(CancellationToken token)
+    {
+        if (_connection.State is not ConnectionState.Open)
+        {
+            _connection.Open();
+        }
+
+        const string sql = @"
+SELECT id,
+       sticker_id AS StickerId
+FROM board_stickers
+ORDER BY id;
+";
+
+        var result = await _connection.QueryAsync<BoardSticker>(new CommandDefinition(
             sql,
             cancellationToken: token));
 

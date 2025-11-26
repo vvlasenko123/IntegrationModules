@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useContext, useState } from 'react'
+import React, { useRef, useEffect, useContext, useState, useMemo } from 'react'
 import { Resizable } from 're-resizable'
 import { useStickersStore } from '../../../entities/stickers/model/useStickersStore'
 import { BoardContext } from './Board'
@@ -6,12 +6,12 @@ import './sticker.css'
 import { notesApi } from '../../../shared/api/notesApi'
 
 export const Sticker = ({ id }) => {
-    const sticker = useStickersStore(state => state.stickers.find(s => s.id === id))
-    const setPosition = useStickersStore(state => state.setPosition)
-    const setSize = useStickersStore(state => state.setSize)
-    const removeSticker = useStickersStore(state => state.removeSticker)
-    const bringToFront = useStickersStore(state => state.bringToFront)
-    const setText = useStickersStore(state => state.setText)
+    const sticker = useStickersStore((state) => state.stickers.find((s) => s.id === id))
+    const setPosition = useStickersStore((state) => state.setPosition)
+    const setSize = useStickersStore((state) => state.setSize)
+    const removeSticker = useStickersStore((state) => state.removeSticker)
+    const bringToFront = useStickersStore((state) => state.bringToFront)
+    const setText = useStickersStore((state) => state.setText)
 
     const boardRef = useContext(BoardContext)
     const elRef = useRef(null)
@@ -29,39 +29,100 @@ export const Sticker = ({ id }) => {
     const [menuVisible, setMenuVisible] = useState(false)
     const [menuPos, setMenuPos] = useState({ x: 0, y: 0 })
     const [editing, setEditing] = useState(false)
+    const [hovered, setHovered] = useState(false)
 
-    // init contentEditable (uncontrolled) and ensure spellcheck off
+    if (!sticker) {
+        return null
+    }
+
+    const isImage = typeof sticker.imageUrl === 'string' && sticker.imageUrl.length > 0
+    const showImageControls = isImage && hovered && !menuVisible
+
+    const imageHandleStyles = useMemo(() => ({
+        topLeft: { top: -6, left: -6, width: 12, height: 12 },
+        topRight: { top: -6, right: -6, width: 12, height: 12 },
+        bottomLeft: { bottom: -6, left: -6, width: 12, height: 12 },
+        bottomRight: { bottom: -6, right: -6, width: 12, height: 12 }
+    }), [])
+
+    const imageHandleClasses = useMemo(() => ({
+        topLeft: 'sticker-resize-handle',
+        topRight: 'sticker-resize-handle',
+        bottomLeft: 'sticker-resize-handle',
+        bottomRight: 'sticker-resize-handle'
+    }), [])
+
+    const imageHandleComponent = useMemo(() => ({
+        topLeft: <span className="sticker-resize-handle__dot" />,
+        topRight: <span className="sticker-resize-handle__dot" />,
+        bottomLeft: <span className="sticker-resize-handle__dot" />,
+        bottomRight: <span className="sticker-resize-handle__dot" />
+    }), [])
+
+    const resizableClassName = [
+        'resizable-sticker-wrapper',
+        isImage ? 'resizable-sticker-wrapper--image' : '',
+        showImageControls ? 'resizable-sticker-wrapper--image-active' : ''
+    ].filter(Boolean).join(' ')
+
     useEffect(() => {
+        if (isImage) {
+            return
+        }
+
         const el = contentRef.current
-        if (!el || !sticker) return
-        if (document.activeElement !== el) el.innerText = sticker.text || ''
+        if (!el) {
+            return
+        }
+
+        if (document.activeElement !== el) {
+            el.innerText = sticker.text || ''
+        }
+
         el.style.direction = 'ltr'
         el.style.textAlign = 'left'
-        // explicitly disable spellcheck on the element
-        try { el.spellcheck = false } catch (e) { /* ignore */ }
-    }, [sticker?.id])
+
+        try {
+            el.spellcheck = false
+        } catch (e) { }
+    }, [sticker?.id, isImage])
 
     useEffect(() => {
+        if (isImage) {
+            return
+        }
+
         const el = contentRef.current
-        if (!el || !sticker) return
+        if (!el) {
+            return
+        }
+
         const domText = el.innerText
         const stateText = sticker.text || ''
+
         if (domText !== stateText && document.activeElement !== el) {
             el.innerText = stateText
         }
-        // keep spellcheck disabled if store updated text
-        try { if (el) el.spellcheck = false } catch (e) {}
-    }, [sticker?.text])
 
-    // global pointer handlers for dragging
+        try {
+            el.spellcheck = false
+        } catch (e) { }
+    }, [sticker?.text, isImage])
+
     useEffect(() => {
         const onMove = (e) => {
-            if (!dragRef.current.dragging) return
-            if (dragRef.current.pointerId != null && e.pointerId !== dragRef.current.pointerId) return
+            if (!dragRef.current.dragging) {
+                return
+            }
+            if (dragRef.current.pointerId != null && e.pointerId !== dragRef.current.pointerId) {
+                return
+            }
 
             const clientX = e.clientX
             const clientY = e.clientY
-            if (clientX == null || clientY == null) return
+            if (clientX == null || clientY == null) {
+                return
+            }
 
             const dx = clientX - dragRef.current.startClientX
             const dy = clientY - dragRef.current.startClientY
@@ -73,13 +134,15 @@ export const Sticker = ({ id }) => {
         }
 
         const onUp = () => {
-            if (!dragRef.current.dragging) return
+            if (!dragRef.current.dragging) {
+                return
+            }
             try {
                 const el = elRef.current
                 if (el && dragRef.current.pointerId != null && el.releasePointerCapture) {
                     el.releasePointerCapture(dragRef.current.pointerId)
                 }
-            } catch (err) { /* ignore */ }
+            } catch (err) { }
             dragRef.current.dragging = false
             dragRef.current.pointerId = null
         }
@@ -95,29 +158,41 @@ export const Sticker = ({ id }) => {
         }
     }, [id, setPosition])
 
-    // menu close handlers
     useEffect(() => {
         const onPointerDown = (ev) => {
-            if (!menuVisible) return
+            if (!menuVisible) {
+                return
+            }
             const menuEl = document.getElementById(`sticker-menu-${id}`)
-            if (menuEl && !menuEl.contains(ev.target)) setMenuVisible(false)
+            if (menuEl && !menuEl.contains(ev.target)) {
+                setMenuVisible(false)
+            }
         }
-        const onKey = (ev) => { if (ev.key === 'Escape') setMenuVisible(false) }
+
+        const onKey = (ev) => {
+            if (ev.key === 'Escape') {
+                setMenuVisible(false)
+            }
+        }
+
         window.addEventListener('pointerdown', onPointerDown)
         window.addEventListener('keydown', onKey)
+
         return () => {
             window.removeEventListener('pointerdown', onPointerDown)
             window.removeEventListener('keydown', onKey)
         }
     }, [menuVisible, id])
 
-    if (!sticker) return null
-
-    // start drag from anywhere on root unless clicking content
     const onRootPointerDown = (e) => {
-        if (e.button !== 0) return
-        if (contentRef.current && contentRef.current.contains(e.target)) {
+        if (e.button !== 0) {
             return
+        }
+
+        if (!isImage) {
+            if (contentRef.current && contentRef.current.contains(e.target)) {
+                return
+            }
         }
 
         e.preventDefault()
@@ -125,9 +200,11 @@ export const Sticker = ({ id }) => {
         bringToFront(id)
 
         const el = elRef.current
-        if (!el) return
+        if (!el) {
+            return
+        }
 
-        const board = boardRef && boardRef.current ? boardRef.current : (el.closest ? el.closest('[data-board="true"]') : null)
+        const board = (boardRef && boardRef.current) ? boardRef.current : (el.closest ? el.closest('[data-board="true"]') : null)
         const boardRect = board ? board.getBoundingClientRect() : el.getBoundingClientRect()
         const clientWidth = board ? (board.clientWidth || boardRect.width) : boardRect.width
         const scale = clientWidth ? (boardRect.width / clientWidth) : 1
@@ -141,11 +218,17 @@ export const Sticker = ({ id }) => {
         dragRef.current.scale = scale || 1
 
         try {
-            if (el.setPointerCapture) el.setPointerCapture(e.pointerId)
-        } catch (err) { /* ignore */ }
+            if (el.setPointerCapture) {
+                el.setPointerCapture(e.pointerId)
+            }
+        } catch (err) { }
     }
 
     const onContentPointerDown = (e) => {
+        if (isImage) {
+            return
+        }
+
         e.stopPropagation()
         setEditing(true)
 
@@ -166,11 +249,18 @@ export const Sticker = ({ id }) => {
     }
 
     const onDoubleClick = (e) => {
+        if (isImage) {
+            return
+        }
+
         e.stopPropagation()
         setEditing(true)
+
         setTimeout(() => {
             const el = contentRef.current
-            if (!el) return
+            if (!el) {
+                return
+            }
             el.focus()
             const range = document.createRange()
             range.selectNodeContents(el)
@@ -181,7 +271,9 @@ export const Sticker = ({ id }) => {
         }, 0)
     }
 
-    const onDragStart = (e) => e.preventDefault()
+    const onDragStart = (e) => {
+        e.preventDefault()
+    }
 
     const onResizeStop = (e, dir, ref, delta) => {
         const w = ref.offsetWidth
@@ -190,6 +282,9 @@ export const Sticker = ({ id }) => {
     }
 
     const onInput = (e) => {
+        if (isImage) {
+            return
+        }
         const text = e.currentTarget.innerText
         setText(id, text)
     }
@@ -197,15 +292,23 @@ export const Sticker = ({ id }) => {
     const onContextMenu = (e) => {
         e.preventDefault()
         e.stopPropagation()
+
         let x = e.clientX
         let y = e.clientY
+
         const padding = 8
         const vw = window.innerWidth
         const vh = window.innerHeight
         const menuW = 140
         const menuH = 40
-        if (x + menuW + padding > vw) x = vw - menuW - padding
-        if (y + menuH + padding > vh) y = vh - menuH - padding
+
+        if (x + menuW + padding > vw) {
+            x = vw - menuW - padding
+        }
+        if (y + menuH + padding > vh) {
+            y = vh - menuH - padding
+        }
+
         setMenuPos({ x, y })
         setMenuVisible(true)
     }
@@ -218,11 +321,15 @@ export const Sticker = ({ id }) => {
     const onContentBlur = async () => {
         setEditing(false)
 
+        if (isImage) {
+            return
+        }
+
         try {
             if (contentRef.current) {
                 contentRef.current.spellcheck = false
             }
-        } catch (e) {}
+        } catch (e) { }
 
         try {
             await notesApi.updateContent(id, sticker.text || '')
@@ -231,16 +338,29 @@ export const Sticker = ({ id }) => {
         }
     }
 
+    const background = isImage ? 'transparent' : sticker.color
+
     return (
         <>
             <Resizable
                 size={{ width: sticker.width, height: sticker.height }}
                 onResizeStop={onResizeStop}
-                minWidth={90}
-                minHeight={60}
-                className="resizable-sticker-wrapper"
+                minWidth={isImage ? 30 : 90}
+                minHeight={isImage ? 30 : 60}
+                className={resizableClassName}
                 style={{ position: 'absolute', left: sticker.x, top: sticker.y, zIndex: sticker.zIndex }}
-                enable={{
+                onPointerEnter={() => { setHovered(true) }}
+                onPointerLeave={() => { setHovered(false) }}
+                enable={isImage ? {
+                    top: false,
+                    right: false,
+                    bottom: false,
+                    left: false,
+                    topRight: true,
+                    bottomRight: true,
+                    bottomLeft: true,
+                    topLeft: true
+                } : {
                     top: false,
                     right: true,
                     bottom: true,
@@ -250,34 +370,48 @@ export const Sticker = ({ id }) => {
                     bottomLeft: true,
                     topLeft: true
                 }}
+                handleStyles={isImage ? imageHandleStyles : undefined}
+                handleClasses={isImage ? imageHandleClasses : undefined}
+                handleComponent={isImage ? imageHandleComponent : undefined}
             >
                 <div
                     ref={elRef}
-                    className={`sticker-root ${editing ? 'sticker-root--editing' : ''}`}
-                    onMouseDown={(e) => e.stopPropagation()}
+                    className={`sticker-root ${(!isImage && editing) ? 'sticker-root--editing' : ''} ${isImage ? 'sticker-root--image' : ''}`}
+                    onMouseDown={(e) => { e.stopPropagation() }}
                     draggable={false}
                     onDragStart={onDragStart}
-                    style={{ background: sticker.color }}
+                    style={{ background }}
                     onContextMenu={onContextMenu}
                     onPointerDown={onRootPointerDown}
                     onDoubleClick={onDoubleClick}
                 >
-                    {/* content area */}
-                    <div className="sticker-content" >
-                        <div
-                            ref={contentRef}
-                            contentEditable
-                            suppressContentEditableWarning
-                            spellCheck={false}
-                            autoCorrect="off"
-                            autoCapitalize="off"
-                            data-gramm="false"
-                            onInput={onInput}
-                            onPointerDown={onContentPointerDown}
-                            onBlur={onContentBlur}
-                            className="sticker-text"
-                            style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
-                        />
+                    <div className={`sticker-content ${isImage ? 'sticker-content--image' : ''}`}>
+                        {!isImage && (
+                            <div
+                                ref={contentRef}
+                                contentEditable
+                                suppressContentEditableWarning
+                                spellCheck={false}
+                                autoCorrect="off"
+                                autoCapitalize="off"
+                                data-gramm="false"
+                                onInput={onInput}
+                                onPointerDown={onContentPointerDown}
+                                onBlur={onContentBlur}
+                                className="sticker-text"
+                                style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+                            />
+                        )}
+
+                        {isImage && (
+                            <img
+                                src={sticker.imageUrl}
+                                alt=""
+                                className="sticker-image"
+                                draggable={false}
+                                onPointerDown={(e) => { e.stopPropagation() }}
+                            />
+                        )}
                     </div>
                 </div>
             </Resizable>

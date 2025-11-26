@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace Dal.Migrations;
 
 /// <summary>
-/// Миграция создания таблиц stickers и notes
+/// Миграция создания таблиц stickers, notes и board_stickers
 /// </summary>
 public sealed class StickersCreateTablesMigration : IDatabaseMigration
 {
@@ -35,6 +35,30 @@ CREATE TABLE IF NOT EXISTS notes
     content text NOT NULL,
     color   text NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS board_stickers
+(
+    id uuid PRIMARY KEY,
+    sticker_id uuid NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS ix_board_stickers_sticker_id
+ON board_stickers (sticker_id);
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_constraint
+        WHERE conname = 'fk_board_stickers_sticker_id'
+    ) THEN
+        ALTER TABLE board_stickers
+            ADD CONSTRAINT fk_board_stickers_sticker_id
+            FOREIGN KEY (sticker_id)
+            REFERENCES stickers(id)
+            ON DELETE CASCADE;
+    END IF;
+END $$;
 ";
 
         if (_connection.State is not ConnectionState.Open)
@@ -42,7 +66,7 @@ CREATE TABLE IF NOT EXISTS notes
             _connection.Open();
         }
 
-        _logger.LogInformation("Применение миграции: создание таблиц stickers и notes");
+        _logger.LogInformation("Применение миграции: создание таблиц stickers, notes и board_stickers");
 
         await _connection.ExecuteAsync(new CommandDefinition(
             sql,
