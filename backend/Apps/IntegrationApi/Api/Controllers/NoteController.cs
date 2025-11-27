@@ -123,4 +123,22 @@ public class NoteController : ControllerBase
             Color = updated.Color
         });
     }
+
+    /// <summary>
+    /// Удаление заметки
+    /// </summary>
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteAsync([FromRoute] Guid id, CancellationToken token)
+    {
+        var deleted = await _noteRepository.DeleteAsync(id, token);
+
+        if (!deleted)
+        {
+            return NotFound("Заметка не найдена");
+        }
+
+        _logger.LogInformation("Заметка удалена: {NoteId}", id);
+
+        return NoContent();
+    }
 }

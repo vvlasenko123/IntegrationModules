@@ -26,4 +26,9 @@ public interface INoteRepository
     /// обновление текста
     /// </summary>
     Task<Note?> UpdateContentAsync(Guid id, string content, CancellationToken token);
+    
+    /// <summary>
+    /// удаление заметок
+    /// </summary>
+    Task<bool> DeleteAsync(Guid id, CancellationToken token);
 }

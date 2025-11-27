@@ -116,4 +116,25 @@ WHERE id = @Id;
             },
             cancellationToken: token));
     }
+
+    /// <inheritdoc />
+    public async Task<bool> DeleteAsync(Guid id, CancellationToken token)
+    {
+        if (_connection.State is not ConnectionState.Open)
+        {
+            _connection.Open();
+        }
+
+        const string sql = @"
+DELETE FROM notes
+WHERE id = @Id;
+";
+
+        var affected = await _connection.ExecuteAsync(new CommandDefinition(
+            sql,
+            new { Id = id },
+            cancellationToken: token));
+
+        return affected > 0;
+    }
 }
