@@ -48,25 +48,6 @@
     mix-blend-mode: screen;
 }
 
-.sticker-content {
-    flex: 1 1 auto;
-    padding: 22px 18px;
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
-    min-height: 48px;
-}
-
-.sticker-text {
-    width: 100%;
-    min-height: 24px;
-    outline: none;
-    font-size: 14px;
-    color: inherit;
-    line-height: 1.3;
-    user-select: text;
-    caret-color: inherit;
-}
 
 .sticker-root--image {
     padding: 0;
@@ -83,12 +64,12 @@
     display: none;
 }
 
-.sticker-content--image {
-    padding: 0;
-    display: flex;
-    align-items: stretch;
-    justify-content: stretch;
-}
+/*.sticker-content--image {*/
+/*    padding: 0;*/
+/*    display: flex;*/
+/*    align-items: stretch;*/
+/*    justify-content: stretch;*/
+/*}*/
 
 .sticker-image {
     width: 100%;
@@ -214,22 +195,32 @@
 
 .sticker-content {
     flex: 1 1 auto;
-    padding: 22px 18px;
+    padding: 0;
     display: flex;
     align-items: flex-start;
     justify-content: flex-start;
     min-height: 48px;
 }
-
+.toolbar-emoji-plate--active {
+    /* аналог стиля активной кнопки стикеров */
+    background-color: #eef4ff;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 .sticker-text {
     width: 100%;
-    min-height: 24px;
+    height: 100%;
+    display: block;
     outline: none;
-    font-size: 14px;
-    color: inherit;
-    line-height: 1.3;
-    user-select: text;
-    caret-color: inherit;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow: hidden;
+    padding: 10px;
+    box-sizing: border-box;
+    font-size: 18px;
+    line-height: 1.2;
 }
 
 .sticker-root--image {
@@ -250,6 +241,7 @@
 .sticker-content--image {
     padding: 0;
     display: flex;
+
     align-items: stretch;
     justify-content: stretch;
 }

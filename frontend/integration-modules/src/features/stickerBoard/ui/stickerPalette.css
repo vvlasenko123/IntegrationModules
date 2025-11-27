@@ -44,7 +44,7 @@
 
 .palette-wrapper {
     margin-left: 8px;
-    margin-top: 0px;
+    margin-top: 0;
     pointer-events: auto;
 }
 
@@ -106,29 +106,17 @@
 .toolbar-btn--note {
     width: 64px;
     height: 64px;
-    padding: 6px 6px 10px 6px;
-    align-items: flex-start;
-    justify-content: center;
-    pointer-events: auto;
-}
-
-.toolbar-note-plate {
-    width: 52px;
-    height: 52px;
-    border-radius: 10px;
-    background: #ffffff;
-    border: 1px solid rgba(0,0,0,0.12);
-    box-shadow: 0 8px 18px rgba(18,24,37,0.06);
-    display: flex;
+    padding: 6px 6px 0 6px;
     align-items: center;
     justify-content: center;
     pointer-events: auto;
 }
 
+
+
 .toolbar-note-plate--active {
     background: #fff;
-    border-color: rgba(0,0,0,0.06);
-    box-shadow: 0 8px 22px rgba(18,24,37,0.08), inset 0 2px 0 rgba(255,255,255,0.6);
+
 }
 
 .toolbar-note-icon {
@@ -152,18 +140,7 @@
     pointer-events: auto;
 }
 
-.toolbar-emoji-plate {
-    width: 52px;
-    height: 52px;
-    border-radius: 10px;
-    background: #ffffff;
-    border: 1px solid rgba(0,0,0,0.12);
-    box-shadow: 0 8px 18px rgba(18,24,37,0.06);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: auto;
-}
+
 
 .toolbar-emoji-img {
     width: 40px;
@@ -176,32 +153,25 @@
 .toolbar-btn--note:hover .toolbar-note-plate,
 .toolbar-btn--emoji:hover .toolbar-emoji-plate {
     transform: translateY(-2px);
-    box-shadow: 0 12px 28px rgba(18,24,37,0.08);
 }
 
 .toolbar-btn--active {
     background: #e4f1ff;
     border: 2px solid rgba(59,130,246,0.14);
     box-shadow: 0 6px 18px rgba(56,132,255,0.12);
-    padding: 6px;
+
     border-radius: 12px;
 }
 
-.toolbar-icon-img--active {
-    background: #ffffff;
-    border-radius: 8px;
-    padding: 6px;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 3px 6px rgba(18,24,37,0.06);
-}
+
 
 .toolbar-btn--note.toolbar-btn--active .toolbar-note-plate {
-    background: #eaf6ff;
-    border-color: rgba(59,130,246,0.18);
-    box-shadow: 0 10px 26px rgba(56,132,255,0.12);
+    background: #e4f1ff;
+
 }
 
 .emoji-panel {
-    background: #E5E7EB;
+    background: #ffffff;
     border: 1px solid rgba(0,0,0,0.06);
     border-radius: 10px;
     box-shadow: 0 8px 22px rgba(18,24,37,0.06);

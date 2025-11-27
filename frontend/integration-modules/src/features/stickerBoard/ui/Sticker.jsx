@@ -174,7 +174,27 @@ export const Sticker = ({ id }) => {
             el.spellcheck = false
         } catch (e) { }
     }, [sticker?.text, isImage])
+    useEffect(() => {
+        if (isImage) return;
 
+        const el = contentRef.current;
+        if (!el) return;
+
+        const MIN = 6;
+        const MAX = 18;
+        let fontSize = MAX;
+
+        el.style.fontSize = fontSize + 'px';
+
+        const parent = el.parentElement;
+        if (!parent) return;
+
+        while (fontSize > MIN && (el.scrollHeight > parent.clientHeight || el.scrollWidth > parent.clientWidth)) {
+            fontSize -= 1;
+            el.style.fontSize = fontSize + 'px';
+        }
+
+    }, [sticker.text, sticker.width, sticker.height, isImage]);
     useEffect(() => {
         const onMove = (e) => {
             if (!dragRef.current.dragging) {
@@ -198,6 +218,8 @@ export const Sticker = ({ id }) => {
 
             setPosition(id, Math.max(0, nx), Math.max(0, ny))
         }
+
+
 
         const onUp = () => {
             if (!dragRef.current.dragging) {
@@ -290,52 +312,27 @@ export const Sticker = ({ id }) => {
         } catch (err) { }
     }
 
-    const onContentPointerDown = (e) => {
-        if (isImage) {
-            return
-        }
-
-        e.stopPropagation()
-        setEditing(true)
-
-        setTimeout(() => {
-            const el = contentRef.current
-            if (!el) {
-                return
-            }
-
-            el.focus()
-            const range = document.createRange()
-            range.selectNodeContents(el)
-            range.collapse(false)
-            const sel = window.getSelection()
-            sel.removeAllRanges()
-            sel.addRange(range)
-        }, 0)
-    }
-
     const onDoubleClick = (e) => {
-        if (isImage) {
-            return
-        }
+        if (isImage) return;
 
-        e.stopPropagation()
-        setEditing(true)
+        e.stopPropagation();
+        setEditing(true);
 
         setTimeout(() => {
-            const el = contentRef.current
-            if (!el) {
-                return
-            }
-            el.focus()
-            const range = document.createRange()
-            range.selectNodeContents(el)
-            range.collapse(false)
-            const sel = window.getSelection()
-            sel.removeAllRanges()
-            sel.addRange(range)
-        }, 0)
-    }
+            const el = contentRef.current;
+            if (!el) return;
+
+            el.focus();
+
+            const range = document.createRange();
+            range.selectNodeContents(el);
+            range.collapse(false);
+
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }, 0);
+    };
 
     const onDragStart = (e) => {
         e.preventDefault()
@@ -348,12 +345,11 @@ export const Sticker = ({ id }) => {
     }
 
     const onInput = (e) => {
-        if (isImage) {
-            return
-        }
-        const text = e.currentTarget.innerText
-        setText(id, text)
-    }
+        if (isImage) return;
+
+        const text = e.currentTarget.innerText;
+        setText(id, text);
+    };
 
     const onContextMenu = (e) => {
         e.preventDefault()
@@ -379,9 +375,16 @@ export const Sticker = ({ id }) => {
         setMenuVisible(true)
     }
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         setMenuVisible(false)
-        removeSticker(id)
+
+        try {
+            await stickersApi.deleteSticker(id)
+            removeSticker(id)
+        } catch (e) {
+            console.error('Не удалось удалить стикер:', e)
+            alert('Ошибка при удалении стикера')
+        }
     }
 
     const onContentBlur = async () => {
@@ -455,17 +458,19 @@ export const Sticker = ({ id }) => {
                         {!isImage && (
                             <div
                                 ref={contentRef}
-                                contentEditable
+                                contentEditable={editing}
                                 suppressContentEditableWarning
                                 spellCheck={false}
-                                autoCorrect="off"
-                                autoCapitalize="off"
-                                data-gramm="false"
                                 onInput={onInput}
-                                onPointerDown={onContentPointerDown}
                                 onBlur={onContentBlur}
                                 className="sticker-text"
-                                style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', color: textColor, caretColor: textColor }}
+                                style={{
+                                    whiteSpace: 'pre-wrap',
+                                    wordBreak: 'break-word',
+                                    color: textColor,
+                                    caretColor: textColor,
+                                    pointerEvents: editing ? 'auto' : 'none'
+                                }}
                             />
                         )}
 

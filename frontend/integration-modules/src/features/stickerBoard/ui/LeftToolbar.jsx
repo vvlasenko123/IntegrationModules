@@ -4,6 +4,7 @@ import './stickerPalette.css'
 import noteAdd from './assets/note_add.svg'
 import noteAddActive from './assets/note_add_active.svg'
 import emojiStub from './assets/emoji_stub.svg'
+import emojiActive from './assets/sticker_add_active.svg'
 import { stickersApi } from '../../../shared/api/stickerApi'
 
 /**
@@ -120,8 +121,13 @@ export const LeftToolbar = ({ onPick }) => {
                     aria-label="Эмодзи"
                     aria-pressed={emojiOpen}
                 >
-                    <div className="toolbar-emoji-plate" role="img" aria-hidden="true">
-                        <img src={emojiStub} alt="" className="toolbar-emoji-img" draggable={false} />
+                    <div className={`toolbar-emoji-plate ${emojiOpen ? 'toolbar-emoji-plate--active' : ''}`} role="img" aria-hidden="true">
+                        <img
+                            src={emojiOpen ? emojiActive : emojiStub}
+                            alt=""
+                            className="toolbar-emoji-img"
+                            draggable={false}
+                        />
                     </div>
                 </button>
             </div>
