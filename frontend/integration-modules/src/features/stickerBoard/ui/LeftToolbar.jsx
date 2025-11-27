@@ -7,9 +7,7 @@ import emojiStub from './assets/emoji_stub.svg'
 import emojiActive from './assets/sticker_add_active.svg'
 import { stickersApi } from '../../../shared/api/stickerApi'
 
-/**
- * LeftToolbar: верхняя кнопка — note plate; нижняя — emoji plate.
- */
+
 export const LeftToolbar = ({ onPick }) => {
     const [open, setOpen] = React.useState(false)
     const [emojiOpen, setEmojiOpen] = React.useState(false)

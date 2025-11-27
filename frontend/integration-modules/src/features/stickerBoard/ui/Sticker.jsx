@@ -1,63 +1,18 @@
-import React, { useRef, useEffect, useContext, useState, useMemo } from 'react'
+import React, { useRef, useContext, useMemo, useState } from 'react'
 import { Resizable } from 're-resizable'
 import { useStickersStore } from '../../../entities/stickers/model/useStickersStore'
-import { BoardContext } from './Board'
 import './sticker.css'
 import { notesApi } from '../../../shared/api/notesApi'
-
-function parseColorToRgb(input) {
-    if (!input || typeof input !== 'string') return null
-    const s = input.trim().toLowerCase()
-
-    if (s[0] === '#') {
-        const hex = s.slice(1)
-        if (hex.length === 3) {
-            const r = parseInt(hex[0] + hex[0], 16)
-            const g = parseInt(hex[1] + hex[1], 16)
-            const b = parseInt(hex[2] + hex[2], 16)
-            return { r, g, b }
-        } else if (hex.length === 6) {
-            const r = parseInt(hex.slice(0, 2), 16)
-            const g = parseInt(hex.slice(2, 4), 16)
-            const b = parseInt(hex.slice(4, 6), 16)
-            return { r, g, b }
-        }
-        return null
-    }
-
-    const rgbMatch = s.match(/rgba?\s*\(\s*([0-9]+)[\s,]+([0-9]+)[\s,]+([0-9]+)(?:[\s,\/]+\s*([0-9.]+))?\s*\)/)
-    if (rgbMatch) {
-        const r = parseInt(rgbMatch[1], 10)
-        const g = parseInt(rgbMatch[2], 10)
-        const b = parseInt(rgbMatch[3], 10)
-        return { r, g, b }
-    }
-
-    const named = {
-        white: { r: 255, g: 255, b: 255 },
-        black: { r: 0, g: 0, b: 0 },
-        red: { r: 255, g: 0, b: 0 },
-        blue: { r: 0, g: 0, b: 255 },
-        yellow: { r: 255, g: 255, b: 0 },
-        green: { r: 0, g: 128, b: 0 }
-    }
-    if (named[s]) return named[s]
-
-    return null
-}
-
-function getContrastColorForBackground(bgColor) {
-    const rgb = parseColorToRgb(bgColor)
-    if (!rgb) {
-        return '#0a0a0a'
-    }
-    const srgb = [rgb.r, rgb.g, rgb.b].map((v) => {
-        const c = v / 255
-        return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
-    })
-    const L = 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2]
-    return L > 0.6 ? '#0a0a0a' : '#ffffff'
-}
+import { getContrastColorForBackground } from './utils/colorUtils.jsx'
+import {
+    imageHandleStyles,
+    imageHandleClasses,
+    imageHandleComponent
+} from './utils/resizeHandles'
+import { useStickerDrag } from './utils/useStickerDrag'
+import { useStickerContent } from './utils/useStickerContent'
+import { useStickerMenu } from './utils/useStickerMenu'
+import { useDragEvents } from './utils/useDragEvents'
 
 export const Sticker = ({ id }) => {
     const sticker = useStickersStore((state) => state.stickers.find((s) => s.id === id))
@@ -67,29 +22,36 @@ export const Sticker = ({ id }) => {
     const bringToFront = useStickersStore((state) => state.bringToFront)
     const setText = useStickersStore((state) => state.setText)
 
-    const boardRef = useContext(BoardContext)
     const elRef = useRef(null)
     const contentRef = useRef(null)
-    const dragRef = useRef({
-        dragging: false,
-        pointerId: null,
-        startClientX: 0,
-        startClientY: 0,
-        startStickerX: 0,
-        startStickerY: 0,
-        scale: 1
-    })
-
-    const [menuVisible, setMenuVisible] = useState(false)
-    const [menuPos, setMenuPos] = useState({ x: 0, y: 0 })
-    const [editing, setEditing] = useState(false)
     const [hovered, setHovered] = useState(false)
 
     if (!sticker) {
         return null
     }
 
-    // compute text color depending on sticker.color; memoized
+    const isImage = typeof sticker.imageUrl === 'string' && sticker.imageUrl.length > 0
+    const { dragRef, onRootPointerDown } = useStickerDrag(id, sticker, setPosition, bringToFront)
+    const {
+        editing,
+        onDoubleClick,
+        onInput,
+        onContentBlur,
+        setupContentEditable,
+        setupAutoFontSize
+    } = useStickerContent(sticker, isImage, setText)
+    const {
+        menuVisible,
+        setMenuVisible,
+        menuPos,
+        onContextMenu
+    } = useStickerMenu(id)
+
+    useDragEvents(dragRef, id, setPosition)
+
+    setupContentEditable(contentRef)
+    setupAutoFontSize(contentRef)
+
     const textColor = useMemo(() => {
         if (sticker && typeof sticker.color === 'string') {
             try {
@@ -101,238 +63,13 @@ export const Sticker = ({ id }) => {
         return '#0a0a0a'
     }, [sticker?.color])
 
-    const isImage = typeof sticker.imageUrl === 'string' && sticker.imageUrl.length > 0
     const showImageControls = isImage && hovered && !menuVisible
-
-    const imageHandleStyles = useMemo(() => ({
-        topLeft: { top: -6, left: -6, width: 12, height: 12 },
-        topRight: { top: -6, right: -6, width: 12, height: 12 },
-        bottomLeft: { bottom: -6, left: -6, width: 12, height: 12 },
-        bottomRight: { bottom: -6, right: -6, width: 12, height: 12 }
-    }), [])
-
-    const imageHandleClasses = useMemo(() => ({
-        topLeft: 'sticker-resize-handle',
-        topRight: 'sticker-resize-handle',
-        bottomLeft: 'sticker-resize-handle',
-        bottomRight: 'sticker-resize-handle'
-    }), [])
-
-    const imageHandleComponent = useMemo(() => ({
-        topLeft: <span className="sticker-resize-handle__dot" />,
-        topRight: <span className="sticker-resize-handle__dot" />,
-        bottomLeft: <span className="sticker-resize-handle__dot" />,
-        bottomRight: <span className="sticker-resize-handle__dot" />
-    }), [])
 
     const resizableClassName = [
         'resizable-sticker-wrapper',
         isImage ? 'resizable-sticker-wrapper--image' : '',
         showImageControls ? 'resizable-sticker-wrapper--image-active' : ''
     ].filter(Boolean).join(' ')
-
-    useEffect(() => {
-        if (isImage) {
-            return
-        }
-
-        const el = contentRef.current
-        if (!el) {
-            return
-        }
-
-        if (document.activeElement !== el) {
-            el.innerText = sticker.text || ''
-        }
-
-        el.style.direction = 'ltr'
-        el.style.textAlign = 'left'
-
-        try {
-            el.spellcheck = false
-        } catch (e) { }
-    }, [sticker?.id, isImage])
-
-    useEffect(() => {
-        if (isImage) {
-            return
-        }
-
-        const el = contentRef.current
-        if (!el) {
-            return
-        }
-
-        const domText = el.innerText
-        const stateText = sticker.text || ''
-
-        if (domText !== stateText && document.activeElement !== el) {
-            el.innerText = stateText
-        }
-
-        try {
-            el.spellcheck = false
-        } catch (e) { }
-    }, [sticker?.text, isImage])
-    useEffect(() => {
-        if (isImage) return;
-
-        const el = contentRef.current;
-        if (!el) return;
-
-        const MIN = 6;
-        const MAX = 18;
-        let fontSize = MAX;
-
-        el.style.fontSize = fontSize + 'px';
-
-        const parent = el.parentElement;
-        if (!parent) return;
-
-        while (fontSize > MIN && (el.scrollHeight > parent.clientHeight || el.scrollWidth > parent.clientWidth)) {
-            fontSize -= 1;
-            el.style.fontSize = fontSize + 'px';
-        }
-
-    }, [sticker.text, sticker.width, sticker.height, isImage]);
-    useEffect(() => {
-        const onMove = (e) => {
-            if (!dragRef.current.dragging) {
-                return
-            }
-            if (dragRef.current.pointerId != null && e.pointerId !== dragRef.current.pointerId) {
-                return
-            }
-
-            const clientX = e.clientX
-            const clientY = e.clientY
-            if (clientX == null || clientY == null) {
-                return
-            }
-
-            const dx = clientX - dragRef.current.startClientX
-            const dy = clientY - dragRef.current.startClientY
-
-            const nx = Math.round(dragRef.current.startStickerX + dx / (dragRef.current.scale || 1))
-            const ny = Math.round(dragRef.current.startStickerY + dy / (dragRef.current.scale || 1))
-
-            setPosition(id, Math.max(0, nx), Math.max(0, ny))
-        }
-
-
-
-        const onUp = () => {
-            if (!dragRef.current.dragging) {
-                return
-            }
-            try {
-                const el = elRef.current
-                if (el && dragRef.current.pointerId != null && el.releasePointerCapture) {
-                    el.releasePointerCapture(dragRef.current.pointerId)
-                }
-            } catch (err) { }
-            dragRef.current.dragging = false
-            dragRef.current.pointerId = null
-        }
-
-        window.addEventListener('pointermove', onMove)
-        window.addEventListener('pointerup', onUp)
-        window.addEventListener('pointercancel', onUp)
-
-        return () => {
-            window.removeEventListener('pointermove', onMove)
-            window.removeEventListener('pointerup', onUp)
-            window.removeEventListener('pointercancel', onUp)
-        }
-    }, [id, setPosition])
-
-    useEffect(() => {
-        const onPointerDown = (ev) => {
-            if (!menuVisible) {
-                return
-            }
-            const menuEl = document.getElementById(`sticker-menu-${id}`)
-            if (menuEl && !menuEl.contains(ev.target)) {
-                setMenuVisible(false)
-            }
-        }
-
-        const onKey = (ev) => {
-            if (ev.key === 'Escape') {
-                setMenuVisible(false)
-            }
-        }
-
-        window.addEventListener('pointerdown', onPointerDown)
-        window.addEventListener('keydown', onKey)
-
-        return () => {
-            window.removeEventListener('pointerdown', onPointerDown)
-            window.removeEventListener('keydown', onKey)
-        }
-    }, [menuVisible, id])
-
-    const onRootPointerDown = (e) => {
-        if (e.button !== 0) {
-            return
-        }
-
-        if (!isImage) {
-            if (contentRef.current && contentRef.current.contains(e.target)) {
-                return
-            }
-        }
-
-        e.preventDefault()
-        e.stopPropagation()
-        bringToFront(id)
-
-        const el = elRef.current
-        if (!el) {
-            return
-        }
-
-        const board = (boardRef && boardRef.current) ? boardRef.current : (el.closest ? el.closest('[data-board="true"]') : null)
-        const boardRect = board ? board.getBoundingClientRect() : el.getBoundingClientRect()
-        const clientWidth = board ? (board.clientWidth || boardRect.width) : boardRect.width
-        const scale = clientWidth ? (boardRect.width / clientWidth) : 1
-
-        dragRef.current.dragging = true
-        dragRef.current.pointerId = e.pointerId
-        dragRef.current.startClientX = e.clientX
-        dragRef.current.startClientY = e.clientY
-        dragRef.current.startStickerX = sticker.x
-        dragRef.current.startStickerY = sticker.y
-        dragRef.current.scale = scale || 1
-
-        try {
-            if (el.setPointerCapture) {
-                el.setPointerCapture(e.pointerId)
-            }
-        } catch (err) { }
-    }
-
-    const onDoubleClick = (e) => {
-        if (isImage) return;
-
-        e.stopPropagation();
-        setEditing(true);
-
-        setTimeout(() => {
-            const el = contentRef.current;
-            if (!el) return;
-
-            el.focus();
-
-            const range = document.createRange();
-            range.selectNodeContents(el);
-            range.collapse(false);
-
-            const sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(range);
-        }, 0);
-    };
 
     const onDragStart = (e) => {
         e.preventDefault()
@@ -344,66 +81,14 @@ export const Sticker = ({ id }) => {
         setSize(id, w, h)
     }
 
-    const onInput = (e) => {
-        if (isImage) return;
-
-        const text = e.currentTarget.innerText;
-        setText(id, text);
-    };
-
-    const onContextMenu = (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-
-        let x = e.clientX
-        let y = e.clientY
-
-        const padding = 8
-        const vw = window.innerWidth
-        const vh = window.innerHeight
-        const menuW = 140
-        const menuH = 40
-
-        if (x + menuW + padding > vw) {
-            x = vw - menuW - padding
-        }
-        if (y + menuH + padding > vh) {
-            y = vh - menuH - padding
-        }
-
-        setMenuPos({ x, y })
-        setMenuVisible(true)
-    }
-
     const handleDelete = async () => {
         setMenuVisible(false)
-
         try {
-            await stickersApi.deleteSticker(id)
+            await notesApi.deleteSticker(id)
             removeSticker(id)
         } catch (e) {
             console.error('Не удалось удалить стикер:', e)
             alert('Ошибка при удалении стикера')
-        }
-    }
-
-    const onContentBlur = async () => {
-        setEditing(false)
-
-        if (isImage) {
-            return
-        }
-
-        try {
-            if (contentRef.current) {
-                contentRef.current.spellcheck = false
-            }
-        } catch (e) { }
-
-        try {
-            await notesApi.updateContent(id, sticker.text || '')
-        } catch (e) {
-            console.warn('Не удалось сохранить текст заметки:', e)
         }
     }
 
@@ -451,7 +136,7 @@ export const Sticker = ({ id }) => {
                     onDragStart={onDragStart}
                     style={{ background, color: textColor, caretColor: textColor }}
                     onContextMenu={onContextMenu}
-                    onPointerDown={onRootPointerDown}
+                    onPointerDown={(e) => onRootPointerDown(e, contentRef, isImage)}
                     onDoubleClick={onDoubleClick}
                 >
                     <div className={`sticker-content ${isImage ? 'sticker-content--image' : ''}`}>
@@ -462,7 +147,7 @@ export const Sticker = ({ id }) => {
                                 suppressContentEditableWarning
                                 spellCheck={false}
                                 onInput={onInput}
-                                onBlur={onContentBlur}
+                                onBlur={() => onContentBlur(notesApi)}
                                 className="sticker-text"
                                 style={{
                                     whiteSpace: 'pre-wrap',
