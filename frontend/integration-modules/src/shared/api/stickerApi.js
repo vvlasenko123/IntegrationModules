@@ -61,5 +61,17 @@ export const stickersApi = {
         }
 
         return await r.json()
+    },
+
+    async deleteSticker(id) {
+        const r = await fetch(`/api/v1/stickers/${id}`, {
+            method: 'DELETE'
+        })
+
+        if (!r.ok) {
+            throw new Error(await parseError(r))
+        }
+
+        return true
     }
 }
