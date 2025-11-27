@@ -123,14 +123,14 @@ export const StickerBoardWidget = () => {
 
     return (
         <Wrapper>
-            <div className="relative flex h-screen w-screen bg-gray-100">
+            <div className="relative flex h-screen w-screen bg-gray-100 overflow-hidden">
                 <LeftToolbar onPick={handlePick} />
 
-                <div className="p-4">
+                <div className="absolute left-20 top-4 z-50">
                     <div className="mt-3">
                         <button
                             onClick={() => { reset() }}
-                            className="px-3 py-1 rounded bg-red-500 text-white text-sm"
+                            className="px-3 py-1 rounded bg-red-500 text-white text-sm pointer-events-auto"
                         >
                             Сбросить
                         </button>
