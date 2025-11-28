@@ -1,14 +1,17 @@
 .left-toolbar-container {
     position: absolute;
     left: 16px;
-    top: 48px;
+    top: 48px; /* отрегулируй при необходимости */
     z-index: 80;
     display: flex;
     align-items: flex-start;
     gap: 10px;
+    pointer-events: none;
+    height: auto;
 }
 
 .toolbar-card {
+    pointer-events: auto;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -42,6 +45,7 @@
 .palette-wrapper {
     margin-left: 8px;
     margin-top: 0px;
+    pointer-events: auto;
 }
 
 .palette-panel--large {
@@ -105,6 +109,7 @@
     padding: 6px 6px 10px 6px;
     align-items: flex-start;
     justify-content: center;
+    pointer-events: auto;
 }
 
 .toolbar-note-plate {
@@ -117,6 +122,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    pointer-events: auto;
 }
 
 .toolbar-note-plate--active {
@@ -143,6 +149,7 @@
     background: transparent;
     border: none;
     cursor: pointer;
+    pointer-events: auto;
 }
 
 .toolbar-emoji-plate {
@@ -155,6 +162,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    pointer-events: auto;
 }
 
 .toolbar-emoji-img {
@@ -165,8 +173,8 @@
     filter: none;
 }
 
-.toolbar-btn--emoji:hover .toolbar-emoji-plate,
-.toolbar-btn--note:hover .toolbar-note-plate {
+.toolbar-btn--note:hover .toolbar-note-plate,
+.toolbar-btn--emoji:hover .toolbar-emoji-plate {
     transform: translateY(-2px);
     box-shadow: 0 12px 28px rgba(18,24,37,0.08);
 }
