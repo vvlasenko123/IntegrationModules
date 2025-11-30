@@ -339,6 +339,13 @@ export const Sticker = ({ id }) => {
         removeSticker(id)
     }
 
+    const onPaste = (e) => {
+        e.preventDefault();
+
+        const text = e.clipboardData.getData('text/plain');
+        document.execCommand('insertText', false, text);
+    };
+
     const onContentBlur = async () => {
         setEditing(false)
 
@@ -411,6 +418,7 @@ export const Sticker = ({ id }) => {
                             <div
                                 ref={contentRef}
                                 contentEditable
+                                onPaste={onPaste}
                                 suppressContentEditableWarning
                                 spellCheck={false}
                                 autoCorrect="off"
