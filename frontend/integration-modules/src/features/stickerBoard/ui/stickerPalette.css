@@ -144,7 +144,7 @@
 
 .toolbar-btn--active {
     background: #e4f1ff;
-    border: 2px solid rgba(59,130,246,0.14);
+    border-color: rgba(59,130,246,0.14);
     box-shadow: 0 6px 18px rgba(56,132,255,0.12);
     border-radius: 12px;
 }
@@ -155,21 +155,24 @@
 
 .emoji-panel {
     background: #ffffff;
+
+    padding-right: 8px;
+    overflow-y: auto;
     border: 1px solid rgba(0,0,0,0.06);
     border-radius: 10px;
     box-shadow: 0 8px 22px rgba(18,24,37,0.06);
-    overflow: hidden;
+    overflow-x: hidden;
 }
 
 .emoji-grid {
-    width: 110%;
+    width: 100%;
     height: 100%;
-    padding: 8px;
+    padding: 8px 8px 8px 8px;
     display: grid;
     grid-template-columns: repeat(3, 91px);
     grid-auto-rows: 84px;
     gap: 5px;
-    overflow: auto;
+    overflow: visible;
     box-sizing: border-box;
 }
 
@@ -211,6 +214,3 @@
     display: block;
 }
 
-.palette-panel--large .color-swatch--large[title="#222222"] {
-    border: 1px solid rgba(0,0,0,0.18);
-}
