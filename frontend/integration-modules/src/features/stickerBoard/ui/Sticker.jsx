@@ -398,8 +398,13 @@ export const Sticker = ({ id }) => {
                                 onInput={onInput}
                                 onPointerDown={onContentPointerDown}
                                 onBlur={onContentBlur}
-                                className="sticker-text"
-                                style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+                                style={{
+                                    whiteSpace: 'pre-wrap',
+                                    wordBreak: 'break-word',
+                                    color: sticker.color === '#262626' ? '#fff' : '#262626',
+                                    caretColor: sticker.color === '#262626' ? '#fff' : '#111',
+                                    outline: 0,
+                                }}
                             />
                         )}
 
