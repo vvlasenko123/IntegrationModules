@@ -334,16 +334,17 @@ export const Sticker = ({ id }) => {
         setMenuVisible(true)
     }
 
-    const onPaste = (e) => {
-        e.preventDefault();
-        const text = e.clipboardData.getData('text/plain');
-        document.execCommand('insertText', false, text);
-    };
-
     const handleDelete = () => {
         setMenuVisible(false)
         removeSticker(id)
     }
+
+    const onPaste = (e) => {
+        e.preventDefault();
+
+        const text = e.clipboardData.getData('text/plain');
+        document.execCommand('insertText', false, text);
+    };
 
     const onContentBlur = async () => {
         setEditing(false)
