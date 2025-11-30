@@ -1,0 +1,255 @@
+.left-toolbar-container {
+    position: absolute;
+    left: 16px;
+    top: 48px;
+    z-index: 80;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.toolbar-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 8px;
+    background: #ffffff;
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 6px 18px rgba(18,24,37,0.06), 0 1px 0 rgba(255,255,255,0.6) inset;
+}
+
+.toolbar-card--open {
+    box-shadow: 0 8px 22px rgba(18,24,37,0.08);
+}
+
+.toolbar-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.toolbar-btn--icon svg {
+    display: block;
+    width: 20px;
+    height: 20px;
+}
+
+.palette-wrapper {
+    margin-left: 8px;
+    margin-top: 0px;
+}
+
+.palette-panel--large {
+    width: 125px;
+    padding: 14px;
+    border-radius: 10px;
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 8px 22px rgba(18,24,37,0.06);
+}
+
+.palette-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    align-items: center;
+    justify-items: center;
+}
+
+.color-swatch--large {
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow:
+            0 6px 14px rgba(18,24,37,0.06),
+            0 1px 0 rgba(255,255,255,0.8) inset;
+    transition: transform .08s ease, box-shadow .12s ease;
+    cursor: pointer;
+}
+
+.color-swatch--large:hover {
+    transform: translateY(-4px);
+    box-shadow:
+            0 10px 24px rgba(18,24,37,0.08),
+            0 1px 0 rgba(255,255,255,0.85) inset;
+}
+
+.palette-panel--large .color-swatch[title="#222222"] {
+    border: 1px solid rgba(0,0,0,0.18);
+}
+
+.color-swatch--large:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(59,130,246,0.12);
+}
+
+.left-toolbar-container { transform: translateY(4px); }
+
+.toolbar-icon-img {
+    display: block;
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+.toolbar-btn--note {
+    width: 64px;
+    height: 64px;
+    padding: 6px 6px 10px 6px;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.toolbar-note-plate {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.12);
+    box-shadow: 0 8px 18px rgba(18,24,37,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toolbar-note-plate--active {
+    background: #fff;
+    border-color: rgba(0,0,0,0.06);
+    box-shadow: 0 8px 22px rgba(18,24,37,0.08), inset 0 2px 0 rgba(255,255,255,0.6);
+}
+
+.toolbar-note-icon {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+.toolbar-btn--emoji {
+    width: 64px;
+    height: 64px;
+    padding: 6px;
+    margin-top: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.toolbar-emoji-plate {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.12);
+    box-shadow: 0 8px 18px rgba(18,24,37,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toolbar-emoji-img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    pointer-events: none;
+    filter: none;
+}
+
+.toolbar-btn--emoji:hover .toolbar-emoji-plate,
+.toolbar-btn--note:hover .toolbar-note-plate {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(18,24,37,0.08);
+}
+
+.toolbar-btn--active {
+    background: #e4f1ff;
+    border: 2px solid rgba(59,130,246,0.14);
+    box-shadow: 0 6px 18px rgba(56,132,255,0.12);
+    padding: 6px;
+    border-radius: 12px;
+}
+
+.toolbar-icon-img--active {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 6px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 3px 6px rgba(18,24,37,0.06);
+}
+
+.toolbar-btn--note.toolbar-btn--active .toolbar-note-plate {
+    background: #eaf6ff;
+    border-color: rgba(59,130,246,0.18);
+    box-shadow: 0 10px 26px rgba(56,132,255,0.12);
+}
+
+.emoji-panel {
+    background: #E5E7EB;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 10px;
+    box-shadow: 0 8px 22px rgba(18,24,37,0.06);
+    overflow: hidden;
+}
+
+.emoji-grid {
+    width: 100%;
+    height: 100%;
+    padding: 8px;
+    display: grid;
+    grid-template-columns: repeat(3, 91px);
+    grid-auto-rows: 84px;
+    gap: 5px;
+    overflow: auto;
+    box-sizing: border-box;
+}
+
+.emoji-item {
+    width: 91px;
+    height: 84px;
+    box-sizing: border-box;
+    background: rgba(255,255,255,0.6);
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 10px;
+    cursor: grab;
+    padding: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.emoji-item:active {
+    cursor: grabbing;
+}
+
+.emoji-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    display: block;
+}
+
+.sticker-content {
+    width: 100%;
+    height: 100%;
+}
+
+.sticker-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.palette-panel--large .color-swatch--large[title="#222222"] {
+    border: 1px solid rgba(0,0,0,0.18);
+}

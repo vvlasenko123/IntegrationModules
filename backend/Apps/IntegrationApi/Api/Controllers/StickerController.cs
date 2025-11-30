@@ -1,0 +1,235 @@
+using Api.Controllers.Models.Request;
+using Api.Controllers.Models.Response;
+using Dal.Repository.interfaces;
+using InfraLib.Minio;
+using InfraLib.MinIO.Storage;
+using InfraLib.Redis.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
+
+namespace Api.Controllers;
+
+/// <summary>
+/// контроллер со стикерами
+/// </summary>
+[ApiController]
+[Route("api/v1/stickers")]
+public sealed class StickerController : ControllerBase
+{
+    private static readonly HttpClient Http = new();
+    private readonly ILogger<StickerController> _logger;
+    private readonly IStickerRepository _stickerRepository;
+    private readonly MinioImageStorage _storage;
+    private readonly IDistributedCache _cache;
+
+    public StickerController(
+        IStickerRepository stickerRepository,
+        MinioImageStorage storage,
+        IDistributedCache cache,
+        ILogger<StickerController> logger)
+    {
+        _stickerRepository = stickerRepository;
+        _storage = storage;
+        _cache = cache;
+        _logger = logger;
+    }
+
+    /// <summary>
+    /// Загрузка стикеров
+    /// </summary>
+    [HttpPost("upload")]
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<IReadOnlyCollection<StickerResponse>>> UploadAsync(
+        [FromForm(Name = "files")] List<IFormFile>? files,
+        CancellationToken token)
+    {
+        if (files is null || files.Count == 0)
+        {
+            return BadRequest("Файлы не переданы");
+        }
+
+        foreach (var file in files)
+        {
+            if (file is null)
+            {
+                return BadRequest("Один из файлов не задан");
+            }
+
+            if (file.Length <= 0)
+            {
+                return BadRequest("Один из файлов пустой");
+            }
+        }
+
+        var result = await _stickerRepository.UploadAsync(files, _storage, token);
+
+        await _cache.RemoveAsync(MinIOHelper.StickersCacheKey, token);
+
+        _logger.LogInformation("Загружено стикеров: {Count}", result.Count);
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Получение списка стикеров
+    /// </summary>
+    [HttpGet("get-all")]
+    public async Task<ActionResult<IReadOnlyCollection<StickerResponse>>> GetAllAsync(CancellationToken token)
+    {
+        var items = await MinIOHelper.GetOrSetCachedItemsAsync(
+            _cache,
+            async (ct) =>
+            {
+                var stickers = await _stickerRepository.GetAllAsync(ct);
+
+                return stickers.Select(x => new StickerCacheItem
+                {
+                    Id = x.Id,
+                    StoragePath = x.StoragePath
+                }).ToList();
+            },
+            token);
+
+        var result = items.Select(x => new StickerResponse
+        {
+            Id = x.Id,
+            StoragePath = x.StoragePath,
+            Url = $"/api/v1/stickers/{x.Id:D}/file"
+        }).ToList();
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Получение файла стикера (бэк проксирует MinIO)
+    /// </summary>
+    [HttpGet("{id:guid}/file")]
+    public async Task<IActionResult> GetFileAsync([FromRoute] Guid id, CancellationToken token)
+    {
+        var items = await MinIOHelper.GetOrSetCachedItemsAsync(
+            _cache,
+            async (ct) =>
+            {
+                var stickers = await _stickerRepository.GetAllAsync(ct);
+
+                return stickers.Select(x => new StickerCacheItem
+                {
+                    Id = x.Id,
+                    StoragePath = x.StoragePath
+                }).ToList();
+            },
+            token);
+
+        var item = items.FirstOrDefault(x => x.Id == id);
+
+        if (item is null)
+        {
+            return NotFound("Стикер не найден");
+        }
+
+        var presigned = await _storage.GetDownloadUrlAsync(item.StoragePath, expirySeconds: 60 * 15, token);
+
+        using var response = await Http.GetAsync(presigned, token);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return StatusCode((int)response.StatusCode, "Не удалось получить файл из хранилища");
+        }
+
+        var bytes = await response.Content.ReadAsByteArrayAsync(token);
+        var contentType = response.Content.Headers.ContentType?.ToString();
+
+        if (string.IsNullOrWhiteSpace(contentType))
+        {
+            contentType = "application/octet-stream";
+        }
+
+        return File(bytes, contentType);
+    }
+
+    /// <summary>
+    /// Удаление стикера по id
+    /// </summary>
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteAsync([FromRoute] Guid id, CancellationToken token)
+    {
+        var items = await MinIOHelper.GetOrSetCachedItemsAsync(
+            _cache,
+            async (ct) =>
+            {
+                var stickers = await _stickerRepository.GetAllAsync(ct);
+
+                return stickers.Select(x => new StickerCacheItem
+                {
+                    Id = x.Id,
+                    StoragePath = x.StoragePath
+                }).ToList();
+            },
+            token);
+
+        var item = items.FirstOrDefault(x => x.Id == id);
+
+        if (item is null)
+        {
+            return NotFound("Стикер не найден");
+        }
+
+        await _stickerRepository.DeleteByIdAsync(id, token);
+
+        try
+        {
+            await _storage.RemoveAsync(item.StoragePath, token);
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning(e, "Не удалось удалить файл стикера из хранилища. Id: {Id}", id);
+        }
+
+        await _cache.RemoveAsync(MinIOHelper.StickersCacheKey, token);
+
+        return NoContent();
+    }
+    
+    /// <summary>
+    /// добавление на доску
+    /// </summary>
+    [HttpPost("board")]
+    public async Task<ActionResult<BoardStickerResponse>> AddToBoardAsync(
+        [FromBody] AddBoardStickerRequest request,
+        CancellationToken token)
+    {
+        if (request.StickerId == Guid.Empty)
+        {
+            return BadRequest("StickerId не задан");
+        }
+
+        var created = await _stickerRepository.AddToBoardAsync(request.StickerId, token);
+
+        var result = new BoardStickerResponse
+        {
+            Id = created.Id,
+            StickerId = created.StickerId,
+            Url = $"/api/v1/stickers/{created.StickerId:D}/file"
+        };
+
+        return Ok(result);
+    }
+    
+    /// <summary>
+    /// Получить все эмодзи на доске
+    /// </summary>
+    [HttpGet("board")]
+    public async Task<ActionResult<IReadOnlyCollection<BoardStickerResponse>>> GetBoardAsync(CancellationToken token)
+    {
+        var items = await _stickerRepository.GetBoardAsync(token);
+
+        var result = items.Select(x => new BoardStickerResponse
+        {
+            Id = x.Id,
+            StickerId = x.StickerId,
+            Url = $"/api/v1/stickers/{x.StickerId:D}/file"
+        }).ToList();
+
+        return Ok(result);
+    }
+}
