@@ -3,9 +3,14 @@ import React from 'react'
 const DND_NOTE = 'application/x-integration-note'
 
 const COLORS = [
-    '#FFF79A', '#FFD7A6', '#FFD1F2', '#FD9AE7',
-    '#99E5FF', '#85B3F9', '#B2D0FE', '#D6C7FF',
-    '#A6FFD6', '#68DF8B', '#FFFFFF', '#262626'
+    '#FFF9C4',
+    '#C8E6C9',
+    '#BBDEFB',
+    '#FFCCBC',
+    '#E1BEE7',
+    '#CFD8DC',
+    '#222222',
+    '#FFFFFF'
 ]
 
 export const ColorPalette = ({ onPick }) => {

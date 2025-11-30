@@ -9,7 +9,7 @@
 .resizable-sticker-wrapper--image-active::after {
     content: "";
     position: absolute;
-    inset: -1px;
+    inset: 0;
     border: 1px solid rgba(59,130,246,0.95);
     border-radius: 2px;
     pointer-events: none;
@@ -19,7 +19,7 @@
     position: relative;
     width: 100%;
     height: 100%;
-    border-radius: 14px;
+    border-radius: 4px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -48,17 +48,32 @@
     mix-blend-mode: screen;
 }
 
-.sticker-root--editing {
-    box-shadow:
-            0 32px 60px rgba(13, 30, 56, 0.12),
-            0 6px 12px rgba(13, 30, 56, 0.06);
-    transform: translateY(-2px);
+.sticker-content {
+    flex: 1 1 auto;
+    padding: 22px 18px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    min-height: 48px;
+}
+
+.sticker-text {
+    width: 100%;
+    min-height: 24px;
+    outline: none;
+    font-size: 14px;
+    color: rgba(10,10,10,0.9);
+    line-height: 1.3;
+    user-select: text;
+    caret-color: #111;
 }
 
 .sticker-root--image {
-    padding: 0;
-    border-radius: 8px;
-    overflow: hidden;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    overflow: visible;
+    transform: none;
 }
 
 .sticker-root--image:hover {
@@ -70,41 +85,28 @@
     display: none;
 }
 
-.sticker-content {
-    flex: 1 1 auto;
-    padding: 0;
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
-    min-height: 48px;
-}
-
 .sticker-content--image {
     padding: 0;
-    display: flex;
+    min-height: 0;
     align-items: stretch;
     justify-content: stretch;
-}
-
-.sticker-text {
-    width: 100%;
-    height: 100%;
-    display: block;
-    outline: none;
-    white-space: pre-wrap;
-    word-break: break-word;
-    overflow: hidden;
-    padding: 10px;
-    box-sizing: border-box;
-    font-size: 18px;
-    line-height: 1.2;
 }
 
 .sticker-image {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     display: block;
+    user-select: none;
+    pointer-events: none;
+}
+
+.resizable-sticker-wrapper--image-active::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border: 1px solid rgba(59,130,246,0.95);
+    border-radius: 2px;
     pointer-events: none;
 }
 
@@ -158,10 +160,9 @@
     background: rgba(0,0,0,0.04);
 }
 
-.toolbar-emoji-plate--active {
-    background-color: #eef4ff;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.sticker-root--editing {
+    box-shadow:
+            0 32px 60px rgba(13, 30, 56, 0.12),
+            0 6px 12px rgba(13, 30, 56, 0.06);
+    transform: translateY(-2px);
 }
