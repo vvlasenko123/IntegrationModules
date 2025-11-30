@@ -12,7 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Libs\InfraLib.csproj" />
     <ProjectReference Include="..\..\..\Libs\InfraLib\InfraLib.csproj" />
   </ItemGroup>
 
