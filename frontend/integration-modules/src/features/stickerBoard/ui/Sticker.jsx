@@ -110,6 +110,27 @@ export const Sticker = ({ id }) => {
     }, [sticker?.text, isImage])
 
     useEffect(() => {
+        if (isImage) return;
+
+        const el = contentRef.current;
+        if (!el) return;
+
+        const MIN = 6;
+        let fontSize = 18;
+
+        el.style.fontSize = fontSize + 'px';
+
+        const parent = el.parentElement;
+        if (!parent) return;
+
+        while (fontSize > MIN && (el.scrollHeight > parent.clientHeight || el.scrollWidth > parent.clientWidth)) {
+            fontSize -= 1;
+            el.style.fontSize = fontSize + 'px';
+        }
+
+    }, [sticker.text, sticker.width, sticker.height, isImage]);
+
+    useEffect(() => {
         const onMove = (e) => {
             if (!dragRef.current.dragging) {
                 return
