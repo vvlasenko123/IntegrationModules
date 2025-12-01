@@ -110,6 +110,27 @@ export const Sticker = ({ id }) => {
     }, [sticker?.text, isImage])
 
     useEffect(() => {
+        if (isImage) return;
+
+        const el = contentRef.current;
+        if (!el) return;
+
+        const MIN = 6;
+        let fontSize = 18;
+
+        el.style.fontSize = fontSize + 'px';
+
+        const parent = el.parentElement;
+        if (!parent) return;
+
+        while (fontSize > MIN && (el.scrollHeight > parent.clientHeight || el.scrollWidth > parent.clientWidth)) {
+            fontSize -= 1;
+            el.style.fontSize = fontSize + 'px';
+        }
+
+    }, [sticker.text, sticker.width, sticker.height, isImage]);
+
+    useEffect(() => {
         const onMove = (e) => {
             if (!dragRef.current.dragging) {
                 return
@@ -318,6 +339,13 @@ export const Sticker = ({ id }) => {
         removeSticker(id)
     }
 
+    const onPaste = (e) => {
+        e.preventDefault();
+
+        const text = e.clipboardData.getData('text/plain');
+        document.execCommand('insertText', false, text);
+    };
+
     const onContentBlur = async () => {
         setEditing(false)
 
@@ -390,6 +418,7 @@ export const Sticker = ({ id }) => {
                             <div
                                 ref={contentRef}
                                 contentEditable
+                                onPaste={onPaste}
                                 suppressContentEditableWarning
                                 spellCheck={false}
                                 autoCorrect="off"
