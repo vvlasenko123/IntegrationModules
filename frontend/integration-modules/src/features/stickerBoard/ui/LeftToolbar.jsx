@@ -3,8 +3,8 @@ import { ColorPalette } from './ColorPalette'
 import './stickerPalette.css'
 import noteAdd from './assets/note_add.svg'
 import noteAddActive from './assets/note_add_active.svg'
-import emojiStub from './assets/emoji_stub.svg'
-import emojiActive from './assets/sticker_add_active.svg'
+import emojiAdd from './assets/emoji_add.svg'
+import emojiAddActive from './assets/emoji_add_active.svg'
 import { stickersApi } from '../../../shared/api/stickerApi'
 
 
@@ -121,7 +121,7 @@ export const LeftToolbar = ({ onPick }) => {
                 >
                     <div className={`toolbar-emoji-plate ${emojiOpen ? 'toolbar-emoji-plate--active' : ''}`} role="img" aria-hidden="true">
                         <img
-                            src={emojiOpen ? emojiActive : emojiStub}
+                            src={emojiOpen ? emojiAddActive : emojiAdd}
                             alt=""
                             className="toolbar-emoji-img"
                             draggable={false}
