@@ -94,7 +94,6 @@ export const LeftToolbar = ({ onPick }) => {
     return (
         <div className="left-toolbar-container" ref={wrapperRef} onClick={(e) => e.stopPropagation()}>
             <div className={`toolbar-card ${(open || emojiOpen) ? 'toolbar-card--open' : ''}`}>
-                {/* верхняя кнопка — стикеры (цвета/заметки) */}
                 <button
                     onClick={toggle}
                     title="Стикеры"
@@ -111,7 +110,6 @@ export const LeftToolbar = ({ onPick }) => {
                     </div>
                 </button>
 
-                {/* нижняя кнопка — эмодзи */}
                 <button
                     className={`toolbar-btn toolbar-btn--icon toolbar-btn--emoji ${emojiOpen ? 'toolbar-btn--active' : ''}`}
                     title="Эмодзи"

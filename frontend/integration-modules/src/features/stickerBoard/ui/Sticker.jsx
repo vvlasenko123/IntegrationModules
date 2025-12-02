@@ -413,6 +413,12 @@ export const Sticker = ({ id }) => {
                     onPointerDown={onRootPointerDown}
                     onDoubleClick={onDoubleClick}
                 >
+                    {!isImage && (
+                    <div
+                        className="sticker-drag-header"
+                        onPointerDown={onRootPointerDown}
+                    />
+                    )}
                     <div className={`sticker-content ${isImage ? 'sticker-content--image' : ''}`}>
                         {!isImage && (
                             <div

@@ -114,7 +114,6 @@ export const Board = forwardRef(function Board(_, ref) {
         const rawEmoji = dt.getData(DND_EMOJI)
         const rawNote = dt.getData(DND_NOTE)
 
-        // если это не наш перенос — не ломаем чужой dnd
         if (!rawEmoji && !rawNote) {
             return
         }
@@ -174,7 +173,6 @@ export const Board = forwardRef(function Board(_, ref) {
             return
         }
 
-        // ===== note drop =====
         const notePayload = tryParseJson(rawNote)
         const color = notePayload?.color
         if (!color) {
