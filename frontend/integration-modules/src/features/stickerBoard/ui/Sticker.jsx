@@ -115,7 +115,7 @@ export const Sticker = ({ id }) => {
         const el = contentRef.current;
         if (!el) return;
 
-        const MIN = 6;
+        const MIN = 2;
         let fontSize = 18;
 
         el.style.fontSize = fontSize + 'px';
@@ -124,7 +124,7 @@ export const Sticker = ({ id }) => {
         if (!parent) return;
 
         while (fontSize > MIN && (el.scrollHeight > parent.clientHeight || el.scrollWidth > parent.clientWidth)) {
-            fontSize -= 1;
+            fontSize -= 0.5;
             el.style.fontSize = fontSize + 'px';
         }
 
