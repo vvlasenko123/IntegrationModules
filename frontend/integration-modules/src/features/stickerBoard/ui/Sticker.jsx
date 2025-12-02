@@ -427,6 +427,7 @@ export const Sticker = ({ id }) => {
                                 onInput={onInput}
                                 onPointerDown={onContentPointerDown}
                                 onBlur={onContentBlur}
+                                className="sticker-text"
                                 style={{
                                     whiteSpace: 'pre-wrap',
                                     wordBreak: 'break-word',
