@@ -125,7 +125,6 @@ export const Board = forwardRef(function Board(_, ref) {
         const scrollLeft = board.scrollLeft || 0
         const scrollTop = board.scrollTop || 0
 
-        // ===== emoji drop =====
         if (rawEmoji) {
             const payload = tryParseJson(rawEmoji)
             if (!payload || !payload.id) {
@@ -145,6 +144,7 @@ export const Board = forwardRef(function Board(_, ref) {
 
                 addSticker({
                     id: saved.id,
+                    stickerId: saved.stickerId,
                     x,
                     y,
                     color: 'transparent',
@@ -159,6 +159,7 @@ export const Board = forwardRef(function Board(_, ref) {
 
                 addSticker({
                     id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+                    stickerId: payload.id,
                     x,
                     y,
                     color: 'transparent',

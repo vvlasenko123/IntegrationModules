@@ -4,6 +4,7 @@ import { useStickersStore } from '../../../entities/stickers/model/useStickersSt
 import { BoardContext } from './Board'
 import './sticker.css'
 import { notesApi } from '../../../shared/api/notesApi'
+import { stickersApi } from '../../../shared/api/stickerApi'
 
 export const Sticker = ({ id }) => {
     const sticker = useStickersStore((state) => state.stickers.find((s) => s.id === id))
@@ -30,7 +31,7 @@ export const Sticker = ({ id }) => {
     const [menuPos, setMenuPos] = useState({ x: 0, y: 0 })
     const [editing, setEditing] = useState(false)
     const [hovered, setHovered] = useState(false)
-
+    const [deleting, setDeleting] = useState(false)
     if (!sticker) {
         return null
     }
@@ -334,9 +335,24 @@ export const Sticker = ({ id }) => {
         setMenuVisible(true)
     }
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         setMenuVisible(false)
-        removeSticker(id)
+        setDeleting(true)
+
+        try {
+            if (isImage) {
+                await stickersApi.removeFromBoard(id)
+            } else {
+                await notesApi.delete(id)
+            }
+
+            removeSticker(id)
+        } catch (err) {
+            console.error('Не удалось удалить элемент:', err)
+            alert('Не удалось удалить стикер')
+        } finally {
+            setDeleting(false)
+        }
     }
 
     const onPaste = (e) => {
