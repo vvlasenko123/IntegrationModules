@@ -30,7 +30,6 @@ export const NoteSticker = ({ id }) => {
     const [menuPos, setMenuPos] = useState({ x: 0, y: 0 })
     const [editing, setEditing] = useState(false)
 
-    // === Авто-фонт при изменении текста/размера ===
     useEffect(() => {
         const el = contentRef.current
         if (!el) return
@@ -47,14 +46,18 @@ export const NoteSticker = ({ id }) => {
         }
     }, [sticker.text, sticker.width, sticker.height])
 
-    // === Синхронизация текста из стора в DOM ===
     useEffect(() => {
         const el = contentRef.current
-        if (!el || document.activeElement === el) return
+        if (!el) return
+
+        if (document.activeElement === el) return
+
+        const currentText = el.innerText.replace(/\u200B/g, '')
+        if (currentText === (sticker.text || '')) return
+
         el.innerText = sticker.text || ''
     }, [sticker.text])
 
-    // === Drag логика ===
     useEffect(() => {
         const onMove = (e) => {
             if (!dragRef.current.dragging || (dragRef.current.pointerId != null && e.pointerId !== dragRef.current.pointerId)) return
@@ -83,7 +86,6 @@ export const NoteSticker = ({ id }) => {
         }
     }, [id, setPosition])
 
-    // === Закрытие меню по клику вне меню ===
     useEffect(() => {
         if (!menuVisible) return
         const close = (e) => {
@@ -127,12 +129,6 @@ export const NoteSticker = ({ id }) => {
         setEditing(true)
         setTimeout(() => {
             contentRef.current?.focus()
-            const range = document.createRange()
-            range.selectNodeContents(contentRef.current)
-            range.collapse(false)
-            const sel = window.getSelection()
-            sel.removeAllRanges()
-            sel.addRange(range)
         }, 0)
     }
 
@@ -176,7 +172,18 @@ export const NoteSticker = ({ id }) => {
                 minWidth={90}
                 minHeight={60}
                 style={{ position: 'absolute', left: sticker.x, top: sticker.y, zIndex: sticker.zIndex }}
+                enable={{
+                    top: false,
+                    right: true,
+                    bottom: true,
+                    left: true,
+                    topRight: true,
+                    bottomRight: true,
+                    bottomLeft: true,
+                    topLeft: true
+                }}
             >
+
                 <div
                     ref={elRef}
                     className={`sticker-root ${editing ? 'sticker-root--editing' : ''}`}

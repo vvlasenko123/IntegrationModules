@@ -136,12 +136,13 @@
 }
 .resizable-sticker-wrapper--image-active .sticker-resize-handle__dot {
     background: #ffffff;
-    border: 2px solid #3b82f6;
+    border: 1px solid #3b82f6;
     border-radius: 50%;
     width: 6px;
     height: 6px;
     margin: 3px;
 }
+
 .sticker-context-menu {
     width: 140px;
     background: #fff;
@@ -165,7 +166,7 @@
     border-radius: 6px;
 }
 .sticker-drag-header {
-    height: 7px;
+    height: 10px;
     width: 100%;
     cursor: grab;
 }
