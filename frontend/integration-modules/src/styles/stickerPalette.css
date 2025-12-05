@@ -213,3 +213,35 @@
     display: block;
 }
 
+
+.toolbar-btn--shape { /* стили как у других кнопок */ }
+.toolbar-shape-plate { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; }
+.toolbar-shape-plate--active { background: rgba(59,130,246,0.15); border-radius: 8px; }
+
+.shape-panel {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    padding: 16px;
+    width: 280px;
+}
+.shape-grid {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 12px;
+}
+.shape-item {
+    width: 64px;
+    height:64px;
+    background: transparent;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.shape-item:hover {
+    background: rgba(59,130,246,0.1);
+    border-color: #3b82f6;
+}

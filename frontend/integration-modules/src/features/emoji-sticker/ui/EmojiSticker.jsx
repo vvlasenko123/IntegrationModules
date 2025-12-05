@@ -1,4 +1,3 @@
-// src/features/emoji-sticker/ui/EmojiSticker.jsx
 import React, { useRef,useEffect, useContext, useState, useMemo } from 'react'
 import { Resizable } from 're-resizable'
 import { useStickersStore } from '../../../entities/stickers/model/useStickersStore.js'
@@ -27,7 +26,6 @@ export const EmojiSticker = ({ id }) => {
         scale: 1
     })
 
-    // Стили для "скелета" — как у обычных заметок
     const handleStyles = useMemo(() => ({
         topLeft:     { top: -6, left: -6, width: 12, height: 12 },
         topRight:    { top: -6, right: -6, width: 12, height: 12 },
@@ -42,7 +40,7 @@ export const EmojiSticker = ({ id }) => {
         bottomRight: <span className="sticker-resize-handle__dot" />
     }), [])
 
-    // Drag-логика
+
     useEffect(() => {
         const onMove = (e) => {
             if (!dragRef.current.dragging || (dragRef.current.pointerId != null && e.pointerId !== dragRef.current.pointerId)) return

@@ -66,7 +66,6 @@
             const res = await fetch(`/api/v1/stickers/board/${placementId}`, {
                 method: 'DELETE',
                 headers: { 'accept': '*/*' },
-                name: 'remove sticker from board', // красиво в Network
             })
 
             if (!res.ok) {
