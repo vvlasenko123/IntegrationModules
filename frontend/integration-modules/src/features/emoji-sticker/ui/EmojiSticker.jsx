@@ -40,7 +40,6 @@ export const EmojiSticker = ({ id }) => {
         bottomRight: <span className="sticker-resize-handle__dot" />
     }), [])
 
-
     useEffect(() => {
         const onMove = (e) => {
             if (!dragRef.current.dragging || (dragRef.current.pointerId != null && e.pointerId !== dragRef.current.pointerId)) return
@@ -61,11 +60,16 @@ export const EmojiSticker = ({ id }) => {
         }
     }, [id, setPosition])
 
+    const notifyTouched = () => {
+        window.dispatchEvent(new CustomEvent('sticker-touched', { detail: { id, type: 'emoji' } }))
+    }
+
     const onPointerDown = (e) => {
         if (e.button !== 0) return
         e.preventDefault()
         e.stopPropagation()
         bringToFront(id)
+        notifyTouched()
 
         const el = elRef.current
         const board = boardRef?.current || el?.closest('[data-board="true"]')
