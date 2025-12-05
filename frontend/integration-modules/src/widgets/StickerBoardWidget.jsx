@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { LeftToolbar } from './LeftToolbar'
-import { Board } from './Board'
-import { useStickersStore } from '../../../entities/stickers/model/useStickersStore'
-import { notesApi } from '../../../shared/api/notesApi'
-import { stickersApi } from '../../../shared/api/stickerApi'
+import { LeftToolbar } from '../components/LeftToolbar.jsx'
+import { Board } from '../features/board/ui/Board.jsx'
+import { useStickersStore } from '../entities/stickers/model/useStickersStore.js'
+import { notesApi } from '../shared/api/notesApi.js'
+import { stickersApi } from '../shared/api/stickerApi.js'
 
 const SafeFallbackWidget = ({ children }) => <div>{children}</div>
 

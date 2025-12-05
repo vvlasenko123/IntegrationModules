@@ -127,9 +127,20 @@
 }
 
 .resizable-sticker-wrapper--image-active .sticker-resize-handle {
-    opacity: 1;
+    opacity: 1 !important;
     transform: scale(1);
     pointer-events: auto;
+    background: white;
+    border: 2px solid #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59,130,246,0.3);
+}
+.resizable-sticker-wrapper--image-active .sticker-resize-handle__dot {
+    background: #ffffff;
+    border: 1px solid #3b82f6;
+    border-radius: 50%;
+    width: 6px;
+    height: 6px;
+    margin: 3px;
 }
 
 .sticker-context-menu {
@@ -155,7 +166,7 @@
     border-radius: 6px;
 }
 .sticker-drag-header {
-    height: 7px;
+    height: 10px;
     width: 100%;
     cursor: grab;
 }

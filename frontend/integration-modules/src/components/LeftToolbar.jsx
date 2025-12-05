@@ -1,11 +1,11 @@
 import React from 'react'
-import { ColorPalette } from './ColorPalette'
-import './stickerPalette.css'
-import noteAdd from './assets/note_add.svg'
-import noteAddActive from './assets/note_add_active.svg'
-import emojiAdd from './assets/emoji_add.svg'
-import emojiAddActive from './assets/emoji_add_active.svg'
-import { stickersApi } from '../../../shared/api/stickerApi'
+import { ColorPalette } from './ColorPalette.jsx'
+import '../styles/stickerPalette.css'
+import noteAdd from '../assets/note_add.svg'
+import noteAddActive from '../assets/note_add_active.svg'
+import emojiAdd from '../assets/emoji_add.svg'
+import emojiAddActive from '../assets/emoji_add_active.svg'
+import { stickersApi } from '../shared/api/stickerApi.js'
 
 
 export const LeftToolbar = ({ onPick }) => {

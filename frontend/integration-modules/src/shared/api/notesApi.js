@@ -46,5 +46,18 @@ export const notesApi = {
         }
 
         return await res.json()
+    },
+    async delete(id) {
+        const res = await fetch(`/api/v1/note/${id}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+
+        })
+
+        if (!res.ok) {
+            throw new Error(await parseError(res))
+        }
+
+        return res.status === 204
     }
 }
