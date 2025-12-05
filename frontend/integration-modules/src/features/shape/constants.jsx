@@ -7,4 +7,5 @@ export const SHAPES = [
     { id: 'arrow', name: 'Стрелка', defaultSize: { width: 180, height: 60 } },
     { id: 'dblarrow', name: 'Двойная стрелка', defaultSize: { width: 200, height: 60 } },
     { id: 'parallelogram', name: 'Параллелограмм', defaultSize: { width: 200, height: 120 } },
+    { id: "line", name: "Линия", defaultSize: { width: 80, height: 0 } },
 ];

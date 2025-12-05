@@ -100,5 +100,8 @@ export const useStickersStore = create((set) => ({
                 topZ: filtered.reduce((acc, x) => Math.max(acc, x.zIndex ?? 1), 1)
             }
         })
-    }
+    },
+    selectSticker: (id) => set({ selectedId: id }),
+    selectedId: null,
+
 }))

@@ -140,7 +140,6 @@ export const LeftToolbar = ({ onPick }) => {
                                     onDragStart={onShapeDragStart(shape)}
                                     title={shape.name}
                                 >
-                                    {/* SVG preview */}
                                     {shape.id === "square" && (
                                         <svg width="40" height="40">
                                             <rect x="4" y="4" width="32" height="32" stroke="black" fill="none" strokeWidth="2"/>
@@ -173,6 +172,11 @@ export const LeftToolbar = ({ onPick }) => {
                                     {shape.id === "stick" && (
                                         <svg width="40" height="40">
                                             <rect x="16" y="4" width="8" height="32" stroke="black" fill="none" strokeWidth="2"/>
+                                        </svg>
+                                    )}
+                                    {shape.id === "line" && (
+                                        <svg width="40" height="40">
+                                            <line x1="4" y1="20" x2="36" y2="20" stroke="black" strokeWidth="2"/>
                                         </svg>
                                     )}
 

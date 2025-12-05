@@ -214,7 +214,7 @@
 }
 
 
-.toolbar-btn--shape { /* стили как у других кнопок */ }
+.toolbar-btn--shape
 .toolbar-shape-plate { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; }
 .toolbar-shape-plate--active { background: rgba(59,130,246,0.15); border-radius: 8px; }
 
