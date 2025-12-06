@@ -1,4 +1,3 @@
-// src/features/note/ui/NoteSticker.jsx
 import React, { useRef, useEffect, useContext, useState } from 'react'
 import { Resizable } from 're-resizable'
 import { useStickersStore } from '../../../entities/stickers/model/useStickersStore.js'
@@ -96,6 +95,10 @@ export const NoteSticker = ({ id }) => {
         return () => window.removeEventListener('pointerdown', close)
     }, [menuVisible, id])
 
+    const notifyTouched = () => {
+        window.dispatchEvent(new CustomEvent('sticker-touched', { detail: { id, type: 'note' } }))
+    }
+
     const onRootPointerDown = (e) => {
         if (e.button !== 0) return
         if (contentRef.current?.contains(e.target)) return
@@ -103,6 +106,7 @@ export const NoteSticker = ({ id }) => {
         e.preventDefault()
         e.stopPropagation()
         bringToFront(id)
+        notifyTouched()
 
         const el = elRef.current
         if (!el) return
@@ -127,6 +131,7 @@ export const NoteSticker = ({ id }) => {
     const onContentPointerDown = (e) => {
         e.stopPropagation()
         setEditing(true)
+        notifyTouched()
         setTimeout(() => {
             contentRef.current?.focus()
         }, 0)
@@ -186,6 +191,8 @@ export const NoteSticker = ({ id }) => {
 
                 <div
                     ref={elRef}
+                    data-sticker-id={id}
+                    data-sticker-type="note"
                     className={`sticker-root ${editing ? 'sticker-root--editing' : ''}`}
                     style={{ background: sticker.color }}
                     onPointerDown={onRootPointerDown}

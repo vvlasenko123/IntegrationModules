@@ -13,11 +13,15 @@ export const useStickersStore = create((set) => ({
                 id,
                 x: payload.x,
                 y: payload.y,
-                color: payload.color,
                 width: payload.width,
                 height: payload.height,
+                color: payload.color,
                 text: payload.text ?? '',
                 zIndex,
+
+                type: payload.type,
+                shapeId: payload.shapeId,
+                shapeData: payload.shapeData,
                 imageUrl: payload.imageUrl
             }
 
@@ -28,10 +32,11 @@ export const useStickersStore = create((set) => ({
         })
     },
 
+
     setStickers: (stickers) => {
         set(() => ({
             stickers,
-            topZ: stickers.reduce((acc, x) => Math.max(acc, x.zIndex || 1), 1)
+            topZ: stickers.reduce((acc, x) => Math.max(acc, x.zIndex ?? 1), 1)
         }))
     },
 
@@ -42,62 +47,61 @@ export const useStickersStore = create((set) => ({
         })
     },
 
+    updateSticker: (id, patch) => {
+        set((state) => ({
+            stickers: state.stickers.map((s) =>
+                s.id === id ? { ...s, ...patch } : s
+            )
+        }))
+    },
+
     setPosition: (id, x, y) => {
         set((state) => ({
-            stickers: state.stickers.map((s) => {
-                if (s.id === id) {
-                    return { ...s, x, y }
-                }
-
-                return s
-            })
+            stickers: state.stickers.map((s) =>
+                s.id === id ? { ...s, x, y } : s
+            )
         }))
     },
 
     setSize: (id, width, height) => {
         set((state) => ({
-            stickers: state.stickers.map((s) => {
-                if (s.id === id) {
-                    return { ...s, width, height }
-                }
-
-                return s
-            })
+            stickers: state.stickers.map((s) =>
+                s.id === id ? { ...s, width, height } : s
+            )
         }))
     },
 
     setText: (id, text) => {
         set((state) => ({
-            stickers: state.stickers.map((s) => {
-                if (s.id === id) {
-                    return { ...s, text }
-                }
-
-                return s
-            })
+            stickers: state.stickers.map((s) =>
+                s.id === id ? { ...s, text } : s
+            )
         }))
     },
 
     bringToFront: (id) => {
         set((state) => {
-            const nextZ = (state.topZ || 1) + 1
+            const nextZ = state.topZ + 1
 
             return {
-                stickers: state.stickers.map((s) => {
-                    if (s.id === id) {
-                        return { ...s, zIndex: nextZ }
-                    }
-
-                    return s
-                }),
+                stickers: state.stickers.map((s) =>
+                    s.id === id ? { ...s, zIndex: nextZ } : s
+                ),
                 topZ: nextZ
             }
         })
     },
 
     removeSticker: (id) => {
-        set((state) => ({
-            stickers: state.stickers.filter((s) => s.id !== id)
-        }))
-    }
+        set((state) => {
+            const filtered = state.stickers.filter((s) => s.id !== id)
+            return {
+                stickers: filtered,
+                topZ: filtered.reduce((acc, x) => Math.max(acc, x.zIndex ?? 1), 1)
+            }
+        })
+    },
+    selectSticker: (id) => set({ selectedId: id }),
+    selectedId: null,
+
 }))

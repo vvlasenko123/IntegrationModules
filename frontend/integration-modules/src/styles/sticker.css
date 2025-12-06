@@ -6,15 +6,6 @@
     overflow: visible;
 }
 
-.resizable-sticker-wrapper--image-active::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border: 1px solid rgba(59,130,246,0.95);
-    border-radius: 2px;
-    pointer-events: none;
-}
-
 .sticker-root {
     position: relative;
     width: 100%;
@@ -184,4 +175,18 @@
             0 32px 60px rgba(13, 30, 56, 0.12),
             0 6px 12px rgba(13, 30, 56, 0.06);
     transform: translateY(-2px);
+}
+
+.sticker-root--shape {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+.sticker-root--shape::before {
+    display: none !important;
+}
+
+.resizable-sticker-wrapper:not(.resizable-sticker-wrapper--image-active) {
+    border: none;
 }
