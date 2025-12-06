@@ -2,7 +2,7 @@
     position: absolute;
     left: 16px;
     top: 48px;
-    z-index: 80;
+    z-index: 99998;
     display: flex;
     align-items: flex-start;
     gap: 10px;
@@ -17,10 +17,13 @@
     border-radius: 10px;
     border: 1px solid rgba(0,0,0,0.06);
     box-shadow: 0 6px 18px rgba(18,24,37,0.06), 0 1px 0 rgba(255,255,255,0.6) inset;
+    z-index: 99998;
+    position: relative;
 }
 
 .toolbar-card--open {
     box-shadow: 0 8px 22px rgba(18,24,37,0.08);
+    z-index: 99998;
 }
 
 .toolbar-btn {
