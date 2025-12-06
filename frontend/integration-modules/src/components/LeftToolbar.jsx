@@ -196,9 +196,44 @@ export const LeftToolbar = ({ onPick }) => {
                                     )}
 
                                     {shape.id === "parallelogram" && (
-                                        <svg width="40" height="40">
-                                            <polygon points="10,6 34,6 30,34 6,34"
-                                                     stroke="black" fill="none" strokeWidth="2"/>
+                                        <svg width="40" height="40" viewBox="0 0 40 40">
+                                            <polygon points="8,8 34,8 26,32 0,32" stroke="black" fill="none" strokeWidth="2"/>
+                                        </svg>
+                                    )}
+
+                                    {shape.id === "roundedRect" && (
+                                        <svg width="40" height="40" viewBox="0 0 40 40">
+                                            <rect x="6" y="10" width="28" height="20" rx="4" ry="4" stroke="black" fill="none" strokeWidth="2"/>
+                                        </svg>
+                                    )}
+
+                                    {shape.id === "capsule" && (
+                                        <svg width="40" height="40" viewBox="0 0 40 40">
+                                            <rect x="6" y="14" width="28" height="12" rx="6" ry="6" stroke="black" fill="none" strokeWidth="2"/>
+                                        </svg>
+                                    )}
+
+                                    {shape.id === "pentagon" && (
+                                        <svg width="40" height="40" viewBox="0 0 40 40">
+                                            <polygon points="20,6 34,15 28,32 12,32 6,15" stroke="black" fill="none" strokeWidth="2"/>
+                                        </svg>
+                                    )}
+
+                                    {shape.id === "cloud" && (
+                                        <svg width="40" height="40" viewBox="0 0 40 40">
+                                            <path d="M8 24 C6 18 12 14 16 16 C18 10 26 10 30 14 C36 14 36 20 32 22 C28 26 12 26 8 24 Z" stroke="black" fill="none" strokeWidth="2"/>
+                                        </svg>
+                                    )}
+
+                                    {shape.id === "speech" && (
+                                        <svg width="40" height="40" viewBox="0 0 40 40">
+                                            <path d="M6 10 Q20 2 34 10 Q36 18 30 24 L24 24 L20 30 L18 24 L10 24 Q4 18 6 10 Z" stroke="black" fill="none" strokeWidth="2"/>
+                                        </svg>
+                                    )}
+
+                                    {shape.id === "chevron" && (
+                                        <svg width="40" height="40" viewBox="0 0 40 40">
+                                            <polyline points="6,28 20,12 34,28" fill="none" stroke="black" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
                                         </svg>
                                     )}
 

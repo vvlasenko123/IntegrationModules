@@ -8,4 +8,10 @@ export const SHAPES = [
     { id: 'dblarrow', name: 'Двойная стрелка', defaultSize: { width: 200, height: 60 } },
     { id: 'parallelogram', name: 'Параллелограмм', defaultSize: { width: 200, height: 120 } },
     { id: "line", name: "Линия", defaultSize: { width: 80, height: 0 } },
+    { id: 'roundedRect', name: 'Скруглённый прямоугольник', defaultSize: { width: 160, height: 100 } },
+    { id: 'capsule', name: 'Капсула', defaultSize: { width: 160, height: 60 } },
+    { id: 'pentagon', name: 'Пятиугольник', defaultSize: { width: 140, height: 140 } },
+    { id: 'cloud', name: 'Облако', defaultSize: { width: 180, height: 120 } },
+    { id: 'speech', name: 'Облачко речи', defaultSize: { width: 180, height: 120 } },
+    { id: 'chevron', name: 'Шеврон', defaultSize: { width: 160, height: 80 } },
 ];
