@@ -217,10 +217,46 @@
 }
 
 
-.toolbar-btn--shape
-.toolbar-shape-plate { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; }
-.toolbar-shape-plate--active { background: rgba(59,130,246,0.15); border-radius: 8px; }
+.toolbar-btn--shape {
+    padding: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
 
+.toolbar-shape-plate {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .12s ease, background .12s ease;
+}
+
+.toolbar-btn--shape:hover .toolbar-shape-plate {
+    transform: translateY(-2px);
+    background: rgba(59,130,246,0.08);
+}
+
+.toolbar-shape-plate--active {
+    background: #e4f1ff;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(56,132,255,0.12);
+}
+
+.toolbar-btn--shape.toolbar-btn--active {
+    background: #e4f1ff;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(56,132,255,0.12);
+}
+
+.toolbar-btn--shape.toolbar-btn--active .toolbar-shape-plate {
+    background: #e4f1ff;
+}
 .shape-panel {
     background: white;
     border-radius: 12px;
