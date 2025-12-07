@@ -9,8 +9,9 @@ import emojiAddActive from '../assets/emoji_add_active.svg'
 import shapeAdd from '../assets/shape_add.svg'
 import shapeAddActive from '../assets/shape_add_active.svg'
 import { stickersApi } from '../shared/api/stickerApi.js'
-import { DND_SHAPE, DND_EMOJI } from '../features/board/constants.js'
+import { DND_SHAPE, DND_EMOJI, DND_CODE } from '../features/board/constants.js'
 import { SHAPE_ICONS } from "../features/shape/shapeIcons.jsx";
+import codeIcon from '../assets/shape_add.svg'
 
 
 export const LeftToolbar = ({ onPick }) => {
@@ -82,6 +83,13 @@ export const LeftToolbar = ({ onPick }) => {
         e.dataTransfer.effectAllowed = 'copy'
     }
 
+    const onCodeDragStart = (e) => {
+    e.stopPropagation()
+    // Передаем тип code
+    e.dataTransfer.setData(DND_CODE, JSON.stringify({ type: 'code' }))
+    e.dataTransfer.effectAllowed = 'copy'
+}
+
     return (
         <div className="left-toolbar-container" ref={wrapperRef} onClick={e => e.stopPropagation()}>
             <div className={`toolbar-card ${open || emojiOpen || shapeOpen ? 'toolbar-card--open' : ''}`}>
@@ -100,6 +108,18 @@ export const LeftToolbar = ({ onPick }) => {
                 <button onClick={toggleShape} className={`toolbar-btn toolbar-btn--icon toolbar-btn--shape ${shapeOpen ? 'toolbar-btn--active' : ''}`}>
                     <div className={`toolbar-shape-plate ${shapeOpen ? 'toolbar-shape-plate--active' : ''}`}>
                         <img src={shapeOpen ? shapeAddActive : shapeAdd} alt="Фигуры" draggable={false} />
+                    </div>
+                </button>
+
+                <button
+                    className="toolbar-btn toolbar-btn--icon"
+                    draggable
+                    onDragStart={onCodeDragStart}
+                    title="Markdown Code Block"
+                >
+                    <div className="toolbar-shape-plate">
+                        {/* Замени src на иконку кода, если есть */}
+                        <img src={codeIcon} alt="Code" draggable={false} style={{ filter: 'hue-rotate(90deg)' }} />
                     </div>
                 </button>
             </div>

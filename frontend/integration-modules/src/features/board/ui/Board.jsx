@@ -2,11 +2,13 @@ import React, { forwardRef, useImperativeHandle, useRef, useState, useEffect } f
 import { useStickersStore } from '../../../entities/stickers/model/useStickersStore'
 import { useDropHandler } from '../hooks/useDropHandler'
 import { NoteSticker } from '../../note/ui/NoteSticker.jsx'
+
 import { EmojiSticker } from '../../emoji-sticker/ui/EmojiSticker.jsx'
 import { BoardContext } from './BoardContext.jsx'
-import { BOARD_SAFE_PAD, NOTE_W, NOTE_H, DND_EMOJI, DND_NOTE, DND_SHAPE } from '../constants'
+import { BOARD_SAFE_PAD, NOTE_W, NOTE_H, DND_EMOJI, DND_NOTE, DND_SHAPE, DND_CODE } from '../constants'
 import { ShapeSticker } from '../../shape/ui/ShapeSticker.jsx'
 import { Stage, Layer } from 'react-konva'
+import { CodeBlock } from '../../code-block/ui/CodeBlock.jsx'
 
 export const Board = forwardRef((_, ref) => {
     const boardRef = useRef(null)
@@ -109,7 +111,7 @@ export const Board = forwardRef((_, ref) => {
     }), [addSticker, topZ])
 
     const onDragOver = (e) => {
-        if (e.dataTransfer.types.some(t => [DND_NOTE, DND_EMOJI, DND_SHAPE].includes(t))) {
+        if (e.dataTransfer.types.some(t => [DND_NOTE, DND_EMOJI, DND_SHAPE, DND_CODE].includes(t))) {
             e.preventDefault()
         }
     }
@@ -303,6 +305,9 @@ export const Board = forwardRef((_, ref) => {
                     }
                     if (s.type === 'shape') {
                         return null
+                    }
+                    if (s.type === 'code') {
+                        return <CodeBlock key={s.id} id={s.id} />
                     }
                     return <NoteSticker key={s.id} id={s.id} />
                 })}
