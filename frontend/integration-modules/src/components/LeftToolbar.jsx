@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState} from 'react'
 import { ColorPalette } from './ColorPalette.jsx'
 import { SHAPES } from '../features/shape/constants.jsx'
 import '../styles/stickerPalette.css'
@@ -11,8 +11,8 @@ import shapeAddActive from '../assets/shape_add_active.svg'
 import { stickersApi } from '../shared/api/stickerApi.js'
 import { DND_SHAPE, DND_EMOJI, DND_CODE } from '../features/board/constants.js'
 import { SHAPE_ICONS } from "../features/shape/shapeIcons.jsx";
-import codeIcon from '../assets/shape_add.svg'
-
+import markdownAdd from '../assets/markdown_add.svg'
+import markdownAddActive from '../assets/markdown_add_active.svg'
 
 export const LeftToolbar = ({ onPick }) => {
     const [open, setOpen] = React.useState(false)
@@ -20,6 +20,7 @@ export const LeftToolbar = ({ onPick }) => {
     const [shapeOpen, setShapeOpen] = React.useState(false)
     const [emojiItems, setEmojiItems] = React.useState([])
     const wrapperRef = React.useRef(null)
+    const [isMarkdownDragging, setIsMarkdownDragging] = React.useState(false);
 
     const toggle = (e) => {
         e.stopPropagation()
@@ -84,11 +85,15 @@ export const LeftToolbar = ({ onPick }) => {
     }
 
     const onCodeDragStart = (e) => {
-    e.stopPropagation()
-    // Передаем тип code
-    e.dataTransfer.setData(DND_CODE, JSON.stringify({ type: 'code' }))
-    e.dataTransfer.effectAllowed = 'copy'
-}
+        e.stopPropagation();
+        setIsMarkdownDragging(true);
+        e.dataTransfer.setData(DND_CODE, JSON.stringify({ type: 'code' }));
+        e.dataTransfer.effectAllowed = 'copy';
+    };
+    const onCodeDragEnd = (e) => {
+        e.preventDefault();
+        setIsMarkdownDragging(false);
+    };
 
     return (
         <div className="left-toolbar-container" ref={wrapperRef} onClick={e => e.stopPropagation()}>
@@ -112,14 +117,18 @@ export const LeftToolbar = ({ onPick }) => {
                 </button>
 
                 <button
-                    className="toolbar-btn toolbar-btn--icon"
+                    className={`toolbar-btn toolbar-btn--icon toolbar-btn--markdown ${isMarkdownDragging ? 'toolbar-btn--active' : ''}`.trim()}
                     draggable
                     onDragStart={onCodeDragStart}
+                    onDragEnd={onCodeDragEnd}
                     title="Markdown Code Block"
                 >
-                    <div className="toolbar-shape-plate">
-                        {/* Замени src на иконку кода, если есть */}
-                        <img src={codeIcon} alt="Code" draggable={false} style={{ filter: 'hue-rotate(90deg)' }} />
+                    <div className={`toolbar-markdown-plate ${isMarkdownDragging ? 'toolbar-markdown-plate--active' : ''}`}>
+                        <img
+                            src={isMarkdownDragging ? markdownAddActive : markdownAdd}
+                            alt="Code"
+                            draggable={false}
+                        />
                     </div>
                 </button>
             </div>

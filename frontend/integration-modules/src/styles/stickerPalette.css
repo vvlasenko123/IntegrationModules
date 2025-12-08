@@ -143,6 +143,7 @@
 .toolbar-btn--emoji:hover .toolbar-emoji-plate,
 .toolbar-btn--note:hover .toolbar-note-plate {
     transform: translateY(-2px);
+    background: rgba(59,130,246,0.08);
 }
 
 .toolbar-btn--active {
@@ -284,3 +285,28 @@
     background: rgba(59,130,246,0.1);
     border-color: #3b82f6;
 }
+
+.toolbar-btn--markdown {
+    padding: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.toolbar-btn--markdown:hover .toolbar-markdown-plate {
+    transform: translateY(-2px);
+    background: rgba(59,130,246,0.08);
+}
+
+.toolbar-btn--markdown.toolbar-btn--active,
+.toolbar-markdown-plate--active {
+    background: #e4f1ff;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(56,132,255,0.12);
+}
+
+
+
