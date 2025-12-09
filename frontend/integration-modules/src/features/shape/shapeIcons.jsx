@@ -115,4 +115,42 @@ export const SHAPE_ICONS = {
             />
         </svg>
     ),
+    table3x3: (
+        <svg width="40" height="40" viewBox="0 0 40 40">
+            <rect x="4" y="4" width="32" height="32" stroke="black" fill="none" strokeWidth="2"/>
+
+            <line x1="14" y1="4" x2="14" y2="36" stroke="black" strokeWidth="2"/>
+            <line x1="26" y1="4" x2="26" y2="36" stroke="black" strokeWidth="2"/>
+
+            <line x1="4" y1="14" x2="36" y2="14" stroke="black" strokeWidth="2"/>
+            <line x1="4" y1="26" x2="36" y2="26" stroke="black" strokeWidth="2"/>
+        </svg>
+    ),
+
+    pyramid: (
+        <svg width="40" height="40" viewBox="0 0 40 40">
+            <polygon points="4,4 36,4 20,36" stroke="black" fill="none" strokeWidth="2" />
+
+            <line x1="8" y1="12" x2="32" y2="12" stroke="black" strokeWidth="2" />
+            <line x1="12" y1="20" x2="28" y2="20" stroke="black" strokeWidth="2" />
+            <line x1="16" y1="28" x2="24" y2="28" stroke="black" strokeWidth="2" />
+        </svg>
+    ),
+    circleArrow: (
+        <svg width="40" height="40" viewBox="0 0 40 40">
+            <circle cx="20" cy="20" r="14" stroke="black" fill="none" strokeWidth="2"/>
+            <line x1="20" y1="6" x2="20" y2="0" stroke="black" strokeWidth="2"/>
+            <polygon points="18,2 22,2 20,0" fill="black"/>
+        </svg>
+    ),
+
+    table3x3LeftMerge: (
+        <svg width="40" height="40" viewBox="0 0 40 40">
+            <rect x="4" y="4" width="32" height="32" stroke="black" fill="none" strokeWidth="2"/>
+            <line x1="14" y1="4" x2="14" y2="36" stroke="black" strokeWidth="2"/>
+            <line x1="26" y1="4" x2="26" y2="36" stroke="black" strokeWidth="2"/>
+            <line x1="14" y1="16" x2="36" y2="16" stroke="black" strokeWidth="2"/>
+            <line x1="14" y1="28" x2="36" y2="28" stroke="black" strokeWidth="2"/>
+        </svg>
+    ),
 };

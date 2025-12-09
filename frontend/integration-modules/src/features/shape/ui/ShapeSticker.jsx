@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import { Rect, Line, Star, Arrow, Transformer, Ellipse, Path, Circle } from "react-konva";
+import { Rect, Line, Star, Arrow, Transformer, Ellipse, Path, Circle, Group } from "react-konva";
 import { useStickersStore } from "../../../entities/stickers/model/useStickersStore";
 
 export const ShapeSticker = ({ id }) => {
@@ -33,12 +33,12 @@ export const ShapeSticker = ({ id }) => {
     const { x, y, width, height, rotation, fill, stroke, shapeId } = sticker;
 
     const notifyTouched = () => {
-        window.dispatchEvent(new CustomEvent('sticker-touched', { 
+        window.dispatchEvent(new CustomEvent('sticker-touched', {
             detail:
                 {
-                    id, 
-                    type: 'shape' 
-                } 
+                    id,
+                    type: 'shape'
+                }
         }));
     }
 
@@ -177,9 +177,9 @@ export const ShapeSticker = ({ id }) => {
                 return <Path {...common} data={path} listening={true} />;
             }
             case "arrow":
-                return <Arrow {...common} points={[0, height / 2, width, height / 2]} pointerLength={20} pointerWidth={20} />;
+                return <Arrow {...common} points={[0,height/2,width,height/2]} pointerLength={20} pointerWidth={20} fill={stroke || "#000"} stroke={stroke || "#000"} strokeWidth={2} hitStrokeWidth={20} ref={shapeRef} />;
             case "dblarrow":
-                return <Arrow {...common} points={[0, height / 2, width, height / 2]} pointerLength={20} pointerWidth={20} pointerAtBeginning />;
+                return <Arrow {...common} points={[0,height/2,width,height/2]} pointerLength={20} pointerWidth={20} pointerAtBeginning fill={stroke || "#000"} stroke={stroke || "#000"} strokeWidth={2} hitStrokeWidth={20} ref={shapeRef} />;
             case "parallelogram":
                 return <Line {...common} points={[40, 0, width, 0, width - 40, height, 0, height]} closed />;
             case "line":
@@ -188,6 +188,160 @@ export const ShapeSticker = ({ id }) => {
                 const pts = [0, height, width * 0.5, height * 0.2, width, height];
                 return <Line {...common} points={pts} stroke={stroke || "#000"} strokeWidth={4} closed={false} />;
             }
+            case "table3x3": {
+                const cellW = width / 3;
+                const cellH = height / 3;
+
+                return (
+                    <>
+                        <Rect {...common} />
+                        <Line
+                            x={x} y={y}
+                            points={[cellW, 0, cellW, height]}
+                            stroke={stroke || "#000"}
+                            strokeWidth={2}
+                        />
+                        <Line
+                            x={x} y={y}
+                            points={[cellW * 2, 0, cellW * 2, height]}
+                            stroke={stroke || "#000"}
+                            strokeWidth={2}
+                        />
+                        <Line
+                            x={x} y={y}
+                            points={[0, cellH, width, cellH]}
+                            stroke={stroke || "#000"}
+                            strokeWidth={2}
+                        />
+                        <Line
+                            x={x} y={y}
+                            points={[0, cellH * 2, width, cellH * 2]}
+                            stroke={stroke || "#000"}
+                            strokeWidth={2}
+                        />
+                    </>
+                );
+            }
+            case "pyramid": {
+                const levels = 4;
+                const stepH = height / levels;
+
+                const shapes = [];
+
+                for (let i = 0; i < levels; i++) {
+                    const topY = stepH * i;
+                    const bottomY = stepH * (i + 1);
+
+                    const topW = width * (1 - i / levels);
+                    const bottomW = width * (1 - (i + 1) / levels);
+
+                    const topX = (width - topW) / 2;
+                    const bottomX = (width - bottomW) / 2;
+
+                    const points = [
+                        topX, topY,
+                        topX + topW, topY,
+                        bottomX + bottomW, bottomY,
+                        bottomX, bottomY
+                    ];
+
+                    shapes.push(
+                        <Line
+                            key={`pyramid-${i}`}
+                            points={points}
+                            closed
+                            fill={fill ?? "transparent"}
+                            stroke={stroke || "#000"}
+                            strokeWidth={2}
+                            listening={false}
+                        />
+                    );
+                }
+
+                return (
+                    <Group
+                        ref={shapeRef}
+                        x={x}
+                        y={y}
+                        rotation={rotation}
+                        draggable
+                        onClick={(e) => { e.cancelBubble = true; bringToFront(id); select(id); notifyTouched(); }}
+                        onPointerDown={(e) => { e.cancelBubble = true; bringToFront(id); select(id); notifyTouched(); }}
+                        onDragEnd={(e) => { update(id, { x: e.target.x(), y: e.target.y() }); notifyTouched(); }}
+                        onTransformEnd={() => {
+                            const node = shapeRef.current;
+                            const scaleX = node.scaleX();
+                            const scaleY = node.scaleY();
+                            update(id, { x: node.x(), y: node.y(), width: width * scaleX, height: height * scaleY, rotation: node.rotation() });
+                            node.scaleX(1);
+                            node.scaleY(1);
+                            notifyTouched();
+                        }}
+                    >
+
+                        <Rect
+                            x={0} y={0}
+                            width={width} height={height}
+                            fill="rgba(0,0,0,0.001)"
+                            strokeWidth={0}
+                        />
+                        {shapes}
+                    </Group>
+                );
+            }
+            case "circleArrow": {
+                const radius = Math.min(width, height) / 2;
+                const centerX = width / 2;
+                const centerY = height / 2;
+
+                const arrowLength = radius * 0.6;
+                const arrowAngle = -Math.PI / 2;
+
+                const startX = centerX + radius * Math.cos(arrowAngle);
+                const startY = centerY + radius * Math.sin(arrowAngle);
+
+                const endX = startX + arrowLength * Math.cos(arrowAngle);
+                const endY = startY + arrowLength * Math.sin(arrowAngle);
+
+                return (
+                    <Group {...common}>
+                        <Ellipse
+                            x={centerX}
+                            y={centerY}
+                            radiusX={radius}
+                            radiusY={radius}
+                            fill={fill ?? "transparent"}
+                            stroke={stroke || "#000"}
+                            strokeWidth={2}
+                        />
+                        <Arrow
+                            points={[startX, startY, endX, endY]}
+                            pointerLength={15}
+                            pointerWidth={10}
+                            fill={stroke || "#000"}
+                            stroke={stroke || "#000"}
+                            strokeWidth={2}
+                        />
+                    </Group>
+                );
+            }
+
+            case "table3x3LeftMerge": {
+                const cellW = width / 3;
+                const cellH = height / 3;
+
+                return (
+                    <>
+                        <Rect {...common} />
+
+                        <Line x={x + cellW} y={y} points={[0, 0, 0, height]} stroke={stroke || "#000"} strokeWidth={2} />
+                        <Line x={x + cellW * 2} y={y} points={[0, 0, 0, height]} stroke={stroke || "#000"} strokeWidth={2} />
+                        <Line x={x + cellW} y={y} points={[0, cellH, cellW * 2, cellH]} stroke={stroke || "#000"} strokeWidth={2} />
+                        <Line x={x + cellW} y={y} points={[0, cellH * 2, cellW * 2, cellH * 2]} stroke={stroke || "#000"} strokeWidth={2} />
+                    </>
+                );
+            }
+
             default:
                 return <Rect {...common} />;
         }
