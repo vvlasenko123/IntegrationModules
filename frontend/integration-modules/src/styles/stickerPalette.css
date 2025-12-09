@@ -2,7 +2,7 @@
     position: absolute;
     left: 16px;
     top: 48px;
-    z-index: 80;
+    z-index: 99998;
     display: flex;
     align-items: flex-start;
     gap: 10px;
@@ -17,10 +17,13 @@
     border-radius: 10px;
     border: 1px solid rgba(0,0,0,0.06);
     box-shadow: 0 6px 18px rgba(18,24,37,0.06), 0 1px 0 rgba(255,255,255,0.6) inset;
+    z-index: 99998;
+    position: relative;
 }
 
 .toolbar-card--open {
     box-shadow: 0 8px 22px rgba(18,24,37,0.08);
+    z-index: 99998;
 }
 
 .toolbar-btn {
@@ -140,6 +143,7 @@
 .toolbar-btn--emoji:hover .toolbar-emoji-plate,
 .toolbar-btn--note:hover .toolbar-note-plate {
     transform: translateY(-2px);
+    background: rgba(59,130,246,0.08);
 }
 
 .toolbar-btn--active {
@@ -212,4 +216,97 @@
     object-fit: contain;
     display: block;
 }
+
+
+.toolbar-btn--shape {
+    padding: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.toolbar-shape-plate {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .12s ease, background .12s ease;
+}
+
+.toolbar-btn--shape:hover .toolbar-shape-plate {
+    transform: translateY(-2px);
+    background: rgba(59,130,246,0.08);
+}
+
+.toolbar-shape-plate--active {
+    background: #e4f1ff;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(56,132,255,0.12);
+}
+
+.toolbar-btn--shape.toolbar-btn--active {
+    background: #e4f1ff;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(56,132,255,0.12);
+}
+
+.toolbar-btn--shape.toolbar-btn--active .toolbar-shape-plate {
+    background: #e4f1ff;
+}
+.shape-panel {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    padding: 16px;
+    width: 280px;
+}
+.shape-grid {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 12px;
+}
+.shape-item {
+    width: 64px;
+    height:64px;
+    background: transparent;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.shape-item:hover {
+    background: rgba(59,130,246,0.1);
+    border-color: #3b82f6;
+}
+
+.toolbar-btn--markdown {
+    padding: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.toolbar-btn--markdown:hover .toolbar-markdown-plate {
+    transform: translateY(-2px);
+    background: rgba(59,130,246,0.08);
+}
+
+.toolbar-btn--markdown.toolbar-btn--active,
+.toolbar-markdown-plate--active {
+    background: #e4f1ff;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(56,132,255,0.12);
+}
+
+
 
