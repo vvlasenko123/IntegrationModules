@@ -79,18 +79,15 @@ export const useStickersStore = create((set) => ({
         }))
     },
 
-    bringToFront: (id) => {
-        set((state) => {
-            const nextZ = state.topZ + 1
-
-            return {
-                stickers: state.stickers.map((s) =>
-                    s.id === id ? { ...s, zIndex: nextZ } : s
-                ),
-                topZ: nextZ
-            }
-        })
-    },
+    bringToFront: (id) => set(state => {
+        const sticker = state.stickers.find(s => s.id === id);
+        if (!sticker) return state;
+        const newZ = (state.topZ || 1) + 1;
+        return {
+            stickers: state.stickers.map(s => s.id === id ? { ...s, zIndex: newZ } : s),
+            topZ: newZ
+        }
+    }),
 
     removeSticker: (id) => {
         set((state) => {
