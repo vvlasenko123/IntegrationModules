@@ -1,5 +1,5 @@
 export const SHAPES = [
-    { id: "line", name: "Линия", defaultSize: { width: 80, height: 0 } },
+    { id: "line", name: "Линия", defaultSize: { width: 80, height: 20 } },
     { id: 'arrow', name: 'Стрелка', defaultSize: { width: 180, height: 60 } },
     { id: 'dblarrow', name: 'Двойная стрелка', defaultSize: { width: 200, height: 60 } },
     { id: 'square', name: 'Квадрат', defaultSize: { width: 140, height: 140 } },

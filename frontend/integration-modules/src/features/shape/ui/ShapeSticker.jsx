@@ -1,382 +1,155 @@
-import React, { useRef, useEffect } from "react";
-import { Rect, Line, Star, Arrow, Transformer, Ellipse, Path, Circle, Group } from "react-konva";
+import React, { useRef } from "react";
+import { Rnd } from "react-rnd";
 import { useStickersStore } from "../../../entities/stickers/model/useStickersStore";
 
 export const ShapeSticker = ({ id }) => {
-    const shapeRef = useRef();
-    const trRef = useRef();
-
     const sticker = useStickersStore(s => s.stickers.find(st => st.id === id));
     const update = useStickersStore(s => s.updateSticker);
     const select = useStickersStore(s => s.selectSticker);
     const bringToFront = useStickersStore(s => s.bringToFront);
     const isSelected = useStickersStore(s => s.selectedId === id);
 
-    const polyPoints = (w, h, sides) => {
-        const cx = w / 2;
-        const cy = h / 2;
-        const radius = Math.min(w, h) / 2;
-        const points = [];
-        for (let i = 0; i < sides; i++) {
-            const theta = (Math.PI * 2 * i) / sides - Math.PI / 2;
-            const x = Math.round(cx + radius * Math.cos(theta));
-            const y = Math.round(cy + radius * Math.sin(theta));
-            points.push(x, y);
-        }
-        return points;
-    };
+    const rndRef = useRef();
 
-    if (!sticker) {
-        return null;
-    }
-
-    const { x, y, width, height, rotation, fill, stroke, shapeId } = sticker;
+    if (!sticker) return null;
+    const { x, y, width, height, rotation, fill, stroke, shapeId, zIndex } = sticker;
 
     const notifyTouched = () => {
-        window.dispatchEvent(new CustomEvent('sticker-touched', {
-            detail:
-                {
-                    id,
-                    type: 'shape'
-                }
-        }));
-    }
+        window.dispatchEvent(new CustomEvent("sticker-touched", { detail: { id, type: "shape" } }));
+    };
 
-    const common = {
-        ref: shapeRef,
-        x,
-        y,
-        width,
-        height,
-        rotation,
-        fill: fill ?? "transparent",
-        stroke: stroke || "#000",
-        strokeWidth: 2,
-        draggable: true,
-        onClick: (e) => {
-            e.cancelBubble = true;
-            bringToFront(id);
-            select(id);
-            notifyTouched();
-        },
-        onPointerDown: (e) => {
-            e.cancelBubble = true;
-            bringToFront(id);
-            select(id);
-            notifyTouched();
-        },
-        onDragStart: (e) => {
-            e.cancelBubble = true;
-            bringToFront(id);
-            select(id);
-            notifyTouched();
-            window.dispatchEvent(new CustomEvent('shape-drag-start', { detail: { id } }));
-        },
-        onDragEnd: (e) => {
-            update(id, { x: e.target.x(), y: e.target.y() });
-            window.dispatchEvent(new CustomEvent('shape-drag-end', { detail: { id } }));
-            notifyTouched();
-        },
-        onTransformStart: () => {
-            bringToFront(id);
-            select(id);
-            notifyTouched();
-            window.dispatchEvent(new CustomEvent('shape-transform-start', { detail: { id } }));
-        },
-        onTransformEnd: () => {
-            const node = shapeRef.current;
+    const onDragStop = (e, d) => { update(id, { x: d.x, y: d.y }); notifyTouched(); };
+    const onResizeStop = (e, direction, ref, delta, position) => {
+        update(id, { x: position.x, y: position.y, width: ref.offsetWidth, height: ref.offsetHeight });
+        notifyTouched();
+    };
 
-            const scaleX = node.scaleX();
-            const scaleY = node.scaleY();
+    const handleClick = (e) => {
+        e.stopPropagation();
+        bringToFront(id);
+        select(id);
+        notifyTouched();
+    };
 
-            if (shapeId === "stick" || shapeId === "arrow" || shapeId === "dblarrow" || shapeId === "line") {
-                update(id, {
-                    x: node.x(),
-                    y: node.y(),
-                    width: Math.max(20, width * scaleX),
-                    height,
-                    rotation: node.rotation(),
-                });
-            } else if (shapeId === "circle") {
-                update(id, {
-                    x: node.x(),
-                    y: node.y(),
-                    width: Math.max(20, width * scaleX),
-                    height: Math.max(20, height * scaleY),
-                    rotation: node.rotation(),
-                });
-            } else {
-                update(id, {
-                    x: node.x(),
-                    y: node.y(),
-                    width: Math.max(20, width * scaleX),
-                    height: Math.max(20, height * scaleY),
-                    rotation: node.rotation(),
-                });
-            }
-
-            node.scaleX(1);
-            node.scaleY(1);
-            window.dispatchEvent(new CustomEvent('shape-transform-end', { detail: { id } }));
-            notifyTouched();
+    const renderShape = () => {
+        switch (shapeId) {
+            case "line":
+                return <line x1="0" y1="50%" x2="100%" y2="50%" stroke={stroke || "#000"} strokeWidth={2} />;
+            case "arrow":
+                return <line x1="0" y1="50%" x2="100%" y2="50%" stroke={stroke || "#000"} strokeWidth={2} markerEnd="url(#arrowhead-end)" />;
+            case "dblarrow":
+                return <line x1="0" y1="50%" x2="100%" y2="50%" stroke={stroke || "#000"} strokeWidth={2} markerEnd="url(#arrowhead-end)"  markerStart="url(#arrowhead-start)" />;
+            case "square":
+                return <rect width="100%" height="100%" fill={fill||"transparent"} stroke={stroke||"#000"} strokeWidth={2} />;
+            case "circle":
+                return <ellipse cx="50%" cy="50%" rx="50%" ry="50%" fill={fill||"transparent"} stroke={stroke||"#000"} strokeWidth={2} />;
+            case "triangle":
+                return <polygon points="50,0 100,100 0,100" fill={fill||"transparent"} stroke={stroke||"#000"} strokeWidth={2} />;
+            case "star":
+                return <polygon points="50,0 61,35 98,35 68,57 79,91 50,70 21,91 32,57 2,35 39,35" fill={fill||"transparent"} stroke={stroke||"#000"} strokeWidth={2} />;
+            case "parallelogram":
+                return <polygon points="20,0 100,0 80,100 0,100" fill={fill||"transparent"} stroke={stroke||"#000"} strokeWidth={2} />;
+            case "stick":
+                return <rect width="100%" height="100%" fill={fill||"transparent"} stroke={stroke||"#000"} strokeWidth={2} />;
+            case "roundedRect":
+                return <rect width="100%" height="100%" rx="20" ry="20" fill={fill||"transparent"} stroke={stroke||"#000"} strokeWidth={2} />;
+            case "capsule":
+                return <rect width="100%" height="100%" rx="50" ry="50" fill={fill||"transparent"} stroke={stroke||"#000"} strokeWidth={2} />;
+            case "pentagon":
+                return <polygon points="50,0 100,38 82,100 18,100 0,38" fill={fill||"transparent"} stroke={stroke||"#000"} strokeWidth={2} />;
+            case "cloud":
+                return <path d="M20,60 Q0,30 40,20 Q60,0 80,20 Q120,0 140,40 Q160,40 140,60 Z" fill={fill||"transparent"} stroke={stroke||"#000"} strokeWidth={2} />;
+            case "speech":
+                return <path d="M10,0 Q170,0 170,80 Q170,100 150,100 L130,120 L130,100 Q10,100 10,80 Z" fill={fill||"transparent"} stroke={stroke||"#000"} strokeWidth={2} />;
+            case "chevron":
+                return <polygon points="0,0 100,0 60,50 100,100 0,100 40,50" fill={fill||"transparent"} stroke={stroke||"#000"} strokeWidth={2} />;
+            case "table3x3":
+            case "table3x3LeftMerge":
+                return <>
+                    <rect width="100%" height="100%" fill={fill||"transparent"} stroke={stroke||"#000"} strokeWidth={2}/>
+                    <line x1="0" y1="33%" x2="100%" y2="33%" stroke={stroke||"#000"} strokeWidth={1}/>
+                    <line x1="0" y1="66%" x2="100%" y2="66%" stroke={stroke||"#000"} strokeWidth={1}/>
+                    <line x1="33%" y1="0" x2="33%" y2="100%" stroke={stroke||"#000"} strokeWidth={1}/>
+                    <line x1="66%" y1="0" x2="66%" y2="100%" stroke={stroke||"#000"} strokeWidth={1}/>
+                </>;
+            case "pyramid":
+                return <polygon points="50,0 100,100 0,100" fill={fill||"transparent"} stroke={stroke||"#000"} strokeWidth={2} />;
+            case "circleArrow":
+                return <>
+                    <circle cx="50%" cy="50%" r="50%" fill={fill||"transparent"} stroke={stroke||"#000"} strokeWidth={2}/>
+                    <line x1="50%" y1="0%" x2="50%" y2="50%" stroke={stroke||"#000"} strokeWidth={2} markerEnd="url(#arrowhead)"/>
+                </>;
+            default:
+                return <rect width="100%" height="100%" fill={fill||"transparent"} stroke={stroke||"#000"} strokeWidth={2} />;
         }
     };
 
-    const shape = (() => {
-        switch (shapeId) {
-            case "square":
-                return <Rect {...common} />;
-            case "roundedRect":
-                return <Rect {...common} cornerRadius={12} />;
-            case "capsule": {
-                const radius = Math.round((height || 0) / 2);
-                return <Rect {...common} cornerRadius={radius} />;
-            }
-            case "circle":
-                return <Ellipse
-                    {...common}
-                    radiusX={width / 2}
-                    radiusY={height / 2}
-                />;
-            case "triangle":
-                return <Line {...common} points={[width / 2, 0, width, height, 0, height]} closed />;
-            case "roundedTriangle":
-                return <Line {...common} points={[width / 2, 0, width, height, 0, height]} closed />;
-            case "star":
-                return <Star {...common} numPoints={5} innerRadius={width * 0.35} outerRadius={width / 2} />;
-            case "pentagon":
-                return <Line {...common} points={polyPoints(width, height, 5)} closed />;
-            case "cloud": {
-                const w = width || 180;
-                const h = height || 120;
-                const path = `
-                    M ${w * 0.2} ${h * 0.6}
-                    C ${w * 0.05} ${h * 0.6}, ${w * 0.05} ${h * 0.4}, ${w * 0.15} ${h * 0.3}
-                    C ${w * 0.15} ${h * 0.15}, ${w * 0.35} ${h * 0.1}, ${w * 0.45} ${h * 0.2}
-                    C ${w * 0.55} ${h * 0.05}, ${w * 0.75} ${h * 0.05}, ${w * 0.85} ${h * 0.2}
-                    C ${w * 0.95} ${h * 0.25}, ${w * 0.95} ${h * 0.45}, ${w * 0.8} ${h * 0.55}
-                    L ${w * 0.2} ${h * 0.6}
-                    Z
-                `;
-                return <Path {...common} data={path} listening={true} />;
-            }
-            case "speech": {
-                const w = width || 180;
-                const h = height || 120;
-                const path = `
-                    M 10 ${h * 0.2}
-                    Q ${w * 0.5} ${-h * 0.1}, ${w - 10} ${h * 0.2}
-                    Q ${w * 1.05} ${h * 0.45}, ${w - 10} ${h * 0.7}
-                    L ${w * 0.6} ${h * 0.7}
-                    L ${w * 0.5} ${h * 0.9}
-                    L ${w * 0.4} ${h * 0.7}
-                    L 10 ${h * 0.7}
-                    Q -5 ${h * 0.45}, 10 ${h * 0.2}
-                    Z
-                `;
-                return <Path {...common} data={path} listening={true} />;
-            }
-            case "arrow":
-                return <Arrow {...common} points={[0,height/2,width,height/2]} pointerLength={20} pointerWidth={20} fill={stroke || "#000"} stroke={stroke || "#000"} strokeWidth={2} hitStrokeWidth={20} ref={shapeRef} />;
-            case "dblarrow":
-                return <Arrow {...common} points={[0,height/2,width,height/2]} pointerLength={20} pointerWidth={20} pointerAtBeginning fill={stroke || "#000"} stroke={stroke || "#000"} strokeWidth={2} hitStrokeWidth={20} ref={shapeRef} />;
-            case "parallelogram":
-                return <Line {...common} points={[40, 0, width, 0, width - 40, height, 0, height]} closed />;
-            case "line":
-                return <Line {...common} points={[0, height / 2, width, height / 2]} stroke={stroke || "#000"} strokeWidth={2} />;
-            case "chevron": {
-                const pts = [0, height, width * 0.5, height * 0.2, width, height];
-                return <Line {...common} points={pts} stroke={stroke || "#000"} strokeWidth={4} closed={false} />;
-            }
-            case "table3x3": {
-                const cellW = width / 3;
-                const cellH = height / 3;
 
-                return (
-                    <>
-                        <Rect {...common} />
-                        <Line
-                            x={x} y={y}
-                            points={[cellW, 0, cellW, height]}
-                            stroke={stroke || "#000"}
-                            strokeWidth={2}
-                        />
-                        <Line
-                            x={x} y={y}
-                            points={[cellW * 2, 0, cellW * 2, height]}
-                            stroke={stroke || "#000"}
-                            strokeWidth={2}
-                        />
-                        <Line
-                            x={x} y={y}
-                            points={[0, cellH, width, cellH]}
-                            stroke={stroke || "#000"}
-                            strokeWidth={2}
-                        />
-                        <Line
-                            x={x} y={y}
-                            points={[0, cellH * 2, width, cellH * 2]}
-                            stroke={stroke || "#000"}
-                            strokeWidth={2}
-                        />
-                    </>
-                );
-            }
-            case "pyramid": {
-                const levels = 4;
-                const stepH = height / levels;
-
-                const shapes = [];
-
-                for (let i = 0; i < levels; i++) {
-                    const topY = stepH * i;
-                    const bottomY = stepH * (i + 1);
-
-                    const topW = width * (1 - i / levels);
-                    const bottomW = width * (1 - (i + 1) / levels);
-
-                    const topX = (width - topW) / 2;
-                    const bottomX = (width - bottomW) / 2;
-
-                    const points = [
-                        topX, topY,
-                        topX + topW, topY,
-                        bottomX + bottomW, bottomY,
-                        bottomX, bottomY
-                    ];
-
-                    shapes.push(
-                        <Line
-                            key={`pyramid-${i}`}
-                            points={points}
-                            closed
-                            fill={fill ?? "transparent"}
-                            stroke={stroke || "#000"}
-                            strokeWidth={2}
-                            listening={false}
-                        />
-                    );
-                }
-
-                return (
-                    <Group
-                        ref={shapeRef}
-                        x={x}
-                        y={y}
-                        rotation={rotation}
-                        draggable
-                        onClick={(e) => { e.cancelBubble = true; bringToFront(id); select(id); notifyTouched(); }}
-                        onPointerDown={(e) => { e.cancelBubble = true; bringToFront(id); select(id); notifyTouched(); }}
-                        onDragEnd={(e) => { update(id, { x: e.target.x(), y: e.target.y() }); notifyTouched(); }}
-                        onTransformEnd={() => {
-                            const node = shapeRef.current;
-                            const scaleX = node.scaleX();
-                            const scaleY = node.scaleY();
-                            update(id, { x: node.x(), y: node.y(), width: width * scaleX, height: height * scaleY, rotation: node.rotation() });
-                            node.scaleX(1);
-                            node.scaleY(1);
-                            notifyTouched();
-                        }}
-                    >
-
-                        <Rect
-                            x={0} y={0}
-                            width={width} height={height}
-                            fill="rgba(0,0,0,0.001)"
-                            strokeWidth={0}
-                        />
-                        {shapes}
-                    </Group>
-                );
-            }
-            case "circleArrow": {
-                const radius = Math.min(width, height) / 2;
-                const centerX = width / 2;
-                const centerY = height / 2;
-
-                const arrowLength = radius * 0.6;
-                const arrowAngle = -Math.PI / 2;
-
-                const startX = centerX + radius * Math.cos(arrowAngle);
-                const startY = centerY + radius * Math.sin(arrowAngle);
-
-                const endX = startX + arrowLength * Math.cos(arrowAngle);
-                const endY = startY + arrowLength * Math.sin(arrowAngle);
-
-                return (
-                    <Group {...common}>
-                        <Ellipse
-                            x={centerX}
-                            y={centerY}
-                            radiusX={radius}
-                            radiusY={radius}
-                            fill={fill ?? "transparent"}
-                            stroke={stroke || "#000"}
-                            strokeWidth={2}
-                        />
-                        <Arrow
-                            points={[startX, startY, endX, endY]}
-                            pointerLength={15}
-                            pointerWidth={10}
-                            fill={stroke || "#000"}
-                            stroke={stroke || "#000"}
-                            strokeWidth={2}
-                        />
-                    </Group>
-                );
-            }
-
-            case "table3x3LeftMerge": {
-                const cellW = width / 3;
-                const cellH = height / 3;
-
-                return (
-                    <>
-                        <Rect {...common} />
-
-                        <Line x={x + cellW} y={y} points={[0, 0, 0, height]} stroke={stroke || "#000"} strokeWidth={2} />
-                        <Line x={x + cellW * 2} y={y} points={[0, 0, 0, height]} stroke={stroke || "#000"} strokeWidth={2} />
-                        <Line x={x + cellW} y={y} points={[0, cellH, cellW * 2, cellH]} stroke={stroke || "#000"} strokeWidth={2} />
-                        <Line x={x + cellW} y={y} points={[0, cellH * 2, cellW * 2, cellH * 2]} stroke={stroke || "#000"} strokeWidth={2} />
-                    </>
-                );
-            }
-
-            default:
-                return <Rect {...common} />;
-        }
-    })();
-
-    useEffect(() => {
-        if (isSelected && trRef.current && shapeRef.current) {
-            trRef.current.nodes([shapeRef.current]);
-            trRef.current.getLayer().batchDraw();
-        }
-    }, [isSelected]);
+    const renderRig = () => {
+        const points = [
+            { left: 0, top: 0 },
+            { left: '50%', top: 0 },
+            { left: '100%', top: 0 },
+            { left: 0, top: '50%' },
+            { left: '100%', top: '50%' },
+            { left: 0, top: '100%' },
+            { left: '50%', top: '100%' },
+            { left: '100%', top: '100%' },
+        ];
+        return points.map((p, idx) => (
+            <div key={idx} style={{
+                position: 'absolute', width: 8, height: 8, background: '#1976d2',
+                borderRadius: 2, left: p.left, top: p.top, transform: 'translate(-50%, -50%)',
+                pointerEvents: 'none'
+            }}/>
+        ));
+    };
 
     return (
-        <>
-            {shape}
-            {isSelected && (
-                <Transformer
-                    ref={trRef}
-                    rotateEnabled
-                    enabledAnchors={
-                        shapeId === "stick" || shapeId === "arrow" || shapeId === "dblarrow" || shapeId === "line"
-                            ? ["middle-left", "middle-right"]
-                            : undefined
-                    }
-                    boundBoxFunc={(oldBox, newBox) => {
-                        if (newBox.width < 20) {
-                            return oldBox;
-                        }
-                        if (newBox.height < 20 && !(shapeId === "stick" || shapeId === "arrow" || shapeId === "dblarrow" || shapeId === "line")) {
-                            return oldBox;
-                        }
-                        return newBox;
-                    }}
-                />
-            )}
-        </>
+        <Rnd
+            ref={rndRef}
+            size={{ width, height }}
+            position={{ x, y }}
+            onDragStop={onDragStop}
+            onResizeStop={onResizeStop}
+            bounds="parent"
+            style={{
+                zIndex,
+                transform: `rotate(${rotation || 0}deg)`,
+                touchAction: 'none',
+                borderRadius: shapeId === 'circle' ? '50%' : 0,
+                boxSizing: 'border-box',
+                position: 'absolute'
+            }}
+            onClick={handleClick}
+            onDragStart={() => {
+                bringToFront(id);
+                select(id);
+            }}
+        >
+            <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                <svg width="100%" height="100%">
+                    <defs>
+                        <marker id="arrowhead-end" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill={stroke || "#000"} />
+                        </marker>
+
+                        <marker id="arrowhead-start" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                            <polygon points="10 0, 0 3.5, 10 7" fill={stroke || "#000"} />
+                        </marker>
+                    </defs>
+                    {renderShape()}
+                </svg>
+
+                {isSelected && (
+                    <div style={{
+                        position:'absolute', top:0, left:0, width:'100%', height:'100%',
+                        border:'1px dashed #1976d2', pointerEvents:'none'
+                    }}>
+                        {renderRig()}
+                    </div>
+                )}
+            </div>
+        </Rnd>
     );
 };
