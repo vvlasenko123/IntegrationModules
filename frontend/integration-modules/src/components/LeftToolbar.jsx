@@ -10,7 +10,7 @@ import shapeAdd from '../assets/shape_add.svg'
 import shapeAddActive from '../assets/shape_add_active.svg'
 import { stickersApi } from '../shared/api/stickerApi.js'
 import { DND_SHAPE, DND_EMOJI, DND_CODE } from '../features/board/constants.js'
-import { SHAPE_ICONS } from "../features/shape/shapeIcons.jsx";
+import { SHAPE_ICONS } from "./shapeIcons.jsx";
 import markdownAdd from '../assets/markdown_add.svg'
 import markdownAddActive from '../assets/markdown_add_active.svg'
 

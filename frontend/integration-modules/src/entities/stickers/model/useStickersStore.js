@@ -18,7 +18,7 @@ export const useStickersStore = create((set) => ({
                 color: payload.color,
                 text: payload.text ?? '',
                 zIndex,
-
+                rotation: payload.rotation ?? 0,
                 type: payload.type,
                 shapeId: payload.shapeId,
                 shapeData: payload.shapeData,
