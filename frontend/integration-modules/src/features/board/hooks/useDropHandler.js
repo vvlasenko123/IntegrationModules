@@ -1,8 +1,8 @@
 import { useEmojiDrop } from './useEmojiDrop'
 import { useShapeDrop } from './useShapeDrop'
 import { useNoteDrop } from './useNoteDrop'
-import { useCodeDrop } from './useCodeDrop' // 1. Импортируем новый хук
-import { DND_EMOJI, DND_NOTE, DND_SHAPE, DND_CODE } from '../constants'
+import { useCodeDrop } from './useCodeDrop'
+import { DND_EMOJI, DND_SHAPE, DND_NOTE, DND_CODE } from '../constants'
 
 export const useDropHandler = (boardRef) => {
     const handleEmoji = useEmojiDrop()
@@ -10,31 +10,14 @@ export const useDropHandler = (boardRef) => {
     const handleNote = useNoteDrop()
     const handleCode = useCodeDrop()
 
+    return (e, scrollLeft, scrollTop, rect) => {
+        if (!e || !e.dataTransfer) return
 
-    return (e) => {
-        if (!boardRef.current) return
+        const types = Array.from(e.dataTransfer.types || [])
 
-        e.preventDefault()
-        e.stopPropagation()
-
-        const rect = boardRef.current.getBoundingClientRect()
-        const scrollLeft = boardRef.current.scrollLeft
-        const scrollTop = boardRef.current.scrollTop
-
-        const types = e.dataTransfer.types
-
-        if (types.includes(DND_SHAPE)) {
-            handleShape(e, scrollLeft, scrollTop, rect)
-        }
-        else if (types.includes(DND_EMOJI)) {
-            handleEmoji(e, scrollLeft, scrollTop, rect)
-        }
-        else if (types.includes(DND_NOTE)) {
-            handleNote(e, scrollLeft, scrollTop, rect)
-        }
-        else if (types.includes(DND_CODE)) {
-            console.log('Handling Code Drop...')
-            handleCode(e, scrollLeft, scrollTop, rect)
-        }
+        if (types.includes(DND_SHAPE)) return handleShape(e, scrollLeft, scrollTop, rect)
+        if (types.includes(DND_EMOJI)) return handleEmoji(e, scrollLeft, scrollTop, rect)
+        if (types.includes(DND_NOTE)) return handleNote(e, scrollLeft, scrollTop, rect)
+        if (types.includes(DND_CODE)) return handleCode(e, scrollLeft, scrollTop, rect)
     }
 }

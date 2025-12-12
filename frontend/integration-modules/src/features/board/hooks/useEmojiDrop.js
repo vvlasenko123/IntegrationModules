@@ -1,11 +1,10 @@
-// src/features/board/hooks/useEmojiDrop.js
 import { stickersApi } from '../../../shared/api/stickerApi'
 import { useStickersStore } from '../../../entities/stickers/model/useStickersStore.js'
 import { EMOJI_W, EMOJI_H, BOARD_SAFE_PAD } from '../constants'
 
 export const useEmojiDrop = () => {
-    const addSticker = useStickersStore((state) => state.addSticker)
-    const topZ = useStickersStore((state) => state.topZ)
+    const addSticker = useStickersStore(s => s.addSticker)
+    const topZ = useStickersStore(s => s.topZ)
 
     return async (e, scrollLeft, scrollTop, rect) => {
         const rawEmoji = e.dataTransfer.getData('application/x-integration-emoji')
@@ -15,10 +14,18 @@ export const useEmojiDrop = () => {
         try {
             payload = JSON.parse(rawEmoji)
         } catch {}
+
         if (!payload?.id) return
 
-        const x = Math.max(0, Math.round(scrollLeft + e.clientX - rect.left - BOARD_SAFE_PAD - EMOJI_W / 2))
-        const y = Math.max(0, Math.round(scrollTop + e.clientY - rect.top - BOARD_SAFE_PAD - EMOJI_H / 2))
+        const x = Math.max(
+            0,
+            Math.round(scrollLeft + e.clientX - rect.left - BOARD_SAFE_PAD - EMOJI_W / 2)
+        )
+        const y = Math.max(
+            0,
+            Math.round(scrollTop + e.clientY - rect.top - BOARD_SAFE_PAD - EMOJI_H / 2)
+        )
+
         const nextZ = (topZ || 1) + 1
 
         try {

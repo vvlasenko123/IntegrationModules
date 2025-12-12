@@ -72,28 +72,17 @@ export const StickerBoardWidget = () => {
 
         import('@xyflow/react')
             .then((mod) => {
-                if (!mounted) {
-                    return
-                }
-
-                const candidate =
-                    (mod && (mod.Widget || mod.default || mod?.widget || mod?.XyflowWidget)) ?? null
-
+                if (!mounted) return
+                const candidate = (mod && (mod.Widget || mod.default || mod?.widget || mod?.XyflowWidget)) ?? null
                 if (typeof candidate === 'function' || React.isValidElement(candidate)) {
                     setWidgetComp(() => candidate)
                 } else {
                     setWidgetComp(() => SafeFallbackWidget)
                 }
             })
-            .catch(() => {
-                if (mounted) {
-                    setWidgetComp(() => SafeFallbackWidget)
-                }
-            })
+            .catch(() => { if (mounted) setWidgetComp(() => SafeFallbackWidget) })
 
-        return () => {
-            mounted = false
-        }
+        return () => { mounted = false }
     }, [])
 
     const Wrapper = WidgetComp || SafeFallbackWidget
@@ -102,7 +91,7 @@ export const StickerBoardWidget = () => {
         try {
             const created = await notesApi.create(color)
 
-            if (boardRef.current && typeof boardRef.current.addStickerAtCenter === 'function') {
+            if (boardRef.current?.addStickerAtCenter) {
                 boardRef.current.addStickerAtCenter(color, { id: created.id, text: created.content ?? '' })
                 return
             }
@@ -129,8 +118,9 @@ export const StickerBoardWidget = () => {
                 <div className="absolute left-20 top-4 z-50">
                     <div className="mt-3">
                         <button
-                            onClick={() => { reset() }}
-                            className="px-3 py-1 rounded bg-red-500 text-white text-sm pointer-events-auto">
+                            onClick={() => reset()}
+                            className="px-3 py-1 rounded bg-red-500 text-white text-sm pointer-events-auto"
+                        >
                             Сбросить
                         </button>
                     </div>

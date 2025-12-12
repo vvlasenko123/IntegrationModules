@@ -85,11 +85,10 @@ export const LeftToolbar = ({ onPick }) => {
     }
 
     const onCodeDragStart = (e) => {
-        e.stopPropagation();
-        setIsMarkdownDragging(true);
-        e.dataTransfer.setData(DND_CODE, JSON.stringify({ type: 'code' }));
-        e.dataTransfer.effectAllowed = 'copy';
-    };
+        e.dataTransfer.setData(DND_CODE, JSON.stringify({ type: 'code' }))
+        e.dataTransfer.effectAllowed = 'copy'
+        console.log('dragstart types:', Array.from(e.dataTransfer.types))
+    }
     const onCodeDragEnd = (e) => {
         e.preventDefault();
         setIsMarkdownDragging(false);
