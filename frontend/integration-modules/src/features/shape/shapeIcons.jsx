@@ -81,37 +81,13 @@ export const SHAPE_ICONS = {
         </svg>
     ),
 
-    cloud: (
-        <svg width="40" height="40" viewBox="0 0 40 40">
-            <path
-                d="M8 24 C6 18 12 14 16 16 C18 10 26 10 30 14 C36 14 36 20 32 22 C28 26 12 26 8 24 Z"
-                stroke="black"
-                fill="none"
-                strokeWidth="2"
-            />
-        </svg>
-    ),
-
-    speech: (
-        <svg width="40" height="40" viewBox="0 0 40 40">
-            <path
-                d="M6 10 Q20 2 34 10 Q36 18 30 24 L24 24 L20 30 L18 24 L10 24 Q4 18 6 10 Z"
-                stroke="black"
-                fill="none"
-                strokeWidth="2"
-            />
-        </svg>
-    ),
-
     chevron: (
-        <svg width="40" height="40" viewBox="0 0 40 40">
+        <svg width="100%" height="60%" viewBox="0 0 100 100">
             <polyline
-                points="6,28 20,12 34,28"
+                points="0,0 50,100 100,0"
                 fill="none"
                 stroke="black"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+                strokeWidth="5"
             />
         </svg>
     ),
@@ -129,11 +105,10 @@ export const SHAPE_ICONS = {
 
     pyramid: (
         <svg width="40" height="40" viewBox="0 0 40 40">
-            <polygon points="4,4 36,4 20,36" stroke="black" fill="none" strokeWidth="2" />
-
-            <line x1="8" y1="12" x2="32" y2="12" stroke="black" strokeWidth="2" />
-            <line x1="12" y1="20" x2="28" y2="20" stroke="black" strokeWidth="2" />
-            <line x1="16" y1="28" x2="24" y2="28" stroke="black" strokeWidth="2" />
+            <polygon points="20,4 36,36 4,36" stroke="black" fill="none" strokeWidth="2" />
+            <line x1="15" y1="12" x2="25" y2="12" stroke="black" strokeWidth="2" />
+            <line x1="11" y1="20" x2="28" y2="20" stroke="black" strokeWidth="2" />
+            <line x1="7" y1="28" x2="32" y2="28" stroke="black" strokeWidth="2" />
         </svg>
     ),
     circleArrow: (

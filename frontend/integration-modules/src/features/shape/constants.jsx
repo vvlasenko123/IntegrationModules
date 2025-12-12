@@ -11,8 +11,6 @@ export const SHAPES = [
     { id: 'roundedRect', name: 'Скруглённый прямоугольник', defaultSize: { width: 160, height: 100 } },
     { id: 'capsule', name: 'Капсула', defaultSize: { width: 160, height: 60 } },
     { id: 'pentagon', name: 'Пятиугольник', defaultSize: { width: 140, height: 140 } },
-    { id: 'cloud', name: 'Облако', defaultSize: { width: 180, height: 120 } },
-    { id: 'speech', name: 'Облачко речи', defaultSize: { width: 180, height: 120 } },
     { id: 'chevron', name: 'Шеврон', defaultSize: { width: 160, height: 80 } },
     { id: 'table3x3', name: 'Таблица 3×3', defaultSize: { width: 180, height: 180 } },
     { id: 'pyramid', name: 'Пирамида', defaultSize: { width: 160, height: 160 } },
