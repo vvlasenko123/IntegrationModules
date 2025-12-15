@@ -5,7 +5,7 @@ import { NodeResizer, Handle, Position } from '@xyflow/react'
 import { useStickersStore } from '../../../entities/stickers/model/useStickersStore'
 import '../markdown.css'
 
-export const CodeNode = ({ data, selected }) => {
+export const CodeNode = ({ id, data, selected }) => {
     const sticker = useStickersStore(s =>
         s.stickers.find(x => x.id === data.stickerId)
     )
@@ -15,7 +15,7 @@ export const CodeNode = ({ data, selected }) => {
     const { updateSticker, removeSticker, bringToFront, topZ } = useStickersStore()
 
     const [isEditorVisible, setIsEditorVisible] = useState(true)
-
+    const selectedId = useStickersStore(s => s.selectedId)
     const handleTextChange = (e) =>
         updateSticker(sticker.id, { text: e.target.value })
 
@@ -30,8 +30,8 @@ export const CodeNode = ({ data, selected }) => {
         <div
             onPointerDown={onPointerDown}
             style={{
-                width: sticker.width,
-                height: sticker.height,
+                width: '100%',
+                height: '100%',
                 position: 'relative',
                 zIndex: sticker.zIndex,
                 padding: 0,
@@ -41,10 +41,8 @@ export const CodeNode = ({ data, selected }) => {
                 boxSizing: 'border-box',
                 display: 'flex',
                 flexDirection: 'column',
-                overflow: 'hidden',
             }}
         >
-            {/* Добавляем хендлы для соединений */}
             <Handle type="target" position={Position.Left} className="z-100000" />
             <Handle type="source" position={Position.Right} className="z-100000" />
 
@@ -110,10 +108,10 @@ export const CodeNode = ({ data, selected }) => {
             </div>
 
             <NodeResizer
-                isVisible={selected}
+                isVisible={selectedId === sticker.id}
                 minWidth={300}
                 minHeight={200}
-                onResizeStop={({ width, height }) => updateSticker(sticker.id, { width, height })}
+
             />
         </div>
     )

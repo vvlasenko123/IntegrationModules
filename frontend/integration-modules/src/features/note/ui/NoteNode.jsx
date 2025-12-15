@@ -144,7 +144,7 @@ export const NoteNode = ({ id, data, selected }) => {
     return (
         <div
             className={`resizable-sticker-wrapper ${selected ? 'resizable-sticker-wrapper--active' : ''}`}
-            style={{ width: sticker.width, height: sticker.height, position: 'relative' }}
+            style={{ width: '100%', height: '100%', position: 'relative' }}
             onPointerDown={(e) => {
                 if (e.button !== 0) return
                 bringToFront(id)
@@ -184,10 +184,8 @@ export const NoteNode = ({ id, data, selected }) => {
 
                         if (!editing) return
 
-                        // Фокус перед установкой каретки
-                        contentRef.current?.focus()
 
-                        // Ставим каретку в место клика
+                        contentRef.current?.focus()
                         const range = document.caretRangeFromPoint
                             ? document.caretRangeFromPoint(e.clientX, e.clientY)
                             : document.caretPositionFromPoint
@@ -237,7 +235,7 @@ export const NoteNode = ({ id, data, selected }) => {
                     isVisible={selected}
                     minWidth={80}
                     minHeight={60}
-                    onResizeStop={({ width, height }) => setSize(id, width, height)}
+
                 />
             </div>
         </div>

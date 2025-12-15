@@ -4,7 +4,8 @@ import {
     ReactFlow,
     addEdge,
     useNodesState,
-    useEdgesState
+    useEdgesState,
+    applyNodeChanges
 } from '@xyflow/react'
 
 import { useStickersStore } from '../../../entities/stickers/model/useStickersStore'
@@ -41,10 +42,38 @@ export const Board = forwardRef((_, ref) => {
 
     const handleDropGlobal = useDropHandler(boardRef)
 
-    const [nodes, setNodes, onNodesChange] = useNodesState([])
+    const [nodes, setNodes] = useNodesState([])
     const [edges, setEdges, onEdgesChange] = useEdgesState([])
 
-    // Sync stickers → nodes
+    const onNodesChange = useCallback((changes) => {
+        setNodes((nds) => applyNodeChanges(changes, nds))
+
+        for (const change of changes) {
+            if (
+                change.type === 'dimensions' &&
+                change.resizing === false
+            ) {
+                useStickersStore
+                    .getState()
+                    .setSize(
+                        change.id,
+                        change.dimensions.width,
+                        change.dimensions.height
+                    )
+            }
+
+            if (change.type === 'position' && change.dragging === false) {
+                useStickersStore
+                    .getState()
+                    .setPosition(
+                        change.id,
+                        Math.round(change.position.x),
+                        Math.round(change.position.y)
+                    )
+            }
+        }
+    }, [])
+
     useEffect(() => {
         const mapped = stickers.map(s => ({
             id: String(s.id),
@@ -55,14 +84,13 @@ export const Board = forwardRef((_, ref) => {
             position: { x: s.x || 0, y: s.y || 0 },
             data: { stickerId: s.id },
             style: {
-                width: s.width || 160,
-                height: s.height || 160,
-                zIndex: s.zIndex || 0,
+                width: s.width,
+                height: s.height,
+                zIndex: s.zIndex,
                 pointerEvents: 'auto'
             },
             draggable: true,
             selectable: true,
-            resizer: { handleStyle: {}, minWidth: 40, minHeight: 40 }
         }))
         setNodes(mapped)
     }, [stickers, setNodes])
@@ -90,11 +118,6 @@ export const Board = forwardRef((_, ref) => {
         }
     }))
 
-    const onNodeDragStop = useCallback((_, node) => {
-        const x = Math.round(node.position.x)
-        const y = Math.round(node.position.y)
-        setPosition(node.id, x, y)
-    }, [setPosition])
 
     const onNodeClick = useCallback((_, node) => {
         selectSticker(node.id)
@@ -135,7 +158,6 @@ export const Board = forwardRef((_, ref) => {
                         onNodesChange={onNodesChange}
                         onEdgesChange={onEdgesChange}
                         onNodeClick={onNodeClick}
-                        onNodeDragStop={onNodeDragStop}
                         onConnect={onConnect}
                         onDragOver={onDragOver}
                         onDrop={onDrop}

@@ -73,25 +73,19 @@ export const ShapeNode = ({ id, data, selected, style}) => {
                     minWidth={30}
                     minHeight={30}
                     onResize={({ width, height }) => {
-                        // обновляем ноду на лету
                         setNodes(nodes =>
                             nodes.map(n =>
                                 n.id === id ? { ...n, style: { ...n.style, width, height } } : n
                             )
                         )
                     }}
-                    onResizeStop={({ width, height }) => {
-                        // сохраняем в Zustand
-                        updateSticker(sticker.id, { width, height })
-                    }}
+
                 />
-
-
-
-
+                <div style={{ width: '100%', height: '100%', transform: `rotate(${rotation}deg)` }}>
                 <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
                     {renderShape}
                 </svg>
+                </div>
             </div>
             <Handle type="target" position={Position.Left} className="z-100000" />
             <Handle type="source" position={Position.Right} className="z-100000" />

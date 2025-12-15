@@ -51,7 +51,7 @@ export const EmojiNode = ({ data, selected }) => {
                 minWidth={30}
                 minHeight={30}
                 color="#ff0071"
-                onResizeStop={({ width, height }) => setSize(sticker.id, width, height)}
+
             />
 
             <Handle type="target" position={Position.Left} />
