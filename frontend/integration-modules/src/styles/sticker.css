@@ -23,7 +23,7 @@
 }
 
 .sticker-root:hover {
-    transform: translateY(-4px);
+
     box-shadow:
             0 28px 50px rgba(13, 30, 56, 0.10),
             0 4px 8px rgba(13, 30, 56, 0.06);

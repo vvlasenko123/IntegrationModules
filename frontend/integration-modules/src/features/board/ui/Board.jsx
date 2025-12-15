@@ -82,18 +82,23 @@ export const Board = forwardRef((_, ref) => {
                     s.type === 'code' ? 'code' :
                         s.imageUrl ? 'emoji' : 'note',
             position: { x: s.x || 0, y: s.y || 0 },
-            data: { stickerId: s.id },
+            data: {
+                stickerId: s.id, // ← только id
+            },
             style: {
                 width: s.width,
                 height: s.height,
                 zIndex: s.zIndex,
-                pointerEvents: 'auto'
+                pointerEvents: 'auto',
             },
             draggable: true,
             selectable: true,
         }))
+
         setNodes(mapped)
-    }, [stickers, setNodes])
+    }, [
+        stickers.map(s => `${s.id}:${s.x}:${s.y}:${s.width}:${s.height}:${s.zIndex}`).join('|')
+    ])
 
     // Expose public methods
     React.useImperativeHandle(ref, () => ({
@@ -141,6 +146,22 @@ export const Board = forwardRef((_, ref) => {
         const rect = boardEl.getBoundingClientRect()
         handleDropGlobal(e, boardEl.scrollLeft, boardEl.scrollTop, rect)
     }, [handleDropGlobal])
+
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            // Если клик не на ноде
+            if (!e.target.closest('.react-flow__node')) {
+                selectSticker(null); // сброс выделения
+            }
+        };
+
+        const boardEl = boardRef.current;
+        boardEl?.addEventListener('click', handleClickOutside);
+
+        return () => {
+            boardEl?.removeEventListener('click', handleClickOutside);
+        };
+    }, [selectSticker]);
 
     return (
         <BoardContext.Provider value={boardRef}>

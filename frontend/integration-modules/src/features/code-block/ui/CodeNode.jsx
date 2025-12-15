@@ -9,7 +9,7 @@ export const CodeNode = ({ id, data, selected }) => {
     const sticker = useStickersStore(s =>
         s.stickers.find(x => x.id === data.stickerId)
     )
-
+    const [draft, setDraft] = useState(sticker.text || '')
     if (!sticker) return null
 
     const { updateSticker, removeSticker, bringToFront, topZ } = useStickersStore()
@@ -25,6 +25,8 @@ export const CodeNode = ({ id, data, selected }) => {
         }
         bringToFront(sticker.id)
     }
+
+
 
     return (
         <div
@@ -78,9 +80,10 @@ export const CodeNode = ({ id, data, selected }) => {
                         style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
                     >
                         <textarea
-                            value={sticker.text || ''}
-                            onChange={handleTextChange}
+                            value={draft}
+                            onChange={(e) => setDraft(e.target.value)}
                             placeholder="Type markdown..."
+                            onBlur={() => updateSticker(sticker.id, { text: draft })}
                             className="cb-textarea"
                             style={{
                                 flex: 1,
@@ -102,7 +105,7 @@ export const CodeNode = ({ id, data, selected }) => {
                     }}
                 >
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {sticker.text || ''}
+                        {draft}
                     </ReactMarkdown>
                 </div>
             </div>

@@ -14,7 +14,7 @@ export const NoteNode = ({ id, data, selected }) => {
 
     const { setSize, setText, bringToFront, removeSticker } = useStickersStore()
     const boardRef = useContext(BoardContext)
-
+    const [localText, setLocalText] = useState(sticker.text || '')
     const elRef = useRef(null)
     const contentRef = useRef(null)
 
@@ -26,23 +26,38 @@ export const NoteNode = ({ id, data, selected }) => {
     useEffect(() => {
         const el = contentRef.current
         if (!el) return
-        let fontSize = 18
-        el.style.fontSize = fontSize + 'px'
+
         const parent = el.parentElement
         if (!parent) return
-        while (
-            fontSize > 8 &&
-            (el.scrollHeight > parent.clientHeight ||
-                el.scrollWidth > parent.clientWidth)
-            ) {
-            fontSize -= 0.5
+
+        const fitText = () => {
+            let fontSize = 18
             el.style.fontSize = fontSize + 'px'
+
+            while (
+                fontSize > 8 &&
+                (el.scrollHeight > parent.clientHeight ||
+                    el.scrollWidth > parent.clientWidth)
+                ) {
+                fontSize -= 0.5
+                el.style.fontSize = fontSize + 'px'
+            }
         }
-    }, [sticker.text, sticker.width, sticker.height])
+
+        requestAnimationFrame(fitText)
+
+        const ro = new ResizeObserver(() => {
+            fitText()
+        })
+        ro.observe(parent)
+        return () => {
+            ro.disconnect()
+        }
+    }, [sticker.text])
 
 
     useEffect(() => {
-        if (editing) return // Не трогаем текст, пока редактируем
+        if (editing) return
         const el = contentRef.current
         if (!el) return
 
@@ -53,7 +68,11 @@ export const NoteNode = ({ id, data, selected }) => {
             el.innerText = newText
         }
     }, [sticker.text, editing])
-
+    useEffect(() => {
+        if (editing) {
+            setLocalText(sticker.text || '')
+        }
+    }, [editing])
     const notifyTouched = () => {
         window.dispatchEvent(
             new CustomEvent('sticker-touched', {
@@ -75,15 +94,17 @@ export const NoteNode = ({ id, data, selected }) => {
         setTimeout(() => contentRef.current?.focus(), 0)
     }
 
-    const onInput = (e) => setText(id, e.currentTarget.innerText)
+    const onInput = (e) => {
+        setLocalText(e.currentTarget.innerText)
+    }
 
     const onBlur = async () => {
         setEditing(false)
+        setText(id, localText)
+
         try {
-            await notesApi.updateContent(id, sticker.text || '')
-        } catch (err) {
-            console.warn('Ошибка сохранения заметки', err)
-        }
+            await notesApi.updateContent(id, localText)
+        } catch {}
     }
 
     const onDoubleClick = (e) => {
@@ -164,8 +185,8 @@ export const NoteNode = ({ id, data, selected }) => {
             <div
                 className={`sticker-root ${editing ? 'sticker-root--editing' : ''}`}
                 style={{
-                    width: sticker.width + 'px',
-                    height: sticker.height + 'px',
+                    width: '100%',
+                    height: '100%',
                     background: sticker.color,
                     position: 'relative'
                 }}
