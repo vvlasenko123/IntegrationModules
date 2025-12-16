@@ -5,7 +5,7 @@ import { NodeResizer, Handle, Position } from '@xyflow/react'
 import { useStickersStore } from '../../../entities/stickers/model/useStickersStore'
 import '../markdown.css'
 
-export const CodeNode = ({ id, data, selected }) => {
+export const MarkdownNode = ({ id, data, selected }) => {
     const sticker = useStickersStore(s =>
         s.stickers.find(x => x.id === data.stickerId)
     )

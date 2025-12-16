@@ -9,7 +9,7 @@ import emojiAddActive from '../assets/emoji_add_active.svg'
 import shapeAdd from '../assets/shape_add.svg'
 import shapeAddActive from '../assets/shape_add_active.svg'
 import { stickersApi } from '../shared/api/stickerApi.js'
-import { DND_SHAPE, DND_EMOJI, DND_CODE } from '../features/board/constants.js'
+import { DND_SHAPE, DND_EMOJI, DND_MARKDOWN } from '../features/board/constants.js'
 import { SHAPE_ICONS } from "./shapeIcons.jsx";
 import markdownAdd from '../assets/markdown_add.svg'
 import markdownAddActive from '../assets/markdown_add_active.svg'
@@ -84,12 +84,11 @@ export const LeftToolbar = ({ onPick }) => {
         e.dataTransfer.effectAllowed = 'copy'
     }
 
-    const onCodeDragStart = (e) => {
-        e.dataTransfer.setData(DND_CODE, JSON.stringify({ type: 'code' }))
+    const onMarkdownDragStart = (e) => {
+        e.dataTransfer.setData(DND_MARKDOWN, JSON.stringify({ type: 'markdown' }))
         e.dataTransfer.effectAllowed = 'copy'
-        console.log('dragstart types:', Array.from(e.dataTransfer.types))
     }
-    const onCodeDragEnd = (e) => {
+    const onMarkdownDragEnd = (e) => {
         e.preventDefault();
         setIsMarkdownDragging(false);
     };
@@ -118,14 +117,14 @@ export const LeftToolbar = ({ onPick }) => {
                 <button
                     className={`toolbar-btn toolbar-btn--icon toolbar-btn--markdown ${isMarkdownDragging ? 'toolbar-btn--active' : ''}`.trim()}
                     draggable
-                    onDragStart={onCodeDragStart}
-                    onDragEnd={onCodeDragEnd}
-                    title="Markdown Code Block"
+                    onDragStart={onMarkdownDragStart}
+                    onDragEnd={onMarkdownDragEnd}
+                    title="Markdown Markdown Block"
                 >
                     <div className={`toolbar-markdown-plate ${isMarkdownDragging ? 'toolbar-markdown-plate--active' : ''}`}>
                         <img
                             src={isMarkdownDragging ? markdownAddActive : markdownAdd}
-                            alt="Code"
+                            alt="Markdown"
                             draggable={false}
                         />
                     </div>
