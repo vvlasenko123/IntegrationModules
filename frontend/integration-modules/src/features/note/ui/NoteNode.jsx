@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useContext, useState } from 'react'
 import { useStickersStore } from '../../../entities/stickers/model/useStickersStore.js'
-import { BoardContext } from '../../board/ui/BoardContext.jsx'
 import { notesApi } from '../../../shared/api/notesApi'
 import { Handle, Position, NodeResizer } from '@xyflow/react'
 import '../../../styles/sticker.css'
@@ -12,17 +11,31 @@ export const NoteNode = ({ id, data, selected }) => {
     )
     if (!sticker) return null
 
-    const { setSize, setText, bringToFront, removeSticker } = useStickersStore()
-    const boardRef = useContext(BoardContext)
-    const [localText, setLocalText] = useState(sticker.text || '')
-    const elRef = useRef(null)
-    const contentRef = useRef(null)
+    const { setText, bringToFront, removeSticker } = useStickersStore()
 
-    const [menuVisible, setMenuVisible] = useState(false)
-    const [menuPos, setMenuPos] = useState({ x: 0, y: 0 })
+    const [localText, setLocalText] = useState(sticker.text || '')
+    const contentRef = useRef(null)
     const [editing, setEditing] = useState(false)
 
+    const fitText = () => {
+        const el = contentRef.current
+        if (!el) return
 
+        const parent = el.parentElement
+        if (!parent) return
+
+        let fontSize = 18
+        el.style.fontSize = fontSize + 'px'
+
+        while (
+            fontSize > 8 &&
+            (el.scrollHeight > parent.clientHeight ||
+                el.scrollWidth > parent.clientWidth)
+            ) {
+            fontSize -= 0.5
+            el.style.fontSize = fontSize + 'px'
+        }
+    }
     useEffect(() => {
         const el = contentRef.current
         if (!el) return
@@ -30,30 +43,16 @@ export const NoteNode = ({ id, data, selected }) => {
         const parent = el.parentElement
         if (!parent) return
 
-        const fitText = () => {
-            let fontSize = 18
-            el.style.fontSize = fontSize + 'px'
-
-            while (
-                fontSize > 8 &&
-                (el.scrollHeight > parent.clientHeight ||
-                    el.scrollWidth > parent.clientWidth)
-                ) {
-                fontSize -= 0.5
-                el.style.fontSize = fontSize + 'px'
-            }
-        }
-
         requestAnimationFrame(fitText)
 
         const ro = new ResizeObserver(() => {
-            fitText()
+            requestAnimationFrame(fitText)
         })
+
         ro.observe(parent)
-        return () => {
-            ro.disconnect()
-        }
-    }, [sticker.text])
+
+        return () => ro.disconnect()
+    }, [])
 
 
     useEffect(() => {
@@ -68,11 +67,13 @@ export const NoteNode = ({ id, data, selected }) => {
             el.innerText = newText
         }
     }, [sticker.text, editing])
+
     useEffect(() => {
         if (editing) {
             setLocalText(sticker.text || '')
         }
     }, [editing])
+
     const notifyTouched = () => {
         window.dispatchEvent(
             new CustomEvent('sticker-touched', {
@@ -81,21 +82,9 @@ export const NoteNode = ({ id, data, selected }) => {
         )
     }
 
-    const onRootPointerDown = (e) => {
-        if (e.button !== 0) return
-        bringToFront(id)
-        notifyTouched()
-    }
-
-    const onContentPointerDown = (e) => {
-        e.stopPropagation()
-        setEditing(true)
-        notifyTouched()
-        setTimeout(() => contentRef.current?.focus(), 0)
-    }
-
     const onInput = (e) => {
         setLocalText(e.currentTarget.innerText)
+        requestAnimationFrame(fitText)
     }
 
     const onBlur = async () => {
@@ -117,20 +106,6 @@ export const NoteNode = ({ id, data, selected }) => {
         e.preventDefault()
         const text = e.clipboardData.getData('text/plain')
         document.execCommand('insertText', false, text)
-    }
-
-    const onContextMenu = (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-
-        let x = e.clientX
-        let y = e.clientY
-
-        if (x + 140 > window.innerWidth) x = window.innerWidth - 148
-        if (y + 40 > window.innerHeight) y = window.innerHeight - 48
-
-        setMenuPos({ x, y })
-        setMenuVisible(true)
     }
 
     const setCaretToClick = (el, clientX, clientY) => {

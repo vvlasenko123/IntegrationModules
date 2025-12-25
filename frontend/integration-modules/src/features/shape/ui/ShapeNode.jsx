@@ -19,7 +19,7 @@ export const ShapeNode = ({ id, data, selected, style }) => {
     const [rotation, setRotation] = useState(sticker?.rotation || 0)
     const [menuVisible, setMenuVisible] = useState(false)
     const [menuPos, setMenuPos] = useState({ x: 0, y: 0 })
-
+    const [isRotating, setIsRotating] = useState(false)
     if (!sticker) return null
 
     const { width, height, shapeId, zIndex } = sticker
@@ -54,22 +54,35 @@ export const ShapeNode = ({ id, data, selected, style }) => {
     }
 
     useEffect(() => {
-        if (!rotateControlRef.current) return;
-        const selection = select(rotateControlRef.current);
-        const dragHandler = drag().on('drag', (evt) => {
-            const rect = evt.sourceEvent.target.parentElement.getBoundingClientRect();
-            const cx = rect.left + rect.width / 2;
-            const cy = rect.top + rect.height / 2;
-            const dx = evt.sourceEvent.clientX - cx;
-            const dy = evt.sourceEvent.clientY - cy;
-            const rad = Math.atan2(dy, dx);
-            const deg = rad * (180 / Math.PI);
-            setRotation(deg + 90);
-            updateSticker(sticker.id, { rotation: deg + 90 });
-        });
-        selection.call(dragHandler);
-        return () => selection.on('.drag', null);
-    }, [sticker.id, updateSticker])
+        if (!isSelected) return
+        if (!rotateControlRef.current) return
+
+        const selection = select(rotateControlRef.current)
+
+        const dragHandler = drag()
+            .on('start', () => {
+                setIsRotating(true)
+            })
+            .on('drag', (evt) => {
+                const rect = evt.sourceEvent.target.parentElement.getBoundingClientRect()
+                const cx = rect.left + rect.width / 2
+                const cy = rect.top + rect.height / 2
+                const dx = evt.sourceEvent.clientX - cx
+                const dy = evt.sourceEvent.clientY - cy
+                const rad = Math.atan2(dy, dx)
+                const deg = rad * (180 / Math.PI)
+
+                setRotation(deg + 90)
+                updateSticker(sticker.id, { rotation: deg + 90 })
+            })
+            .on('end', () => {
+                setIsRotating(false)
+            })
+
+        selection.call(dragHandler)
+
+        return () => selection.on('.drag', null)
+    }, [isSelected, sticker.id, updateSticker])
 
     return (
         <>
@@ -80,16 +93,15 @@ export const ShapeNode = ({ id, data, selected, style }) => {
                     ...style,
                     position: 'relative',
                     zIndex,
-                    borderRadius: shapeId === 'circle' ? '50%' : 0,
-                    boxSizing: 'border-box',
-                    cursor: 'pointer',
+                    cursor: isRotating ? 'grabbing' : 'pointer',
                     width: localSize.width,
                     height: localSize.height,
                     transform: `rotate(${rotation}deg)`,
-                    transformOrigin: '50% 50%'
+                    transformOrigin: '50% 50%',
+                    pointerEvents: 'auto'
                 }}
+                data-drag-disabled={isRotating}
             >
-                {/* NodeResizer */}
                 <NodeResizer
                     isVisible={isSelected}
                     minWidth={30}
@@ -100,7 +112,6 @@ export const ShapeNode = ({ id, data, selected, style }) => {
                         background: 'rgba(0,0,0,0.5)',
                         borderRadius: 2,
                     }}
-                    // Указываем, какие стороны можно тянуть
                     resizeHandles={['top', 'right', 'bottom', 'left', 'topRight', 'topLeft', 'bottomRight', 'bottomLeft']}
                     onResize={({ width: w, height: h }) => {
                         setLocalSize({ width: w, height: h })
@@ -117,7 +128,6 @@ export const ShapeNode = ({ id, data, selected, style }) => {
                     }}
                 />
 
-                {/* SVG фигура */}
                 <svg
                     width={localSize.width}
                     height={localSize.height}
@@ -127,27 +137,31 @@ export const ShapeNode = ({ id, data, selected, style }) => {
                     {renderShape}
                 </svg>
 
-                {/* Ручка вращения */}
-                <div
-                    ref={rotateControlRef}
-                    style={{
-                        position: 'absolute',
-                        width: 16,
-                        height: 16,
-                        borderRadius: '50%',
-                        background: 'blue',
-                        top: -8,
-                        right: -8,
-                        cursor: 'grab',
-                        zIndex: 1000
-                    }}
-                />
+                {isSelected && (
+                    <div
+                        ref={rotateControlRef}
+                        onMouseDown={(e) => {
+                            e.stopPropagation()
+                            e.preventDefault()
+                        }}
+                        style={{
+                            position: 'absolute',
+                            width: 16,
+                            height: 16,
+                            borderRadius: '50%',
+                            background: 'blue',
+                            top: -8,
+                            right: -8,
+                            cursor: 'grab',
+                            zIndex: 1000
+                        }}
+                    />
+                )}
 
                 <Handle type="target" position={Position.Left} className="z-100000" />
                 <Handle type="source" position={Position.Right} className="z-100000" />
             </div>
 
-            {/* Контекстное меню */}
             {menuVisible && (
                 <div
                     className="sticker-context-menu"
