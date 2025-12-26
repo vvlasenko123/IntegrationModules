@@ -75,4 +75,24 @@
 
             return res.status === 204 ? null : await res.json()
         },
+        async upload(file) {
+            const formData = new FormData()
+            formData.append('files', file)
+
+            const res = await fetch('/api/v1/stickers/upload', {
+                method: 'POST',
+                body: formData,
+            })
+
+            if (!res.ok) {
+                throw new Error(await parseError(res))
+            }
+
+            const contentType = res.headers.get('content-type')
+            if (contentType && contentType.includes('application/json')) {
+                return await res.json()
+            }
+
+            return true
+        },
     }
