@@ -1,6 +1,5 @@
 import React, { forwardRef, useRef } from 'react'
 import { ReactFlowProvider, ReactFlow } from '@xyflow/react'
-
 import { useDropHandler } from '../hooks/useDropHandler'
 import { BOARD_SAFE_PAD } from '../constants'
 import { BoardContext } from './BoardContext.jsx'
@@ -14,7 +13,6 @@ export const Board = forwardRef((_, ref) => {
     const boardRef = useRef(null)
 
     const selectSticker = useStickersStore(s => s.selectSticker)
-
     const {
         nodes,
         edges,

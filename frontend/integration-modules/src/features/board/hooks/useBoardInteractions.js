@@ -1,11 +1,10 @@
-// src/features/board/hooks/useBoardInteractions.js
 import { useCallback, useEffect } from 'react'
-import { DND_NOTE, DND_EMOJI, DND_SHAPE, DND_MARKDOWN } from '../constants'
+import { DND_NOTE, DND_EMOJI, DND_SHAPE, DND_MARKDOWN, DND_ROADMAP } from '../constants'
 
 export function useBoardInteractions(boardRef, handleDropGlobal, selectSticker) {
     const onDragOver = useCallback((e) => {
         const types = Array.from(e.dataTransfer?.types || [])
-        if ([DND_NOTE, DND_EMOJI, DND_SHAPE, DND_MARKDOWN].some(t => types.includes(t))) {
+        if ([DND_NOTE, DND_EMOJI, DND_SHAPE, DND_MARKDOWN,DND_ROADMAP ].some(t => types.includes(t))) {
             e.preventDefault()
             e.dataTransfer.dropEffect = 'copy'
         }

@@ -9,7 +9,7 @@ import emojiAddActive from '../assets/emoji_add_active.svg'
 import shapeAdd from '../assets/shape_add.svg'
 import shapeAddActive from '../assets/shape_add_active.svg'
 import { stickersApi } from '../shared/api/stickerApi.js'
-import { DND_SHAPE, DND_EMOJI, DND_MARKDOWN } from '../features/board/constants.js'
+import { DND_SHAPE, DND_EMOJI, DND_MARKDOWN, DND_ROADMAP } from '../features/board/constants.js'
 import { SHAPE_ICONS } from "./shapeIcons.jsx";
 import markdownAdd from '../assets/markdown_add.svg'
 import markdownAddActive from '../assets/markdown_add_active.svg'
@@ -128,6 +128,18 @@ export const LeftToolbar = ({ onPick }) => {
                             draggable={false}
                         />
                     </div>
+                </button>
+
+                <button
+                    draggable
+                    onDragStart={(e) => {
+                        e.dataTransfer.setData(DND_ROADMAP, 'roadmap')
+                        e.dataTransfer.effectAllowed = 'copy'
+                    }}
+                    className="toolbar-btn toolbar-btn--icon"
+                    title="Roadmap"
+                >
+                    🛣
                 </button>
             </div>
 

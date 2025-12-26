@@ -4,6 +4,7 @@ import { useStickersStore } from '../../../entities/stickers/model/useStickersSt
 
 export function useBoardFlow() {
     const stickers = useStickersStore(s => s.stickers)
+    const storeEdges = useStickersStore(s => s.edges)
 
     const [nodes, setNodes] = useNodesState([])
     const [edges, setEdges, onEdgesChange] = useEdgesState([])
@@ -13,7 +14,6 @@ export function useBoardFlow() {
 
         for (const change of changes) {
             if (change.type === 'dimensions' && change.resizing === false) {
-                // используем getState(), чтобы не вызывать hook в цикле
                 useStickersStore.getState().setSize(
                     change.id,
                     change.dimensions.width,
@@ -32,15 +32,24 @@ export function useBoardFlow() {
     }, [setNodes])
 
     const onConnect = useCallback((params) => {
-        setEdges(eds => addEdge(params, eds))
-    }, [setEdges])
+        useStickersStore.setState(state => ({
+            edges: addEdge(params, state.edges)
+        }))
+    }, [])
 
     useEffect(() => {
         const mapped = stickers.map(s => ({
             id: String(s.id),
-            type: s.type === 'shape' ? 'shape' :
-                s.type === 'markdown' ? 'markdown' :
-                    s.imageUrl ? 'emoji' : 'note',
+            type:
+                s.type === 'roadmap'
+                    ? 'roadmap'
+                    : s.type === 'shape'
+                        ? 'shape'
+                        : s.type === 'markdown'
+                            ? 'markdown'
+                            : s.imageUrl
+                                ? 'emoji'
+                                : 'note',
             position: { x: s.x || 0, y: s.y || 0 },
             data: { stickerId: s.id },
             style: {
@@ -57,6 +66,13 @@ export function useBoardFlow() {
     }, [
         stickers.map(s => `${s.id}:${s.x}:${s.y}:${s.width}:${s.height}:${s.zIndex}`).join('|'),
         setNodes
+    ])
+
+    useEffect(() => {
+        setEdges(storeEdges)
+    }, [
+        storeEdges.map(e => `${e.id}:${e.source}:${e.target}`).join('|'),
+        setEdges
     ])
 
     return {

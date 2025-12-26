@@ -13,7 +13,7 @@
 
 .cb-header {
     height: 36px;
-    background-color: #020024;
+    background-color: #262626;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -31,7 +31,7 @@
 .cb-close {
     background: none;
     border: none;
-    color: #888;
+    color: #9c9c9c;
     cursor: pointer;
     font-size: 16px;
 }
@@ -40,7 +40,7 @@
     display: flex;
     flex-grow: 1;
     min-height: 0;
-    background-color: #050038;
+    background-color: #2C2D31;
 }
 
 .cb-editor {
@@ -52,8 +52,8 @@
 .cb-textarea {
     width: 100%;
     height: 100%;
-    background-color: #050038;
-    color: #a4b1cd;
+    background-color: #2C2D31;
+    color: #efefef;
     border: none;
     resize: none;
     padding: 15px;
