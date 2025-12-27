@@ -11,6 +11,7 @@ export const NoteNode = ({ id, data, selected }) => {
     )
     if (!sticker) return null
 
+    const updateSticker = useStickersStore(s => s.updateSticker)
     const { setText, bringToFront, removeSticker } = useStickersStore()
 
     const [localText, setLocalText] = useState(sticker.text || '')
@@ -146,16 +147,6 @@ export const NoteNode = ({ id, data, selected }) => {
                 bringToFront(id)
                 notifyTouched()
             }}
-            onDoubleClick={(e) => {
-                e.stopPropagation()
-                setEditing(true)
-                setTimeout(() => {
-                    contentRef.current?.focus()
-                    const sel = window.getSelection()
-                    sel.selectAllChildren(contentRef.current)
-                    sel.collapseToEnd()
-                }, 0)
-            }}
         >
             <div
                 className={`sticker-root ${editing ? 'sticker-root--editing' : ''}`}
@@ -225,13 +216,26 @@ export const NoteNode = ({ id, data, selected }) => {
                         cursor: editing ? 'text' : 'default'
                     }}
                 />
+
+
                 <Handle type="source" position={Position.Right} />
 
                 <NodeResizer
                     isVisible={selected}
                     minWidth={80}
                     minHeight={60}
+                    onResizeEnd={async (_, params) => {
+                        const w = Math.max(1, Math.round(params.width))
+                        const h = Math.max(1, Math.round(params.height))
 
+                        updateSticker(id, { width: w, height: h })
+
+                        try {
+                            await notesApi.updateSize(id, w, h)
+                        } catch (e) {
+                            console.warn('Не удалось сохранить размер заметки', e)
+                        }
+                    }}
                 />
             </div>
         </div>

@@ -4,14 +4,18 @@ import { useStickersStore } from '../../../entities/stickers/model/useStickersSt
 import { stickersApi } from '../../../shared/api/stickerApi'
 import '../../../styles/sticker.css'
 
-export const EmojiNode = ({ data, selected }) => {
+export const EmojiNode = ({ id, data, selected }) => {
     const sticker = useStickersStore(s =>
-        s.stickers.find(x => x.id === data.stickerId)
+        s.stickers.find(x => String(x.id) === String(id))
     )
 
-    if (!sticker || !sticker.imageUrl) return null
+    if (!sticker || !sticker.imageUrl) {
+        return null
+    }
 
-    const { setSize, removeSticker, bringToFront } = useStickersStore()
+    const updateSticker = useStickersStore(s => s.updateSticker)
+    const removeSticker = useStickersStore(s => s.removeSticker)
+    const bringToFront = useStickersStore(s => s.bringToFront)
 
     const [menuVisible, setMenuVisible] = useState(false)
     const [menuPos, setMenuPos] = useState({ x: 0, y: 0 })
@@ -36,9 +40,10 @@ export const EmojiNode = ({ data, selected }) => {
 
     const handleDelete = async () => {
         setMenuVisible(false)
+
         try {
-            await stickersApi.removeFromBoard(sticker.id)
-            removeSticker(sticker.id)
+            await stickersApi.removeFromBoard(id)
+            removeSticker(id)
         } catch {
             alert('Не удалось удалить эмодзи')
         }
@@ -50,31 +55,32 @@ export const EmojiNode = ({ data, selected }) => {
                 isVisible={selected}
                 minWidth={30}
                 minHeight={30}
-                color="#ff0071"
+                onResizeEnd={async (_, params) => {
+                    const w = Math.max(1, Math.round(params.width))
+                    const h = Math.max(1, Math.round(params.height))
 
+                    updateSticker(id, { width: w, height: h })
+
+                    try {
+                        await stickersApi.updateBoardSize(id, w, h)
+                    } catch (e) {
+                        console.warn('Не удалось сохранить размер эмодзи', e)
+                    }
+                }}
             />
 
             <Handle type="target" position={Position.Left} />
             <Handle type="source" position={Position.Right} />
 
             <div
-                style={{
-                    width: '100%',
-                    height: '100%',
-                    position: 'relative'
-                }}
-                onPointerDown={() => bringToFront(sticker.id)}
+                style={{ width: '100%', height: '100%', position: 'relative' }}
+                onPointerDown={() => { bringToFront(id) }}
                 onContextMenu={onContextMenu}
             >
                 <img
                     src={sticker.imageUrl}
                     alt=""
-                    style={{
-                        width: '100%',
-                        height: '100%',
-                        display: 'block',
-                        pointerEvents: 'none'
-                    }}
+                    style={{ width: '100%', height: '100%', display: 'block', pointerEvents: 'none' }}
                     draggable={false}
                 />
             </div>
@@ -82,16 +88,9 @@ export const EmojiNode = ({ data, selected }) => {
             {menuVisible && (
                 <div
                     className="sticker-context-menu"
-                    style={{
-                        position: 'fixed',
-                        left: menuPos.x,
-                        top: menuPos.y
-                    }}
+                    style={{ position: 'fixed', left: menuPos.x, top: menuPos.y }}
                 >
-                    <button
-                        className="sticker-context-menu__item"
-                        onClick={handleDelete}
-                    >
+                    <button className="sticker-context-menu__item" onClick={handleDelete}>
                         Удалить
                     </button>
                 </div>

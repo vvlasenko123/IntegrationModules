@@ -40,18 +40,19 @@
             }))
         },
 
-        async addToBoard(stickerId) {
+        async addToBoard(stickerId, width, height) {
             const r = await fetch('/api/v1/stickers/board', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ stickerId })
+                body: JSON.stringify({ stickerId, width, height })
             })
 
             if (!r.ok) {
-                throw new Error('Не удалось сохранить эмодзи на доске')
+                throw new Error(await parseError(r))
             }
 
-            return await r.json()
+            const saved = await r.json()
+            return { ...saved, url: normalizeStickerUrl(saved.url) }
         },
 
         async getBoard() {
@@ -95,4 +96,19 @@
 
             return true
         },
+
+        async updateBoardSize(placementId, width, height) {
+            const res = await fetch(`/api/v1/stickers/board/${placementId}/size`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ width, height })
+            })
+
+            if (!res.ok) {
+                throw new Error(await parseError(res))
+            }
+
+            const updated = await res.json()
+            return { ...updated, url: normalizeStickerUrl(updated.url) }
+        }
     }

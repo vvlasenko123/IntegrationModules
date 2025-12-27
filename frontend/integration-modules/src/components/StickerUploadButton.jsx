@@ -1,7 +1,6 @@
-// src/components/StickerUploadButton.jsx
 import React, { useRef } from 'react';
 import stickerAdd from '../assets/sticker_add.svg';
-import { stickersApi } from '../shared/api/stickerApi.js'; // Путь подправь под свою структуру
+import { stickersApi } from '../shared/api/stickerApi.js';
 
 export const StickerUploadButton = ({ onStickerUploaded, className = '' }) => {
     const fileInputRef = useRef(null);

@@ -4,6 +4,7 @@ import { Board } from '../features/board/ui/Board.jsx'
 import { useStickersStore } from '../entities/stickers/model/useStickersStore.js'
 import { notesApi } from '../shared/api/notesApi.js'
 import { stickersApi } from '../shared/api/stickerApi.js'
+import { NOTE_W, NOTE_H, EMOJI_W, EMOJI_H } from '../features/board/constants'
 
 const SafeFallbackWidget = ({ children }) => <div>{children}</div>
 
@@ -28,32 +29,41 @@ export const StickerBoardWidget = () => {
                 const items = []
 
                 for (const n of notes) {
+                    const w = n.width ?? NOTE_W
+                    const h = n.height ?? NOTE_H
+
                     items.push({
                         id: n.id,
                         x,
                         y,
                         color: n.color,
-                        width: 160,
-                        height: 160,
+                        width: w,
+                        height: h,
                         text: n.content ?? '',
                         zIndex: 1
                     })
+
                     x += 24
                     y += 24
                 }
 
                 for (const e of boardEmojis) {
+                    const w = e.width ?? EMOJI_W
+                    const h = e.height ?? EMOJI_H
+
                     items.push({
                         id: e.id,
                         x,
                         y,
                         color: 'transparent',
-                        width: 91,
-                        height: 84,
+                        width: w,
+                        height: h,
                         text: '',
                         zIndex: 1,
-                        imageUrl: e.url
+                        imageUrl: e.url,
+                        stickerId: e.stickerId
                     })
+
                     x += 24
                     y += 24
                 }
@@ -89,10 +99,18 @@ export const StickerBoardWidget = () => {
 
     const handlePick = async (color) => {
         try {
-            const created = await notesApi.create(color)
+            const created = await notesApi.create(color, NOTE_W, NOTE_H)
+
+            const w = created.width ?? NOTE_W
+            const h = created.height ?? NOTE_H
 
             if (boardRef.current?.addStickerAtCenter) {
-                boardRef.current.addStickerAtCenter(color, { id: created.id, text: created.content ?? '' })
+                boardRef.current.addStickerAtCenter(color, {
+                    id: created.id,
+                    text: created.content ?? '',
+                    width: w,
+                    height: h
+                })
                 return
             }
 
@@ -101,8 +119,8 @@ export const StickerBoardWidget = () => {
                 x: 260,
                 y: 120,
                 color,
-                width: 160,
-                height: 160,
+                width: w,
+                height: h,
                 text: created.content ?? ''
             })
         } catch (e) {
