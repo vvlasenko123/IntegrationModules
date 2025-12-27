@@ -92,7 +92,7 @@ FROM stickers;
         }
 
         const string sql = @"
-DELETE FROM stickers
+DELETE FROM board_stickers
 WHERE id = @Id;
 ";
 

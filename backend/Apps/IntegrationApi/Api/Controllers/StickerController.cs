@@ -152,40 +152,18 @@ public sealed class StickerController : ControllerBase
     /// </summary>
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteAsync([FromRoute] Guid id, CancellationToken token)
-    {
-        var items = await MinIOHelper.GetOrSetCachedItemsAsync(
-            _cache,
-            async (ct) =>
-            {
-                var stickers = await _stickerRepository.GetAllAsync(ct);
-
-                return stickers.Select(x => new StickerCacheItem
-                {
-                    Id = x.Id,
-                    StoragePath = x.StoragePath
-                }).ToList();
-            },
-            token);
-
-        var item = items.FirstOrDefault(x => x.Id == id);
-
-        if (item is null)
+    {    
+        if (id == Guid.Empty)
         {
-            return NotFound("Стикер не найден");
+            return BadRequest("Id не задан");
         }
 
-        await _stickerRepository.DeleteByIdAsync(id, token);
+        var affected = await _stickerRepository.DeleteByIdAsync(id, token);
 
-        try
+        if (affected <= 0)
         {
-            await _storage.RemoveAsync(item.StoragePath, token);
+            return NotFound("Стикер на доске не найден");
         }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Не удалось удалить файл стикера из хранилища. Id: {Id}", id);
-        }
-
-        await _cache.RemoveAsync(MinIOHelper.StickersCacheKey, token);
 
         return NoContent();
     }
