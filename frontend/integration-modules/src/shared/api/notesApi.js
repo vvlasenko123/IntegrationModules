@@ -80,5 +80,3 @@ export const notesApi = {
         return await res.json()
     }
 }
-
-//
