@@ -1,9 +1,9 @@
-namespace Api.Controllers.Models.Request;
+namespace Api.Controllers.Models.Request.Sticker;
 
 /// <summary>
 /// Обновление размеров
 /// </summary>
-public sealed class NoteUpdateSizeRequest
+public sealed class BoardStickerUpdateSizeRequest
 {
     /// <summary>
     /// Длина

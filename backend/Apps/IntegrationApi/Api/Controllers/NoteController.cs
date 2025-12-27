@@ -1,4 +1,5 @@
 using Api.Controllers.Models.Request;
+using Api.Controllers.Models.Request.Note;
 using Api.Controllers.Models.Response;
 using Dal.Models.Notes;
 using Dal.Repository.interfaces;

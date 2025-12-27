@@ -1,4 +1,5 @@
 using Api.Controllers.Models.Request;
+using Api.Controllers.Models.Request.Sticker;
 using Api.Controllers.Models.Response;
 using Dal.Repository.interfaces;
 using InfraLib.Minio;

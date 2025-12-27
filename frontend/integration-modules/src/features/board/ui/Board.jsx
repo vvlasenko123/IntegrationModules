@@ -49,6 +49,8 @@ export const Board = forwardRef((_, ref) => {
                         fitView={false}
                         panOnScroll
                         panOnDrag
+                        noDragClassName="nodrag"
+                        noPanClassName="nopan"
                     />
                 </ReactFlowProvider>
             </div>

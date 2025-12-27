@@ -5,6 +5,7 @@ import { useStickersStore } from '../entities/stickers/model/useStickersStore.js
 import { notesApi } from '../shared/api/notesApi.js'
 import { stickersApi } from '../shared/api/stickerApi.js'
 import { NOTE_W, NOTE_H, EMOJI_W, EMOJI_H } from '../features/board/constants'
+import { shapesApi } from '../shared/api/shapesApi.js'
 
 const SafeFallbackWidget = ({ children }) => <div>{children}</div>
 
@@ -19,10 +20,14 @@ export const StickerBoardWidget = () => {
     useEffect(() => {
         const loadNotes = async () => {
             try {
-                const [notes, boardEmojis] = await Promise.all([
+                const [notes, boardEmojis, allShapes, boardShapes] = await Promise.all([
                     notesApi.getAll(),
-                    stickersApi.getBoard()
+                    stickersApi.getBoard(),
+                    shapesApi.getAll(),
+                    shapesApi.getBoard()
                 ])
+
+                const shapeKeyByDbId = new Map(allShapes.map(x => [String(x.id), x.shapeId]))
 
                 let x = 30
                 let y = 30
@@ -62,6 +67,33 @@ export const StickerBoardWidget = () => {
                         zIndex: 1,
                         imageUrl: e.url,
                         stickerId: e.stickerId
+                    })
+
+                    x += 24
+                    y += 24
+                }
+
+                for (const s of boardShapes) {
+                    const w = s.width ?? 140
+                    const h = s.height ?? 140
+                    const r = s.rotation ?? 0
+
+                    const shapeKey = shapeKeyByDbId.get(String(s.shapeId)) ?? 'square'
+
+                    items.push({
+                        id: s.id,
+                        stickerId: s.id,
+                        type: 'shape',
+                        shapeId: shapeKey,
+                        shapeDbId: s.shapeId,
+                        x,
+                        y,
+                        width: w,
+                        height: h,
+                        rotation: r,
+                        zIndex: 1,
+                        fill: 'transparent',
+                        stroke: '#000',
                     })
 
                     x += 24

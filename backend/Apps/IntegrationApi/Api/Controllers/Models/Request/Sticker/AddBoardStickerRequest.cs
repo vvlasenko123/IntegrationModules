@@ -1,4 +1,4 @@
-namespace Api.Controllers.Models.Request;
+namespace Api.Controllers.Models.Request.Sticker;
 
 /// <summary>
 /// добавление стикера на доску dto

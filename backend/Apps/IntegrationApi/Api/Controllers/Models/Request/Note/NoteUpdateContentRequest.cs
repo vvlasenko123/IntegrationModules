@@ -1,4 +1,4 @@
-namespace Api.Controllers.Models.Request;
+namespace Api.Controllers.Models.Request.Note;
 
 /// <summary>
 /// Запрос на обновление текста заметки
