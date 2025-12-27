@@ -169,7 +169,7 @@
 
 .emoji-grid {
     width: 100%;
-    height: 100%;
+
     padding: 8px;
     display: grid;
     grid-template-columns: repeat(3, 91px);

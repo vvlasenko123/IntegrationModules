@@ -41,7 +41,6 @@ export const useStickersStore = create((set, get) => ({
         const parent = state.stickers.find(s => s.id === parentId)
         if (!parent) return
 
-        // Находим всех текущих детей этого родителя
         const children = state.stickers.filter(s =>
             state.edges.some(e => e.source === parentId && e.target === s.id)
         )
