@@ -20,11 +20,16 @@ export const notesApi = {
         return await res.json()
     },
 
-    async create(color) {
+    async create(color, width, height) {
         const res = await fetch('/api/v1/note/create', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ content: '', color })
+            body: JSON.stringify({
+                content: '',
+                color,
+                width,
+                height
+            })
         })
 
         if (!res.ok) {
@@ -59,5 +64,19 @@ export const notesApi = {
         }
 
         return res.status === 204
+    },
+
+    async updateSize(id, width, height) {
+        const res = await fetch(`/api/v1/note/${id}/size`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ width, height })
+        })
+
+        if (!res.ok) {
+            throw new Error(await parseError(res))
+        }
+
+        return await res.json()
     }
 }

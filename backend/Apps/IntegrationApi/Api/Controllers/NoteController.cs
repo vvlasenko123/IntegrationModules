@@ -41,7 +41,9 @@ public class NoteController : ControllerBase
         var note = new Note
         {
             Content = request.Content ?? string.Empty,
-            Color = request.Color
+            Color = request.Color,
+            Width = request.Width,
+            Height = request.Height
         };
 
         var created = await _noteRepository.CreateAsync(note, token);
@@ -52,7 +54,9 @@ public class NoteController : ControllerBase
         {
             Id = created.Id,
             Content = created.Content,
-            Color = created.Color
+            Color = created.Color,
+            Width = created.Width,
+            Height = created.Height
         });
     }
     
@@ -73,7 +77,9 @@ public class NoteController : ControllerBase
         {
             Id = note.Id,
             Content = note.Content,
-            Color = note.Color
+            Color = note.Color,
+            Width = note.Width,
+            Height = note.Height
         });
     }
     
@@ -89,7 +95,9 @@ public class NoteController : ControllerBase
         {
             Id = x.Id,
             Content = x.Content,
-            Color = x.Color
+            Color = x.Color,
+            Width = x.Width,
+            Height = x.Height
         }).ToList();
 
         return Ok(result);
@@ -120,7 +128,9 @@ public class NoteController : ControllerBase
         {
             Id = updated.Id,
             Content = updated.Content,
-            Color = updated.Color
+            Color = updated.Color,
+            Width = updated.Width,
+            Height = updated.Height
         });
     }
 
@@ -140,5 +150,33 @@ public class NoteController : ControllerBase
         _logger.LogInformation("Заметка удалена: {NoteId}", id);
 
         return NoContent();
+    }
+    
+    [HttpPatch("{id:guid}/size")]
+    public async Task<ActionResult<NoteResponse>> UpdateSizeAsync(
+        [FromRoute] Guid id,
+        [FromBody] NoteUpdateSizeRequest request,
+        CancellationToken token)
+    {
+        if (request is null)
+        {
+            return BadRequest("Тело запроса не задано");
+        }
+
+        var updated = await _noteRepository.UpdateSizeAsync(id, request.Width, request.Height, token);
+
+        if (updated is null)
+        {
+            return NotFound("Заметка не найдена");
+        }
+
+        return Ok(new NoteResponse
+        {
+            Id = updated.Id,
+            Content = updated.Content,
+            Color = updated.Color,
+            Width = updated.Width,
+            Height = updated.Height
+        });
     }
 }

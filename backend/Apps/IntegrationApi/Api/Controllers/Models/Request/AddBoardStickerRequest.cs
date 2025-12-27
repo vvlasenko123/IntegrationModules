@@ -9,4 +9,14 @@ public sealed class AddBoardStickerRequest
     /// айди стикера
     /// </summary>
     public Guid StickerId { get; init; }
+
+    /// <summary>
+    /// Длина
+    /// </summary>
+    public int Width { get; init; }
+
+    /// <summary>
+    /// Высота
+    /// </summary>
+    public int Height { get; init; }
 }

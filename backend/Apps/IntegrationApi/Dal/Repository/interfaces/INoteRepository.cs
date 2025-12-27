@@ -31,4 +31,10 @@ public interface INoteRepository
     /// удаление заметок
     /// </summary>
     Task<bool> DeleteAsync(Guid id, CancellationToken token);
+    
+    /// <summary>
+    /// изменение размера
+    /// </summary>
+    Task<Note?> UpdateSizeAsync(Guid id, int width, int height, CancellationToken token);
+
 }

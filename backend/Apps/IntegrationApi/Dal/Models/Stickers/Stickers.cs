@@ -14,4 +14,14 @@ public class Stickers
     /// Путь до объекта в Minio
     /// </summary>
     public string StoragePath { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Длина
+    /// </summary>
+    public int Width { get; set; }
+
+    /// <summary>
+    /// Высота
+    /// </summary>
+    public int Height { get; set; }
 }

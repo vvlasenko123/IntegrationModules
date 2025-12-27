@@ -31,8 +31,8 @@ public sealed class NoteRepository : INoteRepository
         note.Id = Guid.NewGuid();
 
         const string sql = @"
-INSERT INTO notes (id, content, color)
-VALUES (@Id, @Content, @Color);
+INSERT INTO notes (id, content, color, width, height)
+VALUES (@Id, @Content, @Color, @Width, @Height);
 ";
 
         await _connection.ExecuteAsync(new CommandDefinition(
@@ -54,7 +54,9 @@ VALUES (@Id, @Content, @Color);
         const string sql = @"
 SELECT id,
        content,
-       color
+       color,
+       width,
+       height
 FROM notes
 WHERE id = @Id;
 ";
@@ -76,7 +78,9 @@ WHERE id = @Id;
         const string sql = @"
 SELECT id,
        content,
-       color
+       color,
+       width,
+       height
 FROM notes;
 ";
 
@@ -102,7 +106,9 @@ WHERE id = @Id;
 
 SELECT id,
        content,
-       color
+       color,
+       width,
+       height
 FROM notes
 WHERE id = @Id;
 ";
@@ -136,5 +142,39 @@ WHERE id = @Id;
             cancellationToken: token));
 
         return affected > 0;
+    }
+
+    /// <inheritdoc />
+    public async Task<Note?> UpdateSizeAsync(Guid id, int width, int height, CancellationToken token)
+    {
+        if (_connection.State is not ConnectionState.Open)
+        {
+            _connection.Open();
+        }
+
+        const string sql = @"
+UPDATE notes
+SET width = @Width,
+    height = @Height
+WHERE id = @Id;
+
+SELECT id,
+       content,
+       color,
+       width,
+       height
+FROM notes
+WHERE id = @Id;
+";
+
+        return await _connection.QuerySingleOrDefaultAsync<Note>(new CommandDefinition(
+            sql,
+            new
+            {
+                Id = id,
+                Width = width,
+                Height = height
+            },
+            cancellationToken: token));
     }
 }

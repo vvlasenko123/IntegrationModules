@@ -19,4 +19,14 @@ public sealed class StickerResponse
     /// Ссылка на скачивание стикера
     /// </summary>
     public string Url { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Длина
+    /// </summary>
+    public int Width { get; set; }
+
+    /// <summary>
+    /// Высота
+    /// </summary>
+    public int Height { get; set; }
 }

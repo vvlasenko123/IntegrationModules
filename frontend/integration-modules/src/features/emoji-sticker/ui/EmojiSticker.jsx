@@ -119,7 +119,18 @@ export const EmojiSticker = ({ id }) => {
         <>
             <Resizable
                 size={{ width: sticker.width, height: sticker.height }}
-                onResizeStop={(_, __, ref) => setSize(id, ref.offsetWidth, ref.offsetHeight)}
+                onResizeStop={async (_, __, ref) => {
+                    const w = ref.offsetWidth
+                    const h = ref.offsetHeight
+
+                    setSize(id, w, h)
+
+                    try {
+                        await stickersApi.updateBoardSize(id, w, h)
+                    } catch (e) {
+                        console.warn('Не удалось сохранить размер эмодзи', e)
+                    }
+                }}
                 minWidth={30}
                 minHeight={30}
                 className={wrapperClass}

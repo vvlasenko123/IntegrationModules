@@ -85,7 +85,9 @@ public sealed class StickerController : ControllerBase
                 return stickers.Select(x => new StickerCacheItem
                 {
                     Id = x.Id,
-                    StoragePath = x.StoragePath
+                    StoragePath = x.StoragePath,
+                    Width = x.Width,
+                    Height = x.Height
                 }).ToList();
             },
             token);
@@ -94,7 +96,9 @@ public sealed class StickerController : ControllerBase
         {
             Id = x.Id,
             StoragePath = x.StoragePath,
-            Url = $"/api/v1/stickers/{x.Id:D}/file"
+            Url = $"/api/v1/stickers/{x.Id:D}/file",
+            Width = x.Width,
+            Height = x.Height
         }).ToList();
 
         return Ok(result);
@@ -115,7 +119,9 @@ public sealed class StickerController : ControllerBase
                 return stickers.Select(x => new StickerCacheItem
                 {
                     Id = x.Id,
-                    StoragePath = x.StoragePath
+                    StoragePath = x.StoragePath,
+                    Width = x.Width,
+                    Height = x.Height
                 }).ToList();
             },
             token);
@@ -181,13 +187,19 @@ public sealed class StickerController : ControllerBase
             return BadRequest("StickerId не задан");
         }
 
-        var created = await _stickerRepository.AddToBoardAsync(request.StickerId, token);
+        var created = await _stickerRepository.AddToBoardAsync(
+            request.StickerId,
+            request.Width,
+            request.Height,
+            token);
 
         var result = new BoardStickerResponse
         {
             Id = created.Id,
             StickerId = created.StickerId,
-            Url = $"/api/v1/stickers/{created.StickerId:D}/file"
+            Url = $"/api/v1/stickers/{created.StickerId:D}/file",
+            Width = created.Width,
+            Height = created.Height
         };
 
         return Ok(result);
@@ -199,15 +211,53 @@ public sealed class StickerController : ControllerBase
     [HttpGet("board")]
     public async Task<ActionResult<IReadOnlyCollection<BoardStickerResponse>>> GetBoardAsync(CancellationToken token)
     {
-        var items = await _stickerRepository.GetBoardAsync(token);
+        var boardItems = await _stickerRepository.GetBoardAsync(token);
+        var stickers = await _stickerRepository.GetAllAsync(token);
 
-        var result = items.Select(x => new BoardStickerResponse
+        var sizesByStickerId = stickers.ToDictionary(x => x.Id, x => x);
+
+        var result = boardItems.Select(x =>
         {
-            Id = x.Id,
-            StickerId = x.StickerId,
-            Url = $"/api/v1/stickers/{x.StickerId:D}/file"
+            sizesByStickerId.TryGetValue(x.StickerId, out var sticker);
+
+            return new BoardStickerResponse
+            {
+                Id = x.Id,
+                StickerId = x.StickerId,
+                Url = $"/api/v1/stickers/{x.StickerId:D}/file",
+                Width = x.Width,
+                Height = x.Height
+            };
         }).ToList();
 
         return Ok(result);
+    }
+
+    [HttpPatch("board/{id:guid}/size")]
+    public async Task<ActionResult<BoardStickerResponse>> UpdateBoardSizeAsync(
+        [FromRoute] Guid id,
+        [FromBody] BoardStickerUpdateSizeRequest request,
+        CancellationToken token)
+    {
+        if (request is null)
+        {
+            return BadRequest("Тело запроса не задано");
+        }
+
+        var updated = await _stickerRepository.UpdateBoardSizeAsync(id, request.Width, request.Height, token);
+
+        if (updated is null)
+        {
+            return NotFound("Стикер на доске не найден");
+        }
+
+        return Ok(new BoardStickerResponse
+        {
+            Id = updated.Id,
+            StickerId = updated.StickerId,
+            Url = $"/api/v1/stickers/{updated.StickerId:D}/file",
+            Width = updated.Width,
+            Height = updated.Height
+        });
     }
 }

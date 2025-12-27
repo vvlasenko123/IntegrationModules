@@ -173,7 +173,18 @@ export const NoteSticker = ({ id }) => {
         <>
             <Resizable
                 size={{ width: sticker.width, height: sticker.height }}
-                onResizeStop={(_, __, ref) => setSize(id, ref.offsetWidth, ref.offsetHeight)}
+                onResizeStop={async (_, __, ref) => {
+                    const w = ref.offsetWidth
+                    const h = ref.offsetHeight
+
+                    setSize(id, w, h)
+
+                    try {
+                        await notesApi.updateSize(id, w, h)
+                    } catch (e) {
+                        console.warn('Не удалось сохранить размер заметки', e)
+                    }
+                }}
                 minWidth={90}
                 minHeight={60}
                 style={{ position: 'absolute', left: sticker.x, top: sticker.y, zIndex: sticker.zIndex }}

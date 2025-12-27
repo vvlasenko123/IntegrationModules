@@ -28,13 +28,16 @@ export const StickerBoardWidget = () => {
                 const items = []
 
                 for (const n of notes) {
+                    const w = n.width ?? 160
+                    const h = n.height ?? 160
+
                     items.push({
                         id: n.id,
                         x,
                         y,
                         color: n.color,
-                        width: 160,
-                        height: 160,
+                        width: w,
+                        height: h,
                         text: n.content ?? '',
                         zIndex: 1
                     })
@@ -43,13 +46,17 @@ export const StickerBoardWidget = () => {
                 }
 
                 for (const e of boardEmojis) {
+                    const w = e.width ?? 91
+                    const h = e.height ?? 84
+
                     items.push({
                         id: e.id,
+                        stickerId: e.stickerId,
                         x,
                         y,
                         color: 'transparent',
-                        width: 91,
-                        height: 84,
+                        width: w,
+                        height: h,
                         text: '',
                         zIndex: 1,
                         imageUrl: e.url
@@ -100,10 +107,15 @@ export const StickerBoardWidget = () => {
 
     const handlePick = async (color) => {
         try {
-            const created = await notesApi.create(color)
+            const created = await notesApi.create(color, NOTE_W, NOTE_H)
 
             if (boardRef.current && typeof boardRef.current.addStickerAtCenter === 'function') {
-                boardRef.current.addStickerAtCenter(color, { id: created.id, text: created.content ?? '' })
+                boardRef.current.addStickerAtCenter(color, {
+                    id: created.id,
+                    text: created.content ?? '',
+                    width: created.width ?? NOTE_W,
+                    height: created.height ?? NOTE_H
+                })
                 return
             }
 
@@ -112,8 +124,8 @@ export const StickerBoardWidget = () => {
                 x: 260,
                 y: 120,
                 color,
-                width: 160,
-                height: 160,
+                width: created.width ?? NOTE_W,
+                height: created.height ?? NOTE_H,
                 text: created.content ?? ''
             })
         } catch (e) {
