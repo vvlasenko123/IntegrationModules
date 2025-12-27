@@ -1,6 +1,5 @@
 using Dal.Models.Stickers;
 using InfraLib.MinIO.Storage;
-using InfraLib.Redis.Models;
 using Microsoft.AspNetCore.Http;
 
 namespace Dal.Repository.interfaces;
@@ -24,15 +23,19 @@ public interface IStickerRepository
     /// удаление по айди
     /// </summary>
     Task<int> DeleteByIdAsync(Guid id, CancellationToken token);
-    
+
     /// <summary>
     /// добавление на доску стикера
     /// </summary>
-    Task<BoardSticker> AddToBoardAsync(Guid stickerId, CancellationToken token);
+    Task<BoardSticker> AddToBoardAsync(Guid stickerId, int width, int height, CancellationToken token);
     
     /// <summary>
     /// получение инфы с доски
     /// </summary>
     Task<IReadOnlyCollection<BoardSticker>> GetBoardAsync(CancellationToken token);
 
+    /// <summary>
+    /// Обновление размеров стикеров
+    /// </summary>
+    Task<BoardSticker?> UpdateBoardSizeAsync(Guid id, int width, int height, CancellationToken token);
 }

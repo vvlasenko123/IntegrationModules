@@ -28,14 +28,14 @@ export const useNoteDrop = () => {
         const nextZ = (topZ || 1) + 1
 
         try {
-            const created = await notesApi.create(color)
+            const created = await notesApi.create(color, NOTE_W, NOTE_H)
             addSticker({
                 id: created.id,
                 x,
                 y,
                 color,
-                width: NOTE_W,
-                height: NOTE_H,
+                width: created.width ?? NOTE_W,
+                height: created.height ?? NOTE_H,
                 text: created.content ?? '',
                 zIndex: nextZ,
             })

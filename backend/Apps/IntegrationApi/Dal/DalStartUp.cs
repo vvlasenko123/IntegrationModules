@@ -14,6 +14,7 @@ public static class DalStartUp
     public static IServiceCollection AddDal(this IServiceCollection services)
     {
         services.AddTransient<IDatabaseMigration, StickersCreateTablesMigration>();
+        services.AddTransient<IDatabaseMigration, StickersAndNotesAddSizeMigration>();
         services.AddTransient<IStickerRepository, StickerRepository>();
         services.AddTransient<INoteRepository, NoteRepository>();
 

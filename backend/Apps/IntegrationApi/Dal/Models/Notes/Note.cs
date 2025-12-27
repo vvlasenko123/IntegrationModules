@@ -19,4 +19,14 @@ public class Note
     /// Цвет заметки
     /// </summary>
     public string Color { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Длина
+    /// </summary>
+    public int Width { get; set; }
+
+    /// <summary>
+    /// Высота
+    /// </summary>
+    public int Height { get; set; }
 }

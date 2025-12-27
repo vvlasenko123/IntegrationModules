@@ -19,4 +19,14 @@ public sealed class BoardStickerResponse
     /// url
     /// </summary>
     public string Url { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Длина
+    /// </summary>
+    public int Width { get; init; }
+
+    /// <summary>
+    /// Высота
+    /// </summary>
+    public int Height { get; init; }
 }

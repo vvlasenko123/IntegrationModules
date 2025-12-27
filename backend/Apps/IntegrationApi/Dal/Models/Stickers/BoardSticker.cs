@@ -14,4 +14,14 @@ public sealed class BoardSticker
     /// айди стикера
     /// </summary>
     public Guid StickerId { get; init; }
+
+    /// <summary>
+    /// Длина
+    /// </summary>
+    public int Width { get; set; }
+
+    /// <summary>
+    /// Высота
+    /// </summary>
+    public int Height { get; set; }
 }

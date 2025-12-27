@@ -3,7 +3,6 @@ using Dal.Models.Stickers;
 using Dal.Repository.interfaces;
 using Dapper;
 using InfraLib.MinIO.Storage;
-using InfraLib.Redis.Models;
 using Microsoft.AspNetCore.Http;
 
 namespace Dal.Repository;
@@ -27,8 +26,8 @@ public sealed class StickerRepository : IStickerRepository
         }
 
         const string sql = @"
-INSERT INTO stickers (id, storage_path)
-VALUES (@Id, @StoragePath);
+INSERT INTO stickers (id, storage_path, width, height)
+VALUES (@Id, @StoragePath, @Width, @Height);
 ";
 
         var result = new List<Stickers>(files.Count);
@@ -48,7 +47,9 @@ VALUES (@Id, @StoragePath);
             var sticker = new Stickers
             {
                 Id = id,
-                StoragePath = storagePath
+                StoragePath = storagePath,
+                Width = 160,
+                Height = 180
             };
 
             await _connection.ExecuteAsync(new CommandDefinition(
@@ -72,7 +73,9 @@ VALUES (@Id, @StoragePath);
 
         const string sql = @"
 SELECT id,
-       storage_path AS StoragePath
+       storage_path AS StoragePath,
+       width,
+       height
 FROM stickers;
 ";
 
@@ -92,7 +95,7 @@ FROM stickers;
         }
 
         const string sql = @"
-DELETE FROM stickers
+DELETE FROM board_stickers
 WHERE id = @Id;
 ";
 
@@ -103,7 +106,7 @@ WHERE id = @Id;
     }
 
     /// <inheritdoc />
-    public async Task<BoardSticker> AddToBoardAsync(Guid stickerId, CancellationToken token)
+    public async Task<BoardSticker> AddToBoardAsync(Guid stickerId, int width, int height, CancellationToken token)
     {
         if (_connection.State is not ConnectionState.Open)
         {
@@ -111,14 +114,16 @@ WHERE id = @Id;
         }
 
         const string sql = @"
-INSERT INTO board_stickers (id, sticker_id)
-VALUES (@Id, @StickerId);
+INSERT INTO board_stickers (id, sticker_id, width, height)
+VALUES (@Id, @StickerId, @Width, @Height);
 ";
 
         var entity = new BoardSticker
         {
             Id = Guid.NewGuid(),
-            StickerId = stickerId
+            StickerId = stickerId,
+            Width = width,
+            Height = height
         };
 
         await _connection.ExecuteAsync(new CommandDefinition(
@@ -139,7 +144,9 @@ VALUES (@Id, @StickerId);
 
         const string sql = @"
 SELECT id,
-       sticker_id AS StickerId
+       sticker_id AS StickerId,
+       width,
+       height
 FROM board_stickers
 ORDER BY id;
 ";
@@ -149,5 +156,38 @@ ORDER BY id;
             cancellationToken: token));
 
         return result.AsList();
+    }
+
+    /// <inheritdoc />
+    public async Task<BoardSticker?> UpdateBoardSizeAsync(Guid id, int width, int height, CancellationToken token)
+    {
+        if (_connection.State is not ConnectionState.Open)
+        {
+            _connection.Open();
+        }
+
+        const string sql = @"
+UPDATE board_stickers
+SET width = @Width,
+    height = @Height
+WHERE id = @Id;
+
+SELECT id,
+       sticker_id AS StickerId,
+       width,
+       height
+FROM board_stickers
+WHERE id = @Id;
+";
+
+        return await _connection.QuerySingleOrDefaultAsync<BoardSticker>(new CommandDefinition(
+            sql,
+            new
+            {
+                Id = id,
+                Width = width,
+                Height = height
+            },
+            cancellationToken: token));
     }
 }
