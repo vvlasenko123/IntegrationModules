@@ -113,22 +113,13 @@ export const RoadmapNode = ({ data, selected }) => {
                 onClick={e => { e.stopPropagation(); if (!isCancelled) addRoadmapBranch(sticker.id) }}
                 disabled={isCancelled}
                 className={`plusButton ${isCancelled ? 'plusButtonDisabled' : ''}`}
-            >
-                +
+            >+
             </button>
 
             {showMenu && (
                 <div
                     ref={menuRef}
-                    className="
-                        detailMenu
-                        absolute left-1/2 top-full mt-2
-                        -translate-x-1/2
-                        w-[200px]
-                        border
-                        shadow-[0_8px_24px_rgba(0,0,0,0.06)]
-                        z-50
-                      "
+                    className=" detailMenu absolute left-1/2 top-full mt-2 -translate-x-1/2 w-[200px] border shadow-[0_8px_24px_rgba(0,0,0,0.06)] z-50"
                     onPointerDown={e => e.stopPropagation()}
                 >
                     <div className="px-5 pt-4 pb-5 space-y-4 rounded-3xl">
@@ -138,21 +129,12 @@ export const RoadmapNode = ({ data, selected }) => {
                                     e.stopPropagation()
                                     setShowCalendar(prev => !prev)
                                 }}
-                                className="
-        dateButton
-        w-full flex items-center justify-between
-        px-4 py-3
-        text-[15px] font-medium text-gray-800
-        bg-gray-10
-        hover:bg-gray-50
-        transition
-    "
-                            >
-    <span className="font-mono text-[13px] tracking-tight text-gray-700">
-        {sticker.date
-            ? format(new Date(sticker.date), 'd MMM yyyy', { locale: ru })
-            : 'Выбрать дату'}
-    </span>
+                                className=" dateButton w-full flex items-center justify-between px-4 py-3 text-[15px] font-medium text-gray-800 bg-gray-10 hover:bg-gray-50 transition">
+                                <span className="font-mono text-[13px] tracking-tight text-gray-700">
+                                    {sticker.date
+                                        ? format(new Date(sticker.date), 'd MMM yyyy', { locale: ru })
+                                        : 'Выбрать дату'}
+                                </span>
 
                                 <Calendar className="w-3 h-3 text-gray-500" />
                             </button>
@@ -160,17 +142,7 @@ export const RoadmapNode = ({ data, selected }) => {
                             {/* Календарь слева от кнопки */}
                             {showCalendar && (
                                 <div
-                                    className="
-            absolute top-1/2 -translate-y-1/2
-            right-full mr-2
-            z-50
-            scale-95
-            bg-white
-            rounded-2xl
-            shadow-xl
-            border border-gray-200
-            overflow-hidden
-        "
+                                    className=" absolute top-1/2 -translate-y-1/2 right-full mr-2 z-50 scale-95 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden"
                                     onPointerDown={e => e.stopPropagation()}
                                 >
                                     <DatePicker
@@ -212,20 +184,7 @@ export const RoadmapNode = ({ data, selected }) => {
 
                         {/* Большое поле описания */}
                         <textarea
-                            className=" textPlace
-    w-full min-h-[120px]
-    box-border
-    px-4 py-3
-    rounded-xl
-    bg-gray-20
-    text-[15px] text-gray-800
-    resize-none
-    outline-none
-    placeholder-gray-400
-    focus:bg-white
-    focus:ring-1 focus:ring-gray-300
-    transition
-  "
+                            className=" textPlace w-full min-h-[120px] box-border px-4 py-3 rounded-xl bg-gray-20 text-[15px] text-gray-800 resize-none outline-none placeholder-gray-400 focus:bg-white focus:ring-1 focus:ring-gray-300 transition"
                             placeholder="Текст..."
                             value={sticker.description || ''}
                             onChange={e =>

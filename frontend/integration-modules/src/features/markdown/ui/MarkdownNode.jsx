@@ -9,15 +9,14 @@ export const MarkdownNode = ({ id, data, selected }) => {
     const sticker = useStickersStore(s =>
         s.stickers.find(x => x.id === data.stickerId)
     )
-    const [draft, setDraft] = useState(sticker.text || '')
+
     if (!sticker) return null
 
-    const { updateSticker, removeSticker, bringToFront, topZ } = useStickersStore()
+    const { updateSticker, removeSticker, bringToFront, topZ, selectedId } =
+        useStickersStore()
 
+    const [draft, setDraft] = useState(sticker.text || '')
     const [isEditorVisible, setIsEditorVisible] = useState(true)
-    const selectedId = useStickersStore(s => s.selectedId)
-    const handleTextChange = (e) =>
-        updateSticker(sticker.id, { text: e.target.value })
 
     const onPointerDown = () => {
         if (sticker.zIndex !== (topZ || 0) + 1) {
@@ -26,34 +25,22 @@ export const MarkdownNode = ({ id, data, selected }) => {
         bringToFront(sticker.id)
     }
 
-
-
     return (
         <div
+            className="cb-card"
+            style={{ zIndex: sticker.zIndex }}
             onPointerDown={onPointerDown}
-            style={{
-                width: '100%',
-                height: '100%',
-                position: 'relative',
-                zIndex: sticker.zIndex,
-                padding: 0,
-                background: '#fff',
-                border: '1px solid #ccc',
-                borderRadius: 6,
-                boxSizing: 'border-box',
-                display: 'flex',
-                flexDirection: 'column',
-            }}
         >
-            <Handle type="target" position={Position.Left} className="z-100000" />
-            <Handle type="source" position={Position.Right} className="z-100000" />
+            <Handle type="target" position={Position.Left} />
+            <Handle type="source" position={Position.Right} />
 
             <div className="cb-header">
                 <span className="cb-title">Markdown</span>
-                <div>
+
+                <div className="cb-header-actions">
                     <button
                         className="cb-toggle"
-                        onClick={(e) => {
+                        onClick={e => {
                             e.stopPropagation()
                             setIsEditorVisible(v => !v)
                         }}
@@ -63,7 +50,7 @@ export const MarkdownNode = ({ id, data, selected }) => {
 
                     <button
                         className="cb-close"
-                        onClick={(e) => {
+                        onClick={e => {
                             e.stopPropagation()
                             removeSticker(sticker.id)
                         }}
@@ -73,40 +60,32 @@ export const MarkdownNode = ({ id, data, selected }) => {
                 </div>
             </div>
 
-            <div className="cb-body" style={{ display: 'flex', flex: 1, height: '100%' }}>
+            <div className="cb-body">
                 {isEditorVisible && (
-                    <div
-                        className="cb-editor"
-                        style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
-                    >
+                    <div className="cb-editor">
                         <textarea
-                            value={draft}
-                            onChange={(e) => setDraft(e.target.value)}
-                            placeholder="Type markdown..."
-                            onBlur={() => updateSticker(sticker.id, { text: draft })}
                             className="cb-textarea"
-                            style={{
-                                flex: 1,
-                                resize: 'none',
-                                fontFamily: 'monospace',
-                                padding: 8,
-                            }}
-                            onPointerDown={(e) => e.stopPropagation()}
+                            value={draft}
+                            onChange={e => setDraft(e.target.value)}
+                            onBlur={() =>
+                                updateSticker(sticker.id, { text: draft })
+                            }
+                            placeholder="Type markdown..."
+                            onPointerDown={e => e.stopPropagation()}
                         />
                     </div>
                 )}
 
                 <div
-                    className="cb-preview"
-                    style={{
-                        flex: isEditorVisible ? 1 : 2,
-                        overflow: 'auto',
-                        padding: 8,
-                    }}
+                    className={`cb-preview ${
+                        isEditorVisible ? '' : 'cb-preview-full'
+                    }`}
                 >
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {draft}
-                    </ReactMarkdown>
+                    <div className="cb-preview-content">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {draft}
+                        </ReactMarkdown>
+                    </div>
                 </div>
             </div>
 
@@ -114,7 +93,6 @@ export const MarkdownNode = ({ id, data, selected }) => {
                 isVisible={selectedId === sticker.id}
                 minWidth={300}
                 minHeight={200}
-
             />
         </div>
     )
