@@ -13,13 +13,25 @@ export const useShapeDrop = () => {
         let shapeId
         try {
             shapeId = JSON.parse(raw).shapeId
-        } catch { return }
+        } catch {
+            return
+        }
 
         const shape = SHAPES.find(s => s.id === shapeId)
         if (!shape) return
 
-        const x = Math.round(scrollLeft + e.clientX - rect.left - shape.defaultSize.width / 2)
-        const y = Math.round(scrollTop + e.clientY - rect.top - shape.defaultSize.height / 2)
+        const x = Math.round(
+            scrollLeft +
+            e.clientX -
+            rect.left -
+            shape.defaultSize.width / 2
+        )
+        const y = Math.round(
+            scrollTop +
+            e.clientY -
+            rect.top -
+            shape.defaultSize.height / 2
+        )
 
         addSticker({
             id: `shape-${Date.now()}`,
@@ -31,8 +43,8 @@ export const useShapeDrop = () => {
             height: shape.defaultSize.height,
             rotation: 0,
             zIndex: (topZ || 1) + 1,
-            fill: "#000",
-            stroke: "#000",
+            fill: '#000',
+            stroke: '#000',
         })
     }
 }

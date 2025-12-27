@@ -1,12 +1,12 @@
 import { useStickersStore } from '../../../entities/stickers/model/useStickersStore'
-import { DND_CODE } from '../constants'
+import { DND_MARKDOWN } from '../constants'
 
-export const useCodeDrop = () => {
-    const addSticker = useStickersStore((s) => s.addSticker)
-    const topZ = useStickersStore((s) => s.topZ)
+export const useMarkdownDrop = () => {
+    const addSticker = useStickersStore(s => s.addSticker)
+    const topZ = useStickersStore(s => s.topZ)
 
     return (e, scrollLeft, scrollTop, rect) => {
-        const dataRaw = e.dataTransfer.getData(DND_CODE)
+        const dataRaw = e.dataTransfer.getData(DND_MARKDOWN)
         if (!dataRaw) return
 
         const x = Math.round(scrollLeft + (e.clientX - rect.left))
@@ -14,7 +14,7 @@ export const useCodeDrop = () => {
 
         addSticker({
             id: Date.now(),
-            type: 'code',
+            type: 'markdown',
             x,
             y,
             width: 600,

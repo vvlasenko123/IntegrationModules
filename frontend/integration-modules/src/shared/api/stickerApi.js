@@ -40,39 +40,27 @@
             }))
         },
 
-        async addToBoard(stickerId, width, height) {
+        async addToBoard(stickerId) {
             const r = await fetch('/api/v1/stickers/board', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ stickerId, width, height })
+                body: JSON.stringify({ stickerId })
             })
 
             if (!r.ok) {
-                throw new Error(await parseError(r))
+                throw new Error('Не удалось сохранить эмодзи на доске')
             }
 
-            const saved = await r.json()
-            return {
-                ...saved,
-                url: normalizeStickerUrl(saved.url)
-            }
+            return await r.json()
         },
 
         async getBoard() {
             const r = await fetch('/api/v1/stickers/board')
             if (!r.ok) {
-                throw new Error(await parseError(r))
+                throw new Error('Не удалось загрузить эмодзи с доски')
             }
 
-            const items = await r.json()
-            if (!Array.isArray(items)) {
-                return []
-            }
-
-            return items.map((x) => ({
-                ...x,
-                url: normalizeStickerUrl(x.url)
-            }))
+            return await r.json()
         },
         async removeFromBoard(placementId) {
             const res = await fetch(`/api/v1/stickers/board/${placementId}`, {
@@ -87,19 +75,24 @@
 
             return res.status === 204 ? null : await res.json()
         },
+        async upload(file) {
+            const formData = new FormData()
+            formData.append('files', file)
 
-        async updateBoardSize(placementId, width, height) {
-            const res = await fetch(`/api/v1/stickers/board/${placementId}/size`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ width, height })
+            const res = await fetch('/api/v1/stickers/upload', {
+                method: 'POST',
+                body: formData,
             })
 
             if (!res.ok) {
                 throw new Error(await parseError(res))
             }
 
-            const updated = await res.json()
-            return { ...updated, url: normalizeStickerUrl(updated.url) }
-        }
+            const contentType = res.headers.get('content-type')
+            if (contentType && contentType.includes('application/json')) {
+                return await res.json()
+            }
+
+            return true
+        },
     }

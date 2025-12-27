@@ -28,16 +28,13 @@ export const StickerBoardWidget = () => {
                 const items = []
 
                 for (const n of notes) {
-                    const w = n.width ?? 160
-                    const h = n.height ?? 160
-
                     items.push({
                         id: n.id,
                         x,
                         y,
                         color: n.color,
-                        width: w,
-                        height: h,
+                        width: 160,
+                        height: 160,
                         text: n.content ?? '',
                         zIndex: 1
                     })
@@ -46,17 +43,13 @@ export const StickerBoardWidget = () => {
                 }
 
                 for (const e of boardEmojis) {
-                    const w = e.width ?? 91
-                    const h = e.height ?? 84
-
                     items.push({
                         id: e.id,
-                        stickerId: e.stickerId,
                         x,
                         y,
                         color: 'transparent',
-                        width: w,
-                        height: h,
+                        width: 91,
+                        height: 84,
                         text: '',
                         zIndex: 1,
                         imageUrl: e.url
@@ -79,43 +72,27 @@ export const StickerBoardWidget = () => {
 
         import('@xyflow/react')
             .then((mod) => {
-                if (!mounted) {
-                    return
-                }
-
-                const candidate =
-                    (mod && (mod.Widget || mod.default || mod?.widget || mod?.XyflowWidget)) ?? null
-
+                if (!mounted) return
+                const candidate = (mod && (mod.Widget || mod.default || mod?.widget || mod?.XyflowWidget)) ?? null
                 if (typeof candidate === 'function' || React.isValidElement(candidate)) {
                     setWidgetComp(() => candidate)
                 } else {
                     setWidgetComp(() => SafeFallbackWidget)
                 }
             })
-            .catch(() => {
-                if (mounted) {
-                    setWidgetComp(() => SafeFallbackWidget)
-                }
-            })
+            .catch(() => { if (mounted) setWidgetComp(() => SafeFallbackWidget) })
 
-        return () => {
-            mounted = false
-        }
+        return () => { mounted = false }
     }, [])
 
     const Wrapper = WidgetComp || SafeFallbackWidget
 
     const handlePick = async (color) => {
         try {
-            const created = await notesApi.create(color, NOTE_W, NOTE_H)
+            const created = await notesApi.create(color)
 
-            if (boardRef.current && typeof boardRef.current.addStickerAtCenter === 'function') {
-                boardRef.current.addStickerAtCenter(color, {
-                    id: created.id,
-                    text: created.content ?? '',
-                    width: created.width ?? NOTE_W,
-                    height: created.height ?? NOTE_H
-                })
+            if (boardRef.current?.addStickerAtCenter) {
+                boardRef.current.addStickerAtCenter(color, { id: created.id, text: created.content ?? '' })
                 return
             }
 
@@ -124,8 +101,8 @@ export const StickerBoardWidget = () => {
                 x: 260,
                 y: 120,
                 color,
-                width: created.width ?? NOTE_W,
-                height: created.height ?? NOTE_H,
+                width: 160,
+                height: 160,
                 text: created.content ?? ''
             })
         } catch (e) {
@@ -141,8 +118,9 @@ export const StickerBoardWidget = () => {
                 <div className="absolute left-20 top-4 z-50">
                     <div className="mt-3">
                         <button
-                            onClick={() => { reset() }}
-                            className="px-3 py-1 rounded bg-red-500 text-white text-sm pointer-events-auto">
+                            onClick={() => reset()}
+                            className="px-3 py-1 rounded bg-red-500 text-white text-sm pointer-events-auto"
+                        >
                             Сбросить
                         </button>
                     </div>

@@ -8,11 +8,14 @@ import emojiAdd from '../assets/emoji_add.svg'
 import emojiAddActive from '../assets/emoji_add_active.svg'
 import shapeAdd from '../assets/shape_add.svg'
 import shapeAddActive from '../assets/shape_add_active.svg'
+import roadmapAdd from '../assets/roadmap_add.svg'
+import roadmapAddActive from '../assets/roadmap_add_active.svg'
 import { stickersApi } from '../shared/api/stickerApi.js'
-import { DND_SHAPE, DND_EMOJI, DND_CODE } from '../features/board/constants.js'
-import { SHAPE_ICONS } from "../features/shape/shapeIcons.jsx";
+import { DND_SHAPE, DND_EMOJI, DND_MARKDOWN, DND_ROADMAP } from '../features/board/constants.js'
+import { SHAPE_ICONS } from "./shapeIcons.jsx";
 import markdownAdd from '../assets/markdown_add.svg'
 import markdownAddActive from '../assets/markdown_add_active.svg'
+import { StickerUploadButton } from './StickerUploadButton.jsx';
 
 export const LeftToolbar = ({ onPick }) => {
     const [open, setOpen] = React.useState(false)
@@ -21,6 +24,7 @@ export const LeftToolbar = ({ onPick }) => {
     const [emojiItems, setEmojiItems] = React.useState([])
     const wrapperRef = React.useRef(null)
     const [isMarkdownDragging, setIsMarkdownDragging] = React.useState(false);
+    const [isRoadmapDragging, setIsRoadmapDragging] = useState(false)
 
     const toggle = (e) => {
         e.stopPropagation()
@@ -58,6 +62,35 @@ export const LeftToolbar = ({ onPick }) => {
         return () => { cancelled = true }
     }, [emojiOpen])
 
+
+    React.useEffect(() => {
+        if (!emojiOpen) return
+        let cancelled = false ;
+        (async () => {
+            try {
+                const items = await stickersApi.getAll()
+                if (!cancelled) setEmojiItems(Array.isArray(items) ? items : [])
+            } catch (e) {
+                console.warn('Не удалось загрузить стикеры:', e)
+                if (!cancelled) setEmojiItems([])
+            }
+        })()
+        return () => { cancelled = true }
+    }, [emojiOpen])
+
+    // Обновление списка после загрузки
+    const handleStickerUploaded = async () => {
+        // Перезагружаем список только если панель открыта
+        if (emojiOpen) {
+            try {
+                const items = await stickersApi.getAll()
+                setEmojiItems(Array.isArray(items) ? items : [])
+            } catch (e) {
+                console.warn('Не удалось обновить список стикеров:', e)
+            }
+        }
+    }
+
     React.useEffect(() => {
         if (!open && !emojiOpen && !shapeOpen) return
         const handler = (e) => {
@@ -84,16 +117,29 @@ export const LeftToolbar = ({ onPick }) => {
         e.dataTransfer.effectAllowed = 'copy'
     }
 
-    const onCodeDragStart = (e) => {
-        e.stopPropagation();
-        setIsMarkdownDragging(true);
-        e.dataTransfer.setData(DND_CODE, JSON.stringify({ type: 'code' }));
-        e.dataTransfer.effectAllowed = 'copy';
-    };
-    const onCodeDragEnd = (e) => {
+    const onMarkdownDragStart = (e) => {
+        e.dataTransfer.setData(DND_MARKDOWN, JSON.stringify({ type: 'markdown' }))
+        e.dataTransfer.effectAllowed = 'copy'
+    }
+    const onMarkdownDragEnd = (e) => {
         e.preventDefault();
         setIsMarkdownDragging(false);
     };
+
+    const onRoadmapDragStart = (e) => {
+        e.stopPropagation()
+        setIsRoadmapDragging(true)
+        e.dataTransfer.setData(
+            DND_ROADMAP,
+            JSON.stringify({ type: 'roadmap' })
+        )
+        e.dataTransfer.effectAllowed = 'copy'
+    }
+
+    const onRoadmapDragEnd = (e) => {
+        e.preventDefault()
+        setIsRoadmapDragging(false)
+    }
 
     return (
         <div className="left-toolbar-container" ref={wrapperRef} onClick={e => e.stopPropagation()}>
@@ -119,14 +165,30 @@ export const LeftToolbar = ({ onPick }) => {
                 <button
                     className={`toolbar-btn toolbar-btn--icon toolbar-btn--markdown ${isMarkdownDragging ? 'toolbar-btn--active' : ''}`.trim()}
                     draggable
-                    onDragStart={onCodeDragStart}
-                    onDragEnd={onCodeDragEnd}
-                    title="Markdown Code Block"
+                    onDragStart={onMarkdownDragStart}
+                    onDragEnd={onMarkdownDragEnd}
+                    title="Markdown Markdown Block"
                 >
                     <div className={`toolbar-markdown-plate ${isMarkdownDragging ? 'toolbar-markdown-plate--active' : ''}`}>
                         <img
                             src={isMarkdownDragging ? markdownAddActive : markdownAdd}
-                            alt="Code"
+                            alt="Markdown"
+                            draggable={false}
+                        />
+                    </div>
+                </button>
+
+                <button
+                    className={`toolbar-btn toolbar-btn--icon toolbar-btn--markdown ${isRoadmapDragging ? 'toolbar-btn--active' : ''}`}
+                    draggable
+                    onDragStart={onRoadmapDragStart}
+                    onDragEnd={onRoadmapDragEnd}
+                    title="Roadmap"
+                >
+                    <div className={`toolbar-markdown-plate ${isRoadmapDragging ? 'toolbar-markdown-plate--active' : ''}`}>
+                        <img
+                            src={isRoadmapDragging ? roadmapAddActive : roadmapAdd}
+                            alt="Roadmap"
                             draggable={false}
                         />
                     </div>
@@ -142,21 +204,26 @@ export const LeftToolbar = ({ onPick }) => {
             {emojiOpen && (
                 <div className="palette-wrapper" onClick={e => e.stopPropagation()}>
                     <div className="emoji-panel" style={{ width: '300px', height: '500px' }}>
+                        {/* Хедер с кнопкой "+" */}
+                        <div className="emoji-panel-header">
+                            <StickerUploadButton
+                                onStickerUploaded={handleStickerUploaded}
+                                className="emoji-add-btn"
+                            />
+                            <span className="emoji-header-title">Мои стикеры</span>
+                        </div>
+
+                        {/* Сетка стикеров */}
                         <div className="emoji-grid">
                             {emojiItems.map((x) => (
-                                <button
-                                key={`${x.id}-${x.storagePath}`}
-                             className="emoji-item"
-                             draggable
-                             onDragStart={onEmojiDragStart(x)}
-                        >
-                            <img src={x.url} alt="" className="emoji-img" draggable={false} />
-                        </button>
-                        ))}
+                                <button key={`${x.id}-${x.storagePath}`} className="emoji-item" draggable onDragStart={onEmojiDragStart(x)}>
+                                    <img src={x.url} alt="" className="emoji-img" draggable={false} />
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
-                </div>
-                )}
+            )}
 
             {shapeOpen && (
                 <div className="palette-wrapper" onClick={e => e.stopPropagation()}>
