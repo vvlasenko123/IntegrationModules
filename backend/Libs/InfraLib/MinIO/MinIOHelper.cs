@@ -14,7 +14,7 @@ public static class MinIOHelper
     /// <summary>
     /// получение стикеров из кэша
     /// </summary>
-    public static async Task<List<StickerCacheItem>> GetOrSetCachedItemsAsync(
+    public static async Task<IEnumerable<StickerCacheItem>> GetOrSetCachedItemsAsync(
         IDistributedCache cache,
         Func<CancellationToken, Task<List<StickerCacheItem>>> factory,
         CancellationToken token)

@@ -27,11 +27,14 @@ public static class DalStartUp
         services.AddTransient<IDatabaseMigration, StickersAndNotesAddSizeMigration>();
         services.AddTransient<IDatabaseMigration, ShapesCreateTablesMigration>();
         services.AddTransient<IDatabaseMigration, ShapesSeedMigration>();
+        services.AddTransient<IDatabaseMigration, MarkdownCreateTablesMigration>();
+        services.AddTransient<IDatabaseMigration, MarkdownBoardAddEditorStateMigration>();
         #endregion
         
         services.AddTransient<IStickerRepository, StickerRepository>();
         services.AddTransient<INoteRepository, NoteRepository>();
         services.AddTransient<IShapeRepository, ShapeRepository>();
+        services.AddTransient<IMarkdownRepository, MarkdownRepository>();
 
         return services;
     }

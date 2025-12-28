@@ -26,7 +26,7 @@ public class Startup
     {
         services.AddControllers();
         services.AddDal();
-        services.AddLogic();
+        //services.AddLogic();
 
         services.AddCors(options =>
         {
@@ -40,7 +40,7 @@ public class Startup
             });
         });
 
-        services.AddSwaggerDocumentation();
+        services.AddSwaggerDocumentation("Integration Api", "v1");
         services.AddInfrastructure();
     }
 

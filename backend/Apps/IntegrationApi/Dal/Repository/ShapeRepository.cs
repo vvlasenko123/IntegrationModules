@@ -5,9 +5,7 @@ using Dal.Repository.interfaces;
 
 namespace Dal.Repository;
 
-/// <summary>
-/// Репозиторий фигуры
-/// </summary>
+/// <inheritdoc />
 public sealed class ShapeRepository : IShapeRepository
 {
     private readonly IDbConnection _connection;

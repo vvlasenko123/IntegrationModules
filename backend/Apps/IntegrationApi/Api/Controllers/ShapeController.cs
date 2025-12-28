@@ -35,7 +35,7 @@ public sealed class ShapeController : ControllerBase
         {
             Id = x.Id,
             ShapeId = x.ShapeId
-        }).ToList();
+        });
 
         return Ok(result);
     }
@@ -112,7 +112,7 @@ public sealed class ShapeController : ControllerBase
             Width = x.Width,
             Height = x.Height,
             Rotation = x.Rotation
-        }).ToList();
+        });
 
         return Ok(result);
     }

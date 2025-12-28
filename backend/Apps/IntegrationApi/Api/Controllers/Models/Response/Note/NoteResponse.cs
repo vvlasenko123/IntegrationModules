@@ -1,4 +1,4 @@
-namespace Api.Controllers.Models.Response;
+namespace Api.Controllers.Models.Response.Note;
 
 /// <summary>
 /// Ответ с данными заметки

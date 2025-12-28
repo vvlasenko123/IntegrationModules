@@ -6,6 +6,7 @@ import { notesApi } from '../shared/api/notesApi.js'
 import { stickersApi } from '../shared/api/stickerApi.js'
 import { NOTE_W, NOTE_H, EMOJI_W, EMOJI_H } from '../features/board/constants'
 import { shapesApi } from '../shared/api/shapesApi.js'
+import { markdownApi } from '../shared/api/markdownApi'
 
 const SafeFallbackWidget = ({ children }) => <div>{children}</div>
 
@@ -20,11 +21,12 @@ export const StickerBoardWidget = () => {
     useEffect(() => {
         const loadNotes = async () => {
             try {
-                const [notes, boardEmojis, allShapes, boardShapes] = await Promise.all([
+                const [notes, boardEmojis, allShapes, boardShapes, boardMarkdowns] = await Promise.all([
                     notesApi.getAll(),
                     stickersApi.getBoard(),
                     shapesApi.getAll(),
-                    shapesApi.getBoard()
+                    shapesApi.getBoard(),
+                    markdownApi.getBoard()
                 ])
 
                 const shapeKeyByDbId = new Map(allShapes.map(x => [String(x.id), x.shapeId]))
@@ -67,6 +69,27 @@ export const StickerBoardWidget = () => {
                         zIndex: 1,
                         imageUrl: e.url,
                         stickerId: e.stickerId
+                    })
+
+                    x += 24
+                    y += 24
+                }
+
+                for (const m of boardMarkdowns) {
+                    const w = m.width ?? 600
+                    const h = m.height ?? 400
+
+                    items.push({
+                        id: m.id,
+                        stickerId: m.markdownId,
+                        isEditorVisible: m.isEditorVisible ?? true,
+                        type: 'markdown',
+                        x,
+                        y,
+                        width: w,
+                        height: h,
+                        text: m.content ?? '',
+                        zIndex: 1
                     })
 
                     x += 24

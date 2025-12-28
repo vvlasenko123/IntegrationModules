@@ -1,6 +1,7 @@
 using Api.Controllers.Models.Request;
 using Api.Controllers.Models.Request.Note;
 using Api.Controllers.Models.Response;
+using Api.Controllers.Models.Response.Note;
 using Dal.Models.Notes;
 using Dal.Repository.interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -99,7 +100,7 @@ public class NoteController : ControllerBase
             Color = x.Color,
             Width = x.Width,
             Height = x.Height
-        }).ToList();
+        });
 
         return Ok(result);
     }

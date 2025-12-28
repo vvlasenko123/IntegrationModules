@@ -1,6 +1,7 @@
 using Api.Controllers.Models.Request;
 using Api.Controllers.Models.Request.Sticker;
 using Api.Controllers.Models.Response;
+using Api.Controllers.Models.Response.Sticker;
 using Dal.Repository.interfaces;
 using InfraLib.Minio;
 using InfraLib.MinIO.Storage;
@@ -100,7 +101,7 @@ public sealed class StickerController : ControllerBase
             Url = $"/api/v1/stickers/{x.Id:D}/file",
             Width = x.Width,
             Height = x.Height
-        }).ToList();
+        });
 
         return Ok(result);
     }
@@ -229,7 +230,7 @@ public sealed class StickerController : ControllerBase
                 Width = x.Width,
                 Height = x.Height
             };
-        }).ToList();
+        });
 
         return Ok(result);
     }
