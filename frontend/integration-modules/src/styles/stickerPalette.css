@@ -341,7 +341,8 @@
 }
 
 .emoji-add-btn:hover img:first-child {
-    opacity: 0;
+    background-color: rgba(26, 26, 46, 0.06);
+    border-radius: 100%;
 }
 
 .emoji-add-btn:hover .emoji-add-btn-active {

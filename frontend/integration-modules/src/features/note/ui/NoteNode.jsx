@@ -216,26 +216,27 @@ export const NoteNode = ({ id, selected }) => {
             {menuVisible && (
                 <div
                     style={{
-                        position: 'fixed',
-                        top: menuPos.y,
-                        left: menuPos.x,
+                        position: 'absolute',
+                        top: 4,
+                        right: 4,
                         background: '#fff',
                         border: '1px solid #ccc',
                         borderRadius: 6,
                         boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                        padding: 4,
+                        padding: 2,
                         zIndex: 1000,
-                        animation: 'fadeIn 0.15s ease-in'
+                        display: 'flex',
+                        alignItems: 'center'
                     }}
                 >
                     <button
                         style={{
                             border: 'none',
                             background: 'none',
-                            padding: '6px 12px',
+                            padding: '3px 7px',
                             cursor: 'pointer',
-                            fontSize: 14,
-                            color: '#202020'
+                            fontSize: 12,
+                            color: '#3c3c3c'
                         }}
                         onClick={handleDelete}
                     >
@@ -243,6 +244,7 @@ export const NoteNode = ({ id, selected }) => {
                     </button>
                 </div>
             )}
+
         </div>
     )
 }
