@@ -41,10 +41,13 @@
         },
 
         async addToBoard(stickerId, width, height) {
+            width=80;
+            height=80;
             const r = await fetch('/api/v1/stickers/board', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ stickerId, width, height })
+
             })
 
             if (!r.ok) {
@@ -64,11 +67,10 @@
             return await r.json()
         },
         async removeFromBoard(placementId) {
-            const res = await fetch(`/api/v1/stickers/board/${placementId}`, {
+            const res = await fetch(`/api/v1/stickers/${placementId}`, {
                 method: 'DELETE',
                 headers: { 'accept': '*/*' },
             })
-
             if (!res.ok) {
                 const text = await res.text()
                 throw new Error(text || 'Не удалось удалить стикер с доски')

@@ -29,7 +29,7 @@ export const useEmojiDrop = () => {
         const nextZ = (topZ || 1) + 1
 
         try {
-            const saved = await stickersApi.addToBoard(payload.id)
+            const saved = await stickersApi.addToBoard(payload.id, 40, 40)
             addSticker({
                 id: saved.id,
                 stickerId: saved.stickerId,

@@ -4,14 +4,10 @@ import { useStickersStore } from '../../../entities/stickers/model/useStickersSt
 import { stickersApi } from '../../../shared/api/stickerApi'
 import '../../../styles/sticker.css'
 
-export const EmojiNode = ({ id, data, selected }) => {
+export const EmojiNode = ({ id, selected }) => {
     const sticker = useStickersStore(s =>
         s.stickers.find(x => String(x.id) === String(id))
     )
-
-    if (!sticker || !sticker.imageUrl) {
-        return null
-    }
 
     const updateSticker = useStickersStore(s => s.updateSticker)
     const removeSticker = useStickersStore(s => s.removeSticker)
@@ -47,6 +43,10 @@ export const EmojiNode = ({ id, data, selected }) => {
         } catch {
             alert('Не удалось удалить эмодзи')
         }
+    }
+
+    if (!sticker || !sticker.imageUrl) {
+        return null
     }
 
     return (
