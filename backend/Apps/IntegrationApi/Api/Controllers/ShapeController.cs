@@ -118,6 +118,24 @@ public sealed class ShapeController : ControllerBase
     }
 
     /// <summary>
+    /// Удаление фигуры
+    /// </summary>
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteAsync(Guid id, CancellationToken token)
+    {
+        var item = await _shapeRepository.DeleteAsync(id, token);
+
+        if (!item)
+        {
+            return NotFound("Фигура не найдена");
+        }
+
+        _logger.LogInformation("Фигура удалена: {ShapeId}", id);
+
+        return NoContent();
+    }
+    
+    /// <summary>
     /// Получение фигуры на доске по идентификатору размещения
     /// </summary>
     [HttpGet("board/{id:guid}")]
