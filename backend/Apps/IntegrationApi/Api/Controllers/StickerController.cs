@@ -1,11 +1,9 @@
-using Api.Controllers.Models.Request;
 using Api.Controllers.Models.Request.Sticker;
-using Api.Controllers.Models.Response;
 using Api.Controllers.Models.Response.Sticker;
 using Dal.Repository.interfaces;
 using InfraLib.Minio;
 using InfraLib.MinIO.Storage;
-using InfraLib.Redis.Models;
+using Logic.Services.Cache.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 
@@ -65,7 +63,7 @@ public sealed class StickerController : ControllerBase
 
         var result = await _stickerRepository.UploadAsync(files, _storage, token);
 
-        await _cache.RemoveAsync(MinIOHelper.StickersCacheKey, token);
+        await _cache.RemoveAsync(MinIOCacheHelper.StickersCacheKey, token);
 
         _logger.LogInformation("Загружено стикеров: {Count}", result.Count);
 
@@ -78,7 +76,7 @@ public sealed class StickerController : ControllerBase
     [HttpGet("get-all")]
     public async Task<ActionResult<IReadOnlyCollection<StickerResponse>>> GetAllAsync(CancellationToken token)
     {
-        var items = await MinIOHelper.GetOrSetCachedItemsAsync(
+        var items = await MinIOCacheHelper.GetOrSetCachedItemsAsync(
             _cache,
             async (ct) =>
             {
@@ -112,7 +110,7 @@ public sealed class StickerController : ControllerBase
     [HttpGet("{id:guid}/file")]
     public async Task<IActionResult> GetFileAsync([FromRoute] Guid id, CancellationToken token)
     {
-        var items = await MinIOHelper.GetOrSetCachedItemsAsync(
+        var items = await MinIOCacheHelper.GetOrSetCachedItemsAsync(
             _cache,
             async (ct) =>
             {

@@ -1,4 +1,4 @@
-namespace InfraLib.Redis.Models;
+namespace Logic.Services.Cache.Models;
 
 /// <summary>
 /// Кэш для стикера
