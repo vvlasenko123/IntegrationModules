@@ -1,9 +1,11 @@
 import { create } from 'zustand'
+import { roadmapApi } from '../../../shared/api/roadmapApi.js'
 
 export const useStickersStore = create((set, get) => ({
     stickers: [],
     edges: [],
     topZ: 1,
+    selectedId: null,
 
     addSticker: (payload) => {
         set((state) => {
@@ -18,9 +20,11 @@ export const useStickersStore = create((set, get) => ({
                 height: payload.height,
                 color: payload.color,
                 text: payload.text ?? '',
-                deadline: payload.deadline,
+                description: payload.description ?? '',
+                date: payload.date ?? null,
                 completed: payload.completed ?? false,
                 cancelled: payload.cancelled ?? false,
+                parentId: payload.parentId ?? null,
 
                 zIndex,
                 rotation: payload.rotation ?? 0,
@@ -36,60 +40,90 @@ export const useStickersStore = create((set, get) => ({
             }
         })
     },
-    addRoadmapBranch: (parentId) => {
+
+    addRoadmapBranch: async (parentId) => {
         const state = get()
-        const parent = state.stickers.find(s => s.id === parentId)
-        if (!parent) return
+        const parent = state.stickers.find(s => String(s.id) === String(parentId))
+        if (!parent) {
+            return
+        }
 
         const children = state.stickers.filter(s =>
-            state.edges.some(e => e.source === parentId && e.target === s.id)
+            state.edges.some(e => String(e.source) === String(parentId) && String(e.target) === String(s.id))
         )
 
-        const childId = crypto.randomUUID()
-
         const NODE_WIDTH = 200
-        const NODE_HEIGHT = 100
+        const NODE_HEIGHT = 120
         const HORIZONTAL_OFFSET = NODE_WIDTH + 140
         const VERTICAL_GAP = 50
 
-
-        const newX = parent.x + HORIZONTAL_OFFSET
+        const newX = (parent.x ?? 0) + HORIZONTAL_OFFSET
 
         let newY
         if (children.length === 0) {
-            newY = parent.y + (parent.height || NODE_HEIGHT) / 2 - NODE_HEIGHT / 2 + VERTICAL_GAP
+            newY = (parent.y ?? 0) + ((parent.height || NODE_HEIGHT) / 2) - (NODE_HEIGHT / 2) + VERTICAL_GAP
         } else {
-            const lowestChild = children.reduce((lowest, child) =>
-                child.y + (child.height || NODE_HEIGHT) > lowest.y + (lowest.height || NODE_HEIGHT) ? child : lowest
-            )
-            newY = lowestChild.y + (lowestChild.height || NODE_HEIGHT) + VERTICAL_GAP
+            const lowestChild = children.reduce((lowest, child) => {
+                const lowestBottom = (lowest.y ?? 0) + (lowest.height || NODE_HEIGHT)
+                const childBottom = (child.y ?? 0) + (child.height || NODE_HEIGHT)
+                if (childBottom > lowestBottom) {
+                    return child
+                }
+                return lowest
+            })
+            newY = (lowestChild.y ?? 0) + (lowestChild.height || NODE_HEIGHT) + VERTICAL_GAP
         }
+
+        const nextZ = (state.topZ || 1) + 1
+
+        let created
+        try {
+            created = await roadmapApi.create({
+                text: '',
+                description: '',
+                date: null,
+                completed: false,
+                cancelled: false,
+                zIndex: nextZ,
+                width: NODE_WIDTH,
+                height: NODE_HEIGHT,
+                parentId: String(parentId)
+            })
+        } catch (e) {
+            console.warn('Не удалось создать roadmap ветку', e)
+            return
+        }
+
+        const childId = String(created.id)
 
         state.addSticker({
             id: childId,
             type: 'roadmap',
             x: newX,
             y: newY,
-            width: NODE_WIDTH,
-            height: NODE_HEIGHT,
-            text: '',
-            completed: false,
-            cancelled: false,
-            deadline: null,
-            zIndex: (state.topZ || 1) + 1,
+            width: created.width ?? NODE_WIDTH,
+            height: created.height ?? NODE_HEIGHT,
+            text: created.text ?? '',
+            description: created.description ?? '',
+            date: created.date ?? null,
+            completed: created.completed ?? false,
+            cancelled: created.cancelled ?? false,
+            parentId: created.parentId ?? String(parentId),
+            zIndex: created.zIndex ?? nextZ
         })
 
-        set((state) => ({
+        set((prev) => ({
             edges: [
-                ...state.edges,
+                ...prev.edges,
                 {
                     id: `e-${parentId}-${childId}`,
-                    source: parentId,
+                    source: String(parentId),
                     target: childId,
-                    type: 'bezier',
-                    animated: false,
+                    type: 'default',
+                    animated: false
                 }
-            ]
+            ],
+            topZ: Math.max(prev.topZ || 1, nextZ)
         }))
     },
 
@@ -100,17 +134,25 @@ export const useStickersStore = create((set, get) => ({
         }))
     },
 
+    setEdges: (edges) => {
+        set(() => ({
+            edges
+        }))
+    },
+
     reset: () => {
         set({
             stickers: [],
-            topZ: 1
+            edges: [],
+            topZ: 1,
+            selectedId: null
         })
     },
 
     updateSticker: (id, patch) => {
         set((state) => ({
             stickers: state.stickers.map((s) =>
-                s.id === id ? { ...s, ...patch } : s
+                String(s.id) === String(id) ? { ...s, ...patch } : s
             )
         }))
     },
@@ -118,7 +160,7 @@ export const useStickersStore = create((set, get) => ({
     setPosition: (id, x, y) => {
         set((state) => ({
             stickers: state.stickers.map((s) =>
-                s.id === id ? { ...s, x, y } : s
+                String(s.id) === String(id) ? { ...s, x, y } : s
             )
         }))
     },
@@ -126,7 +168,7 @@ export const useStickersStore = create((set, get) => ({
     setSize: (id, width, height) => {
         set((state) => ({
             stickers: state.stickers.map((s) =>
-                s.id === id ? { ...s, width, height } : s
+                String(s.id) === String(id) ? { ...s, width, height } : s
             )
         }))
     },
@@ -134,32 +176,40 @@ export const useStickersStore = create((set, get) => ({
     setText: (id, text) => {
         set((state) => ({
             stickers: state.stickers.map((s) =>
-                s.id === id ? { ...s, text } : s
+                String(s.id) === String(id) ? { ...s, text } : s
             )
         }))
     },
 
-    bringToFront: (id) => set(state => {
-        const sticker = state.stickers.find(s => s.id === id);
-        if (!sticker) return state;
-        const newZ = (state.topZ || 1) + 1;
-        return {
-            stickers: state.stickers.map(s => s.id === id ? { ...s, zIndex: newZ } : s),
-            topZ: newZ
-        }
-    }),
+    bringToFront: (id) => {
+        set((state) => {
+            const sticker = state.stickers.find(s => String(s.id) === String(id))
+            if (!sticker) {
+                return state
+            }
+
+            const newZ = (state.topZ || 1) + 1
+
+            return {
+                stickers: state.stickers.map(s => String(s.id) === String(id) ? { ...s, zIndex: newZ } : s),
+                topZ: newZ
+            }
+        })
+    },
 
     removeSticker: (id) => {
         set((state) => {
-            const filtered = state.stickers.filter((s) => s.id !== id)
+            const filtered = state.stickers.filter((s) => String(s.id) !== String(id))
+
             return {
                 stickers: filtered,
-                edges: state.edges.filter(e => e.source !== id && e.target !== id),
+                edges: state.edges.filter(e => String(e.source) !== String(id) && String(e.target) !== String(id)),
                 topZ: filtered.reduce((acc, x) => Math.max(acc, x.zIndex ?? 1), 1)
             }
         })
     },
-    selectSticker: (id) => set({ selectedId: id }),
-    selectedId: null,
 
+    selectSticker: (id) => {
+        set({ selectedId: id })
+    }
 }))

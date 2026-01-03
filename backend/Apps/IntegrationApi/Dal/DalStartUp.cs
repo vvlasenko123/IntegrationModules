@@ -1,6 +1,7 @@
 ﻿using Dal.Migrations;
 using Dal.Repository;
 using Dal.Repository.interfaces;
+using Dal.Repository.interfaces.Roadmap;
 using InfraLib.Database.Migration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -29,12 +30,14 @@ public static class DalStartUp
         services.AddTransient<IDatabaseMigration, ShapesSeedMigration>();
         services.AddTransient<IDatabaseMigration, MarkdownCreateTablesMigration>();
         services.AddTransient<IDatabaseMigration, MarkdownBoardAddEditorStateMigration>();
+        services.AddTransient<IDatabaseMigration, RoadmapCreateTableMigration>();
         #endregion
         
         services.AddTransient<IStickerRepository, StickerRepository>();
         services.AddTransient<INoteRepository, NoteRepository>();
         services.AddTransient<IShapeRepository, ShapeRepository>();
         services.AddTransient<IMarkdownRepository, MarkdownRepository>();
+        services.AddScoped<IRoadmapRepository, RoadmapRepository>();
 
         return services;
     }

@@ -36,5 +36,4 @@ public interface INoteRepository
     /// изменение размера
     /// </summary>
     Task<Note?> UpdateSizeAsync(Guid id, int width, int height, CancellationToken token);
-
 }
