@@ -15,8 +15,10 @@ public static class RedisStartUp
             .UseValidationOptions()
             .ValidateOnStart();
 
-        services.AddStackExchangeRedisCache(_ =>
-        {
+        // TODO потом сменим на адрес хоста
+        services.AddStackExchangeRedisCache(options => {
+            options.Configuration = "localhost";
+            options.InstanceName = "local";
         });
 
         services.AddOptions<RedisCacheOptions>()
