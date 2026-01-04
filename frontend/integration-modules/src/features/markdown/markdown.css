@@ -124,3 +124,57 @@
 .cb-preview-full {
     width: 100%;
 }
+
+.cb-help {
+    position: relative;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1px solid #555;
+    color: #ccc;
+    font-size: 12px;
+    line-height: 16px;
+    text-align: center;
+    cursor: default;
+    user-select: none;
+}
+
+.cb-help:hover {
+    color: #fff;
+    border-color: #777;
+}
+
+.cb-help-tooltip {
+    position: absolute;
+    top: 24px;
+    right: 0;
+    width: 220px;
+    background: #333;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #eaeaea;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-4px);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    z-index: 100;
+}
+
+.cb-help:hover .cb-help-tooltip {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.cb-help-tooltip div {
+    margin-bottom: 4px;
+}
+
+.cb-help-tooltip div:last-child {
+    margin-bottom: 0;
+}
+

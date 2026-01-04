@@ -189,8 +189,8 @@ public sealed class StickerController : ControllerBase
 
         var created = await _stickerRepository.AddToBoardAsync(
             request.StickerId,
-            request.Width,
-            request.Height,
+            80,
+            80,
             token);
 
         var result = new BoardStickerResponse

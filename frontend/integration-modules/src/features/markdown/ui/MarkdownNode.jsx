@@ -6,12 +6,11 @@ import { useStickersStore } from '../../../entities/stickers/model/useStickersSt
 import { markdownApi } from '../../../shared/api/markdownApi'
 import '../markdown.css'
 
-export const MarkdownNode = ({ id, data, selected }) => {
+export const MarkdownNode = ({ data}) => {
     const sticker = useStickersStore(s =>
         s.stickers.find(x => x.id === data.stickerId)
     )
 
-    if (!sticker) return null
 
     const { updateSticker, removeSticker, bringToFront, topZ, selectedId } =
         useStickersStore()
@@ -69,6 +68,7 @@ export const MarkdownNode = ({ id, data, selected }) => {
 
         bringToFront(sticker.id)
     }
+    if (!sticker) return null
 
     const flushPendingContent = async () => {
         if (!pendingSaveRef.current) {
@@ -216,7 +216,21 @@ export const MarkdownNode = ({ id, data, selected }) => {
             <div className="cb-header cb-drag-handle">
                 <span className="cb-title">Markdown</span>
 
-                <div className="cb-header-actions nodrag nopan">
+                <div className="cb-header-actions">
+                    <div className="cb-help">
+                        ?
+                        <div className="cb-help-tooltip">
+                            <div><b># Заголовок</b></div>
+                            <div><b>**жирный**</b>, <i>*курсив*</i></div>
+                            <div>~~зачёркнутый~~</div>
+                            <div>- список</div>
+                            <div>1. нумерованный</div>
+                            <div>`код` или ```блок```</div>
+                            <div>[текст](ссылка)</div>
+                            <div>Новая строка — Enter</div>
+                        </div>
+                    </div>
+
                     <button
                         className="cb-toggle"
                         onClick={(e) => {
@@ -239,6 +253,7 @@ export const MarkdownNode = ({ id, data, selected }) => {
                         ✕
                     </button>
                 </div>
+
             </div>
 
             <div className="cb-body nodrag nopan">

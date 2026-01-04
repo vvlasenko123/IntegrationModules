@@ -1,27 +1,29 @@
-import React, { useRef, useEffect, useContext, useState } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import { useStickersStore } from '../../../entities/stickers/model/useStickersStore.js'
 import { notesApi } from '../../../shared/api/notesApi'
 import { Handle, Position, NodeResizer } from '@xyflow/react'
 import '../../../styles/sticker.css'
-import '@xyflow/react/dist/style.css';
+import '@xyflow/react/dist/style.css'
 
-export const NoteNode = ({ id, data, selected }) => {
+export const NoteNode = ({ id, selected }) => {
     const sticker = useStickersStore(s =>
         s.stickers.find(x => String(x.id) === String(id))
     )
-    if (!sticker) return null
 
     const updateSticker = useStickersStore(s => s.updateSticker)
     const { setText, bringToFront, removeSticker } = useStickersStore()
 
-    const [localText, setLocalText] = useState(sticker.text || '')
+    const [localText, setLocalText] = useState('')
     const contentRef = useRef(null)
     const [editing, setEditing] = useState(false)
+
+    const [menuVisible, setMenuVisible] = useState(false)
+    const [menuPos, setMenuPos] = useState({ x: 0, y: 0 })
+
 
     const fitText = () => {
         const el = contentRef.current
         if (!el) return
-
         const parent = el.parentElement
         if (!parent) return
 
@@ -30,56 +32,45 @@ export const NoteNode = ({ id, data, selected }) => {
 
         while (
             fontSize > 8 &&
-            (el.scrollHeight > parent.clientHeight ||
-                el.scrollWidth > parent.clientWidth)
+            (el.scrollHeight > parent.clientHeight || el.scrollWidth > parent.clientWidth)
             ) {
             fontSize -= 0.5
             el.style.fontSize = fontSize + 'px'
         }
     }
+
     useEffect(() => {
         const el = contentRef.current
         if (!el) return
-
         const parent = el.parentElement
         if (!parent) return
 
         requestAnimationFrame(fitText)
-
-        const ro = new ResizeObserver(() => {
-            requestAnimationFrame(fitText)
-        })
-
+        const ro = new ResizeObserver(() => requestAnimationFrame(fitText))
         ro.observe(parent)
-
         return () => ro.disconnect()
     }, [])
 
-
     useEffect(() => {
-        if (editing) return
+        if (!sticker || editing) return
         const el = contentRef.current
         if (!el) return
 
         const current = el.innerText.replace(/\u200B/g, '')
-        const newText = sticker.text || ''
+        const newText = localText // используем localText, а не sticker.text
 
-        if (current !== newText) {
-            el.innerText = newText
-        }
-    }, [sticker.text, editing])
+        if (current !== newText) el.innerText = newText
+    }, [localText, editing])
 
     useEffect(() => {
-        if (editing) {
-            setLocalText(sticker.text || '')
-        }
-    }, [editing])
+        if (!sticker) return
+        setLocalText(sticker.text || '')
+    }, [sticker?.id])
+
 
     const notifyTouched = () => {
         window.dispatchEvent(
-            new CustomEvent('sticker-touched', {
-                detail: { id, type: 'note' }
-            })
+            new CustomEvent('sticker-touched', { detail: { id, type: 'note' } })
         )
     }
 
@@ -90,18 +81,12 @@ export const NoteNode = ({ id, data, selected }) => {
 
     const onBlur = async () => {
         setEditing(false)
-        setText(id, localText)
-
+        setText(id, localText) // сохраняем в Zustand
         try {
-            await notesApi.updateContent(id, localText)
+            await notesApi.updateContent(id, localText) // сохраняем на сервере
         } catch {}
     }
 
-    const onDoubleClick = (e) => {
-        e.stopPropagation()
-        setEditing(true)
-        setTimeout(() => contentRef.current?.focus(), 0)
-    }
 
     const onPaste = (e) => {
         e.preventDefault()
@@ -109,23 +94,12 @@ export const NoteNode = ({ id, data, selected }) => {
         document.execCommand('insertText', false, text)
     }
 
-    const setCaretToClick = (el, clientX, clientY) => {
-        const range = document.caretRangeFromPoint
-            ? document.caretRangeFromPoint(clientX, clientY)
-            : document.caretPositionFromPoint
-                ? (() => {
-                    const pos = document.caretPositionFromPoint(clientX, clientY)
-                    const r = document.createRange()
-                    r.setStart(pos.offsetNode, pos.offset)
-                    r.collapse(true)
-                    return r
-                })()
-                : null
-
-        if (!range) return
-        const sel = window.getSelection()
-        sel.removeAllRanges()
-        sel.addRange(range)
+    // ПКМ — открытие контекстного меню
+    const handleContextMenu = (e) => {
+        e.preventDefault()
+        bringToFront(id)
+        setMenuVisible(true)
+        setMenuPos({ x: e.clientX, y: e.clientY })
     }
 
     const handleDelete = async () => {
@@ -138,6 +112,13 @@ export const NoteNode = ({ id, data, selected }) => {
         }
     }
 
+    // Закрыть меню при клике вне
+    useEffect(() => {
+        const handleClickOutside = () => setMenuVisible(false)
+        window.addEventListener('click', handleClickOutside)
+        return () => window.removeEventListener('click', handleClickOutside)
+    }, [])
+    if (!sticker) return null
     return (
         <div
             className={`resizable-sticker-wrapper ${selected ? 'resizable-sticker-wrapper--active' : ''}`}
@@ -147,6 +128,7 @@ export const NoteNode = ({ id, data, selected }) => {
                 bringToFront(id)
                 notifyTouched()
             }}
+            onContextMenu={handleContextMenu} // ПКМ
         >
             <div
                 className={`sticker-root ${editing ? 'sticker-root--editing' : ''}`}
@@ -154,7 +136,8 @@ export const NoteNode = ({ id, data, selected }) => {
                     width: '100%',
                     height: '100%',
                     background: sticker.color,
-                    position: 'relative'
+                    position: 'relative',
+                    transition: 'box-shadow 0.2s'
                 }}
             >
                 <Handle type="target" position={Position.Left} />
@@ -216,10 +199,7 @@ export const NoteNode = ({ id, data, selected }) => {
                         cursor: editing ? 'text' : 'default'
                     }}
                 />
-
-
                 <Handle type="source" position={Position.Right} />
-
                 <NodeResizer
                     isVisible={selected}
                     minWidth={80}
@@ -227,17 +207,44 @@ export const NoteNode = ({ id, data, selected }) => {
                     onResizeEnd={async (_, params) => {
                         const w = Math.max(1, Math.round(params.width))
                         const h = Math.max(1, Math.round(params.height))
-
                         updateSticker(id, { width: w, height: h })
-
-                        try {
-                            await notesApi.updateSize(id, w, h)
-                        } catch (e) {
-                            console.warn('Не удалось сохранить размер заметки', e)
-                        }
+                        try { await notesApi.updateSize(id, w, h) } catch {}
                     }}
                 />
             </div>
+
+            {menuVisible && (
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: 4,
+                        right: 4,
+                        background: '#fff',
+                        border: '1px solid #ccc',
+                        borderRadius: 6,
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                        padding: 2,
+                        zIndex: 1000,
+                        display: 'flex',
+                        alignItems: 'center'
+                    }}
+                >
+                    <button
+                        style={{
+                            border: 'none',
+                            background: 'none',
+                            padding: '3px 7px',
+                            cursor: 'pointer',
+                            fontSize: 12,
+                            color: '#3c3c3c'
+                        }}
+                        onClick={handleDelete}
+                    >
+                        Удалить
+                    </button>
+                </div>
+            )}
+
         </div>
     )
 }

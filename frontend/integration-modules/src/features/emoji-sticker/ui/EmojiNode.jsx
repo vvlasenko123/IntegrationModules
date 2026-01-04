@@ -1,17 +1,13 @@
-import React, { useState } from 'react'
+import React, {useEffect, useState} from 'react'
 import { NodeResizer, Handle, Position } from '@xyflow/react'
 import { useStickersStore } from '../../../entities/stickers/model/useStickersStore.js'
 import { stickersApi } from '../../../shared/api/stickerApi'
 import '../../../styles/sticker.css'
 
-export const EmojiNode = ({ id, data, selected }) => {
+export const EmojiNode = ({ id, selected }) => {
     const sticker = useStickersStore(s =>
         s.stickers.find(x => String(x.id) === String(id))
     )
-
-    if (!sticker || !sticker.imageUrl) {
-        return null
-    }
 
     const updateSticker = useStickersStore(s => s.updateSticker)
     const removeSticker = useStickersStore(s => s.removeSticker)
@@ -47,6 +43,16 @@ export const EmojiNode = ({ id, data, selected }) => {
         } catch {
             alert('Не удалось удалить эмодзи')
         }
+    }
+
+    useEffect(() => {
+        const handleClose = () => setMenuVisible(false)
+        document.addEventListener('click', handleClose)
+        return () => document.removeEventListener('click', handleClose)
+    }, [])
+
+    if (!sticker || !sticker.imageUrl) {
+        return null
     }
 
     return (
@@ -87,10 +93,31 @@ export const EmojiNode = ({ id, data, selected }) => {
 
             {menuVisible && (
                 <div
-                    className="sticker-context-menu"
-                    style={{ position: 'fixed', left: menuPos.x, top: menuPos.y }}
+                    style={{
+                        position: 'absolute',
+                        top: 4,
+                        right: 4,
+                        background: '#fff',
+                        border: '1px solid #ccc',
+                        borderRadius: 6,
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                        padding: 2,
+                        zIndex: 1000,
+                        display: 'flex',
+                        alignItems: 'center'
+                    }}
                 >
-                    <button className="sticker-context-menu__item" onClick={handleDelete}>
+                    <button
+                        style={{
+                            border: 'none',
+                            background: 'none',
+                            padding: '3px 7px',
+                            cursor: 'pointer',
+                            fontSize: 12,
+                            color: '#3c3c3c'
+                        }}
+                        onClick={handleDelete}
+                    >
                         Удалить
                     </button>
                 </div>
