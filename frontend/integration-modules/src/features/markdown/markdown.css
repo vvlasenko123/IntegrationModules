@@ -12,6 +12,11 @@
     min-height: 0;
 }
 
+.react-flow__resize-control {
+    z-index: 10000;
+    pointer-events: all;
+}
+
 .cb-header {
     flex: none;
     z-index: 1;

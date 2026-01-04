@@ -1,5 +1,5 @@
 using System.Text.Json;
-using InfraLib.Redis.Models;
+using Logic.Services.Cache.Models;
 using Microsoft.Extensions.Caching.Distributed;
 
 namespace InfraLib.Minio;
@@ -7,14 +7,14 @@ namespace InfraLib.Minio;
 /// <summary>
 /// minio helper
 /// </summary>
-public static class MinIOHelper
+public static class MinIOCacheHelper
 {
     public const string StickersCacheKey = "stickers:get-all:v1";
 
     /// <summary>
     /// получение стикеров из кэша
     /// </summary>
-    public static async Task<List<StickerCacheItem>> GetOrSetCachedItemsAsync(
+    public static async Task<IEnumerable<StickerCacheItem>> GetOrSetCachedItemsAsync(
         IDistributedCache cache,
         Func<CancellationToken, Task<List<StickerCacheItem>>> factory,
         CancellationToken token)

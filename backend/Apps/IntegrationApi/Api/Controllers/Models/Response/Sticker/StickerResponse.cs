@@ -1,19 +1,24 @@
-namespace InfraLib.Redis.Models;
+namespace Api.Controllers.Models.Response.Sticker;
 
 /// <summary>
-/// Кэш для стикера
+/// Ответ с данными стикера
 /// </summary>
-public sealed class StickerCacheItem
+public sealed class StickerResponse
 {
     /// <summary>
-    /// Id
+    /// Идентификатор стикера
     /// </summary>
     public Guid Id { get; set; }
-    
+
     /// <summary>
-    /// Путь в minIO
+    /// Путь до объекта в Minio
     /// </summary>
     public string StoragePath { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Ссылка на скачивание стикера
+    /// </summary>
+    public string Url { get; set; } = string.Empty;
 
     /// <summary>
     /// Длина

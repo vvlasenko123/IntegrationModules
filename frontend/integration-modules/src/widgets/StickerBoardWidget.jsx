@@ -6,6 +6,8 @@ import { notesApi } from '../shared/api/notesApi.js'
 import { stickersApi } from '../shared/api/stickerApi.js'
 import { NOTE_W, NOTE_H, EMOJI_W, EMOJI_H } from '../features/board/constants'
 import { shapesApi } from '../shared/api/shapesApi.js'
+import { markdownApi } from '../shared/api/markdownApi'
+import { roadmapApi} from "../shared/api/roadmapApi.js";
 
 const SafeFallbackWidget = ({ children }) => <div>{children}</div>
 
@@ -13,18 +15,28 @@ export const StickerBoardWidget = () => {
     const reset = useStickersStore((state) => state.reset)
     const addSticker = useStickersStore((state) => state.addSticker)
     const setStickers = useStickersStore((state) => state.setStickers)
+    const setEdges = useStickersStore((state) => state.setEdges)
 
     const boardRef = useRef(null)
     const [WidgetComp, setWidgetComp] = useState(() => SafeFallbackWidget)
 
     useEffect(() => {
-        const loadNotes = async () => {
+        const loadBoard = async () => {
             try {
-                const [notes, boardEmojis, allShapes, boardShapes] = await Promise.all([
+                const [
+                    notes,
+                    boardEmojis,
+                    allShapes,
+                    boardShapes,
+                    boardMarkdowns,
+                    roadmaps
+                ] = await Promise.all([
                     notesApi.getAll(),
                     stickersApi.getBoard(),
                     shapesApi.getAll(),
-                    shapesApi.getBoard()
+                    shapesApi.getBoard(),
+                    markdownApi.getBoard(),
+                    roadmapApi.getAll()
                 ])
 
                 const shapeKeyByDbId = new Map(allShapes.map(x => [String(x.id), x.shapeId]))
@@ -32,7 +44,9 @@ export const StickerBoardWidget = () => {
                 let x = 30
                 let y = 30
                 const items = []
+                const edges = []
 
+                // NOTES
                 for (const n of notes) {
                     const w = n.width ?? NOTE_W
                     const h = n.height ?? NOTE_H
@@ -52,6 +66,7 @@ export const StickerBoardWidget = () => {
                     y += 24
                 }
 
+                // EMOJIS
                 for (const e of boardEmojis) {
                     const w = e.width ?? EMOJI_W
                     const h = e.height ?? EMOJI_H
@@ -73,6 +88,29 @@ export const StickerBoardWidget = () => {
                     y += 24
                 }
 
+                // MARKDOWNS
+                for (const m of boardMarkdowns) {
+                    const w = m.width ?? 600
+                    const h = m.height ?? 400
+
+                    items.push({
+                        id: m.id,
+                        stickerId: m.markdownId,
+                        isEditorVisible: m.isEditorVisible ?? true,
+                        type: 'markdown',
+                        x,
+                        y,
+                        width: w,
+                        height: h,
+                        text: m.content ?? '',
+                        zIndex: 1
+                    })
+
+                    x += 24
+                    y += 24
+                }
+
+                // SHAPES
                 for (const s of boardShapes) {
                     const w = s.width ?? 140
                     const h = s.height ?? 140
@@ -100,21 +138,60 @@ export const StickerBoardWidget = () => {
                     y += 24
                 }
 
+                // ROADMAPS
+                for (const r of roadmaps) {
+                    const w = r.width ?? 200
+                    const h = r.height ?? 120
+
+                    items.push({
+                        id: String(r.id),
+                        type: 'roadmap',
+                        x,
+                        y,
+                        width: w,
+                        height: h,
+                        text: r.text ?? '',
+                        description: r.description ?? '',
+                        date: r.date ?? null,
+                        completed: r.completed ?? false,
+                        cancelled: r.cancelled ?? false,
+                        parentId: r.parentId ?? null,
+                        zIndex: r.zIndex ?? 1
+                    })
+
+                    if (r.parentId) {
+                        edges.push({
+                            id: `e-${r.parentId}-${r.id}`,
+                            source: String(r.parentId),
+                            target: String(r.id),
+                            type: 'bezier',
+                            animated: false,
+                        })
+                    }
+
+                    x += 24
+                    y += 24
+                }
+
                 setStickers(items)
+                setEdges(edges)
             } catch (e) {
                 console.warn('Не удалось загрузить доску:', e)
             }
         }
 
-        loadNotes()
-    }, [setStickers])
+        loadBoard()
+    }, [setStickers, setEdges])
 
     useEffect(() => {
         let mounted = true
 
         import('@xyflow/react')
             .then((mod) => {
-                if (!mounted) return
+                if (!mounted) {
+                    return
+                }
+
                 const candidate = (mod && (mod.Widget || mod.default || mod?.widget || mod?.XyflowWidget)) ?? null
                 if (typeof candidate === 'function' || React.isValidElement(candidate)) {
                     setWidgetComp(() => candidate)
@@ -122,9 +199,15 @@ export const StickerBoardWidget = () => {
                     setWidgetComp(() => SafeFallbackWidget)
                 }
             })
-            .catch(() => { if (mounted) setWidgetComp(() => SafeFallbackWidget) })
+            .catch(() => {
+                if (mounted) {
+                    setWidgetComp(() => SafeFallbackWidget)
+                }
+            })
 
-        return () => { mounted = false }
+        return () => {
+            mounted = false
+        }
     }, [])
 
     const Wrapper = WidgetComp || SafeFallbackWidget

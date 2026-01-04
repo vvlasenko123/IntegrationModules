@@ -1,24 +1,19 @@
-namespace Api.Controllers.Models.Response;
+namespace Logic.Services.Cache.Models;
 
 /// <summary>
-/// Ответ с данными стикера
+/// Кэш для стикера
 /// </summary>
-public sealed class StickerResponse
+public sealed class StickerCacheItem
 {
     /// <summary>
-    /// Идентификатор стикера
+    /// Id
     /// </summary>
     public Guid Id { get; set; }
-
+    
     /// <summary>
-    /// Путь до объекта в Minio
+    /// Путь в minIO
     /// </summary>
     public string StoragePath { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Ссылка на скачивание стикера
-    /// </summary>
-    public string Url { get; set; } = string.Empty;
 
     /// <summary>
     /// Длина

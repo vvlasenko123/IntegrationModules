@@ -1,32 +1,32 @@
-namespace Api.Controllers.Models.Response.Shape;
+namespace Dal.Models.Markdown;
 
 /// <summary>
-/// Ответ фигуры с доски
+/// Маркдаун на доске
 /// </summary>
-public sealed class BoardShapeResponse
+public sealed class BoardMarkdown
 {
     /// <summary>
     /// Айди
     /// </summary>
     public Guid Id { get; set; }
-
+    
     /// <summary>
-    /// Айди фигуры
+    /// Айди маркдауна
     /// </summary>
-    public Guid ShapeId { get; set; }
-
+    public Guid MarkdownId { get; set; }
+    
     /// <summary>
     /// Ширина
     /// </summary>
     public int Width { get; set; }
-
+    
     /// <summary>
     /// Высота
     /// </summary>
     public int Height { get; set; }
-
+    
     /// <summary>
-    /// Вращение фигуры
+    /// Состояние редактирования
     /// </summary>
-    public double Rotation { get; set; }
+    public bool IsEditorVisible { get; set; }
 }

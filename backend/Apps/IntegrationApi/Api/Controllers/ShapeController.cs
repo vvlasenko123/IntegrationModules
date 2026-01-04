@@ -35,7 +35,7 @@ public sealed class ShapeController : ControllerBase
         {
             Id = x.Id,
             ShapeId = x.ShapeId
-        }).ToList();
+        });
 
         return Ok(result);
     }
@@ -112,11 +112,29 @@ public sealed class ShapeController : ControllerBase
             Width = x.Width,
             Height = x.Height,
             Rotation = x.Rotation
-        }).ToList();
+        });
 
         return Ok(result);
     }
 
+    /// <summary>
+    /// Удаление фигуры
+    /// </summary>
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteAsync(Guid id, CancellationToken token)
+    {
+        var item = await _shapeRepository.DeleteAsync(id, token);
+
+        if (!item)
+        {
+            return NotFound("Фигура не найдена");
+        }
+
+        _logger.LogInformation("Фигура удалена: {ShapeId}", id);
+
+        return NoContent();
+    }
+    
     /// <summary>
     /// Получение фигуры на доске по идентификатору размещения
     /// </summary>

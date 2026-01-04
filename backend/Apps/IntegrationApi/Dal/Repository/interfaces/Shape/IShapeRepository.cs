@@ -36,4 +36,9 @@ public interface IShapeRepository
     /// Трансформация фигуры
     /// </summary>
     Task<BoardShape?> UpdateBoardTransformAsync(Guid id, int width, int height, double rotation, CancellationToken token);
+    
+    /// <summary>
+    /// удаление фигуры
+    /// </summary>
+    Task<bool> DeleteAsync(Guid id, CancellationToken token);
 }

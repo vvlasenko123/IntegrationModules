@@ -6,12 +6,12 @@ import 'react-datepicker/dist/react-datepicker.css'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import '../roadmap.css'
-
 import DateIcon from '../../../assets/icons/date.svg?react'
 import CancelIcon from '../../../assets/icons/cancel_btn.svg?react'
 import CancelActiveIcon from '../../../assets/icons/cancel_btn_active.svg?react'
 import DeleteIcon from '../../../assets/icons/delete_btn.svg?react'
 import Calendar from '../../../assets/icons/calendar.svg?react'
+import { roadmapApi } from '../../../shared/api/roadmapApi.js'
 
 export const RoadmapNode = ({ data, selected }) => {
     const sticker = useStickersStore(s => s.stickers.find(x => x.id === data.stickerId))
@@ -19,17 +19,15 @@ export const RoadmapNode = ({ data, selected }) => {
     const updateSticker = useStickersStore(s => s.updateSticker)
     const removeSticker = useStickersStore(s => s.removeSticker)
     const bringToFront = useStickersStore(s => s.bringToFront)
+
     const menuRef = useRef(null)
     const [showMenu, setShowMenu] = useState(false)
     const [showCalendar, setShowCalendar] = useState(false)
 
-    if (!sticker) return null
-
-    const isCompleted = sticker.completed
-    const isCancelled = sticker.cancelled
-    const hasDate = !!sticker.date
     useEffect(() => {
-        if (!showMenu) return
+        if (!showMenu) {
+            return
+        }
 
         const handlePointerDown = (e) => {
             if (
@@ -47,6 +45,101 @@ export const RoadmapNode = ({ data, selected }) => {
             document.removeEventListener('pointerdown', handlePointerDown)
         }
     }, [showMenu])
+
+    if (!sticker) {
+        return null
+    }
+
+    const isCompleted = sticker.completed
+    const isCancelled = sticker.cancelled
+    const hasDate = !!sticker.date
+
+    const handleDelete = async (e) => {
+        e.stopPropagation()
+
+        try {
+            await roadmapApi.delete(sticker.id)
+            removeSticker(sticker.id)
+        } catch {
+            alert('Не удалось удалить элемент roadmap')
+        }
+    }
+
+    const handleToggleCancelled = async (e) => {
+        e.stopPropagation()
+
+        const prev = sticker.cancelled
+        const next = !prev
+
+        updateSticker(sticker.id, { cancelled: next })
+
+        try {
+            await roadmapApi.updateCancelled(sticker.id, next)
+        } catch (err) {
+            updateSticker(sticker.id, { cancelled: prev })
+            console.warn('Не удалось сохранить cancelled', err)
+        }
+    }
+
+    const handleToggleCompleted = async (e) => {
+        e.stopPropagation()
+
+        const prev = sticker.completed
+        const next = !prev
+
+        updateSticker(sticker.id, { completed: next })
+
+        try {
+            await roadmapApi.updateCompleted(sticker.id, next)
+        } catch (err) {
+            updateSticker(sticker.id, { completed: prev })
+            console.warn('Не удалось сохранить completed', err)
+        }
+    }
+
+    const handleTextBlur = async (e) => {
+        const value = e.currentTarget.value ?? ''
+
+        try {
+            await roadmapApi.updateText(sticker.id, value)
+        } catch (err) {
+            console.warn('Не удалось сохранить текст roadmap', err)
+        }
+    }
+
+    const handleDescriptionBlur = async (e) => {
+        const value = e.currentTarget.value ?? ''
+
+        try {
+            await roadmapApi.updateDescription(sticker.id, value)
+        } catch (err) {
+            console.warn('Не удалось сохранить описание roadmap', err)
+        }
+    }
+
+    const handleDateChange = async (date) => {
+        const iso = date ? date.toISOString() : null
+
+        updateSticker(sticker.id, { date: iso, completed: false })
+
+        try {
+            await roadmapApi.updateDate(sticker.id, iso, false)
+        } catch (err) {
+            console.warn('Не удалось сохранить дату roadmap', err)
+        }
+    }
+
+    const handleDateClear = async (e) => {
+        e.stopPropagation()
+
+        updateSticker(sticker.id, { date: null, completed: false })
+
+        try {
+            await roadmapApi.updateDate(sticker.id, null, false)
+        } catch (err) {
+            console.warn('Не удалось убрать дату roadmap', err)
+        }
+    }
 
     return (
         <div
@@ -71,17 +164,22 @@ export const RoadmapNode = ({ data, selected }) => {
                 className="dropdownArrow iconButton"
             >
                 <DateIcon
-                    className={`w-5 h-5 transition-transform duration-200 ${
-                        showMenu ? 'rotate-180' : ''
-                    }`}
+                    className={`w-5 h-5 transition-transform duration-200 ${showMenu ? 'rotate-180' : ''}`}
                 />
             </button>
 
             <div className="actionButtons">
-                <button onClick={e => { e.stopPropagation(); updateSticker(sticker.id, { cancelled: !isCancelled }) }} className="iconButton">
+                <button
+                    onClick={handleToggleCancelled}
+                    className="iconButton"
+                >
                     {isCancelled ? <CancelActiveIcon className="w-6 h-6" /> : <CancelIcon className="w-6 h-6" />}
                 </button>
-                <button onClick={e => { e.stopPropagation(); removeSticker(sticker.id) }} className="iconButton">
+
+                <button
+                    onClick={handleDelete}
+                    className="iconButton"
+                >
                     <DeleteIcon className="w-6 h-6" />
                 </button>
             </div>
@@ -91,6 +189,7 @@ export const RoadmapNode = ({ data, selected }) => {
                 placeholder="type here..."
                 value={sticker.text || ''}
                 onChange={e => updateSticker(sticker.id, { text: e.target.value })}
+                onBlur={handleTextBlur}
                 onPointerDown={e => e.stopPropagation()}
                 rows={6}
             />
@@ -101,7 +200,7 @@ export const RoadmapNode = ({ data, selected }) => {
                         {format(new Date(sticker.date), 'd MMM yyyy', { locale: ru })}
                     </span>
                     <button
-                        onClick={e => { e.stopPropagation(); updateSticker(sticker.id, { completed: !isCompleted }) }}
+                        onClick={handleToggleCompleted}
                         className={`statusCircle ${isCompleted ? 'statusCompleted' : 'statusInProgress'}`}
                     >
                         {isCompleted && <span className="text-sm font-bold">✓</span>}
@@ -110,10 +209,16 @@ export const RoadmapNode = ({ data, selected }) => {
             )}
 
             <button
-                onClick={e => { e.stopPropagation(); if (!isCancelled) addRoadmapBranch(sticker.id) }}
+                onClick={(e) => {
+                    e.stopPropagation()
+                    if (!isCancelled) {
+                        void addRoadmapBranch(sticker.id)
+                    }
+                }}
                 disabled={isCancelled}
                 className={`plusButton ${isCancelled ? 'plusButtonDisabled' : ''}`}
-            >+
+            >
+                +
             </button>
 
             {showMenu && (
@@ -129,7 +234,8 @@ export const RoadmapNode = ({ data, selected }) => {
                                     e.stopPropagation()
                                     setShowCalendar(prev => !prev)
                                 }}
-                                className=" dateButton w-full flex items-center justify-between px-4 py-3 text-[15px] font-medium text-gray-800 bg-gray-10 hover:bg-gray-50 transition">
+                                className=" dateButton w-full flex items-center justify-between px-4 py-3 text-[15px] font-medium text-gray-800 bg-gray-10 hover:bg-gray-50 transition"
+                            >
                                 <span className="font-mono text-[13px] tracking-tight text-gray-700">
                                     {sticker.date
                                         ? format(new Date(sticker.date), 'd MMM yyyy', { locale: ru })
@@ -139,7 +245,6 @@ export const RoadmapNode = ({ data, selected }) => {
                                 <Calendar className="w-3 h-3 text-gray-500" />
                             </button>
 
-                            {/* Календарь слева от кнопки */}
                             {showCalendar && (
                                 <div
                                     className=" absolute top-1/2 -translate-y-1/2 right-full mr-2 z-50 scale-95 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden"
@@ -148,10 +253,7 @@ export const RoadmapNode = ({ data, selected }) => {
                                     <DatePicker
                                         selected={sticker.date ? new Date(sticker.date) : null}
                                         onChange={date => {
-                                            updateSticker(sticker.id, {
-                                                date: date ? date.toISOString() : null,
-                                                completed: false
-                                            })
+                                            handleDateChange(date)
                                             setShowCalendar(false)
                                         }}
                                         inline
@@ -159,14 +261,10 @@ export const RoadmapNode = ({ data, selected }) => {
                                         calendarClassName="border-0 shadow-none"
                                     />
 
-                                    {/* КНОПКА ОТМЕНЫ */}
                                     <button
                                         onPointerDown={e => {
                                             e.stopPropagation()
-                                            updateSticker(sticker.id, {
-                                                date: null,
-                                                completed: false
-                                            })
+                                            handleDateClear(e)
                                             setShowCalendar(false)
                                         }}
                                         className="dateCancel"
@@ -177,25 +275,39 @@ export const RoadmapNode = ({ data, selected }) => {
                             )}
                         </div>
 
-                        {/* Заголовок "Описание" */}
                         <div className="about text-sm font-medium text-gray-700 px-2">
                             Описание
                         </div>
 
-                        {/* Большое поле описания */}
                         <textarea
                             className=" textPlace w-full min-h-[120px] box-border px-4 py-3 rounded-xl bg-gray-20 text-[15px] text-gray-800 resize-none outline-none placeholder-gray-400 focus:bg-white focus:ring-1 focus:ring-gray-300 transition"
                             placeholder="Текст..."
                             value={sticker.description || ''}
-                            onChange={e =>
-                                updateSticker(sticker.id, { description: e.target.value })
-                            }
+                            onChange={e => updateSticker(sticker.id, { description: e.target.value })}
+                            onBlur={handleDescriptionBlur}
                         />
                     </div>
                 </div>
             )}
 
-            {selected && <NodeResizer minWidth={140} minHeight={30} />}
+            {selected && (
+                <NodeResizer
+                    minWidth={140}
+                    minHeight={30}
+                    onResizeEnd={async (_, params) => {
+                        const w = Math.max(1, Math.round(params.width))
+                        const h = Math.max(1, Math.round(params.height))
+
+                        updateSticker(sticker.id, { width: w, height: h })
+
+                        try {
+                            await roadmapApi.updateSize(sticker.id, w, h)
+                        } catch (err) {
+                            console.warn('Не удалось сохранить размер roadmap', err)
+                        }
+                    }}
+                />
+            )}
         </div>
     )
 }

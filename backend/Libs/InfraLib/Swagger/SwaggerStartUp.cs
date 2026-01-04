@@ -12,16 +12,20 @@ public static class SwaggerStartUp
     /// <summary>
     /// Регистрация Swagger в DI
     /// </summary>
-    public static IServiceCollection AddSwaggerDocumentation(this IServiceCollection services)
+    public static IServiceCollection AddSwaggerDocumentation(this IServiceCollection services, string? apiName, string? version)
     {
+        if (apiName is null && version is null)
+        {
+            throw new ArgumentException("Отсутствуют параметры конфигурации Swagger");
+        }
         services.AddEndpointsApiExplorer();
 
         services.AddSwaggerGen(options =>
         {
             options.SwaggerDoc("v1", new OpenApiInfo
             {
-                Title = "Integration API",
-                Version = "v1"
+                Title = apiName,
+                Version = version
             });
         });
 
