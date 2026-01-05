@@ -42,7 +42,7 @@ VALUES (@Id, @StoragePath, @Width, @Height);
                 ? "application/octet-stream"
                 : file.ContentType;
 
-            var storagePath = await storage.UploadAsync(id, stream, contentType, token);
+            var storagePath = await storage.UploadAsync(id, stream, contentType, "stickers",token);
 
             var sticker = new Stickers
             {

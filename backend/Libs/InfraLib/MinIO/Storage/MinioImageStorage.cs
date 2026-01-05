@@ -1,3 +1,4 @@
+using InfraLib.MinIO.Configuration;
 using InfraLib.MinIO.Options;
 using Microsoft.Extensions.Options;
 using Minio;
@@ -20,22 +21,27 @@ public sealed class MinioImageStorage
     /// </summary>
     private readonly MinioOptions _options;
 
+    /// <summary>
+    /// Конструктор
+    /// </summary>
     public MinioImageStorage(
-        IMinioClient client,
+        MinioClientConfigurator configurator,
         IOptions<MinioOptions> options)
     {
-        _client = client;
+        ArgumentNullException.ThrowIfNull(configurator);
+
+        _client = configurator.Client;
         _options = options.Value;
     }
 
     /// <summary>
     /// Загрузка файлов
     /// </summary>
-    public async Task<string> UploadAsync(Guid objectId, Stream content, string contentType, CancellationToken cancellationToken)
+    public async Task<string> UploadAsync(Guid objectId, Stream content, string contentType, string folderName, CancellationToken cancellationToken)
     {
         await EnsureBucketExistsAsync(cancellationToken);
 
-        var objectName = $"stickers/{objectId:D}/{Guid.NewGuid():N}";
+        var objectName = $"{folderName}/{objectId:D}/{Guid.NewGuid():N}";
 
         var args = new PutObjectArgs()
             .WithBucket(_options.BucketName)
@@ -50,7 +56,7 @@ public sealed class MinioImageStorage
     }
 
     /// <summary>
-    /// Получение ссылки на скачивание файла.
+    /// Получение ссылки на скачивание файла
     /// </summary>
     public async Task<string> GetDownloadUrlAsync(string objectName, int expirySeconds, CancellationToken cancellationToken)
     {

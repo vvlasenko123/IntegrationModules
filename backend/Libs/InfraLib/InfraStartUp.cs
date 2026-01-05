@@ -1,7 +1,6 @@
-﻿using InfraLib.Database;
+﻿using InfraLib.Cache;
+using InfraLib.Database;
 using InfraLib.Minio;
-using InfraLib.Redis;
-using InfraLib.Swagger;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace InfraLib;

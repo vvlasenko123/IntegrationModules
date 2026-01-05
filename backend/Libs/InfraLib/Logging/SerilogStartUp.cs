@@ -16,6 +16,7 @@ public static class SerilogStartUp
         Log.Logger = new LoggerConfiguration()
             .WriteTo.Console()
             .CreateBootstrapLogger();
+
         builder.UseSerilog(configureLogger: ((context, provider, config) =>
         {
             config.ReadFrom.Configuration(context.Configuration)
