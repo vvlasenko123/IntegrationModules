@@ -21,6 +21,7 @@ export const MarkdownNode = ({ data}) => {
     const pendingSaveRef = useRef(false)
     const pendingDraftRef = useRef('')
     const savingRef = useRef(false)
+    const markdownIdRef = useRef(sticker?.stickerId)
 
     useEffect(() => {
         if (!sticker) {
@@ -39,19 +40,18 @@ export const MarkdownNode = ({ data}) => {
         setIsEditorVisible(sticker.isEditorVisible ?? true)
     }, [sticker?.isEditorVisible])
 
-    const getCurrentSticker = () => {
-        const current = useStickersStore
-            .getState()
-            .stickers
-            .find(x => x.id === data.stickerId)
+    useEffect(() => {
+        if (!sticker) return
+        flushPendingContent()
+    }, [sticker?.stickerId])
 
-        return current
-    }
+    useEffect(() => {
+        if (sticker?.stickerId) {
+            markdownIdRef.current = sticker.stickerId
+        }
+    }, [sticker?.stickerId])
 
-    const getMarkdownId = () => {
-        const current = getCurrentSticker()
-        return current?.stickerId
-    }
+    const getMarkdownId = () => markdownIdRef.current
 
     const onPointerDown = (e) => {
         if (!sticker) {
@@ -96,13 +96,7 @@ export const MarkdownNode = ({ data}) => {
         }
     }
 
-    useEffect(() => {
-        if (!sticker) {
-            return
-        }
 
-        flushPendingContent()
-    }, [sticker?.stickerId])
 
     const saveContent = async () => {
         if (!sticker) {
@@ -158,16 +152,13 @@ export const MarkdownNode = ({ data}) => {
     }
 
     const deleteItem = async () => {
-        if (!sticker) {
-            return
-        }
+        if (!sticker) return
 
-        removeSticker(sticker.id)
+        const markdownId = getMarkdownId()
 
         try {
             await markdownApi.deleteBoard(sticker.id)
 
-            const markdownId = getMarkdownId()
             if (markdownId) {
                 await markdownApi.deleteById(markdownId)
             } else {
@@ -175,6 +166,8 @@ export const MarkdownNode = ({ data}) => {
             }
         } catch (err) {
             console.warn('Не удалось удалить markdown:', err)
+        } finally {
+            removeSticker(sticker.id)
         }
     }
 
@@ -227,7 +220,7 @@ export const MarkdownNode = ({ data}) => {
                             <div>1. нумерованный</div>
                             <div>`код` или ```блок```</div>
                             <div>[текст](ссылка)</div>
-                            <div>Новая строка — Enter</div>
+                            <div>Новая строка — 2 пробела + Enter</div>
                         </div>
                     </div>
 
