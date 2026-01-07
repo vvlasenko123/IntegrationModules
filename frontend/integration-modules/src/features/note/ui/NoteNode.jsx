@@ -94,7 +94,6 @@ export const NoteNode = ({ id, selected }) => {
         document.execCommand('insertText', false, text)
     }
 
-    // ПКМ — открытие контекстного меню
     const handleContextMenu = (e) => {
         e.preventDefault()
         bringToFront(id)
@@ -112,7 +111,6 @@ export const NoteNode = ({ id, selected }) => {
         }
     }
 
-    // Закрыть меню при клике вне
     useEffect(() => {
         const handleClickOutside = () => setMenuVisible(false)
         window.addEventListener('click', handleClickOutside)

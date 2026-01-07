@@ -11,7 +11,7 @@ export const MarkdownNode = ({ data}) => {
         s.stickers.find(x => x.id === data.stickerId)
     )
 
-
+    const [localSize, setLocalSize] = useState({ width: sticker.width, height: sticker.height });
     const { updateSticker, removeSticker, bringToFront, topZ, selectedId } =
         useStickersStore()
 
@@ -178,7 +178,7 @@ export const MarkdownNode = ({ data}) => {
     return (
         <div
             className="cb-card"
-            style={{ zIndex: sticker.zIndex, width: sticker.width, height: sticker.height }}
+            style={{ zIndex: sticker.zIndex, width: localSize.width, height: localSize.height }}
             onPointerDown={onPointerDown}
         >
             <NodeResizer
@@ -186,20 +186,14 @@ export const MarkdownNode = ({ data}) => {
                 isVisible={selectedId === sticker.id}
                 minWidth={300}
                 minHeight={200}
-                resizeHandles={[
-                    'top',
-                    'right',
-                    'bottom',
-                    'left',
-                    'topRight',
-                    'topLeft',
-                    'bottomRight',
-                    'bottomLeft'
-                ]}
+                onResize={(_, params) => {
+                    setLocalSize({ width: params.width, height: params.height });
+                }}
                 onResizeEnd={async (_, params) => {
-                    const w = Math.max(1, Math.round(Number(params.width) || 1))
-                    const h = Math.max(1, Math.round(Number(params.height) || 1))
-                    await saveSize(w, h)
+                    const w = Math.max(1, Math.round(Number(params.width) || 1));
+                    const h = Math.max(1, Math.round(Number(params.height) || 1));
+                    updateSticker(sticker.id, { width: w, height: h });
+                    await saveSize(w, h);
                 }}
             />
 
