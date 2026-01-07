@@ -11,7 +11,7 @@ export const MarkdownNode = ({ data}) => {
         s.stickers.find(x => x.id === data.stickerId)
     )
 
-    const [localSize, setLocalSize] = useState({ width: sticker.width, height: sticker.height });
+    const [localSize, setLocalSize] = useState({ width: 600, height: 400 });
     const { updateSticker, removeSticker, bringToFront, topZ, selectedId } =
         useStickersStore()
 
@@ -161,8 +161,6 @@ export const MarkdownNode = ({ data}) => {
 
             if (markdownId) {
                 await markdownApi.deleteById(markdownId)
-            } else {
-                console.warn('MarkdownId не задан при удалении:', sticker.id)
             }
         } catch (err) {
             console.warn('Не удалось удалить markdown:', err)
@@ -171,9 +169,7 @@ export const MarkdownNode = ({ data}) => {
         }
     }
 
-    if (!sticker) {
-        return null
-    }
+
 
     return (
         <div

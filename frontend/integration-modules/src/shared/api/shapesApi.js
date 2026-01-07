@@ -76,5 +76,11 @@ export const shapesApi = {
         }
 
         return await res.json()
+    },
+    async delete(id) {
+        const res = await fetch(`/api/v1/shapes/${id}`, { method: 'DELETE' })
+        if (!res.ok) throw new Error(await parseError(res))
+        return true
     }
+
 }

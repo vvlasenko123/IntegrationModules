@@ -282,6 +282,7 @@ export const RoadmapNode = ({ data, selected }) => {
                         <textarea
                             className=" textPlace w-full min-h-[120px] box-border px-4 py-3 rounded-xl bg-gray-20 text-[15px] text-gray-800 resize-none outline-none placeholder-gray-400 focus:bg-white focus:ring-1 focus:ring-gray-300 transition"
                             placeholder="Текст..."
+                            spellCheck={false}
                             value={sticker.description || ''}
                             onChange={e => updateSticker(sticker.id, { description: e.target.value })}
                             onBlur={handleDescriptionBlur}
