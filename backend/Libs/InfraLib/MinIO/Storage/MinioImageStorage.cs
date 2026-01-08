@@ -7,17 +7,17 @@ using Minio.DataModel.Args;
 namespace InfraLib.MinIO.Storage;
 
 /// <summary>
-/// миньо чтобы хранить изображение
+/// Minio чтобы хранить изображение
 /// </summary>
 public sealed class MinioImageStorage
 {
     /// <summary>
-    /// миньо клиент
+    /// Minio клиент
     /// </summary>
     private readonly IMinioClient _client;
     
     /// <summary>
-    /// миньо опции
+    /// Minio опции
     /// </summary>
     private readonly MinioOptions _options;
 
@@ -92,14 +92,11 @@ public sealed class MinioImageStorage
     }
     
     /// <summary>
-    /// Удаление файла из MinIO по имени объекта
+    /// Удаление файла из Minio по имени объекта
     /// </summary>
     public async Task RemoveAsync(string objectName, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(objectName))
-        {
-            throw new ArgumentException("Не задан путь объекта", nameof(objectName));
-        }
+        ArgumentException.ThrowIfNullOrWhiteSpace(objectName);
 
         await EnsureBucketExistsAsync(cancellationToken);
 

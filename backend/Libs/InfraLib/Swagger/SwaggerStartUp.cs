@@ -12,37 +12,34 @@ public static class SwaggerStartUp
     /// <summary>
     /// Регистрация Swagger в DI
     /// </summary>
-    public static IServiceCollection AddSwaggerDocumentation(this IServiceCollection services, string? apiName, string? version)
+    public static void AddSwaggerDocumentation(this IServiceCollection services, string? apiName, string? version)
     {
-        if (apiName is null && version is null)
-        {
-            throw new ArgumentException("Отсутствуют параметры конфигурации Swagger");
-        }
-        services.AddEndpointsApiExplorer();
+        ArgumentNullException.ThrowIfNull(apiName);
+        ArgumentNullException.ThrowIfNull(version);
 
+        services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(options =>
         {
-            options.SwaggerDoc("v1", new OpenApiInfo
+            options.SwaggerDoc(version, new OpenApiInfo
             {
                 Title = apiName,
                 Version = version
             });
         });
-
-        return services;
     }
 
     /// <summary>
-    /// Подключение middleware Swagger
+    /// Подключение middlewares Swagger
     /// </summary>
-    public static IApplicationBuilder UseSwaggerDocumentation(this IApplicationBuilder app)
+    public static void UseSwaggerDocumentation(this IApplicationBuilder app, string? apiName, string? version)
     {
+        ArgumentNullException.ThrowIfNull(apiName);
+        ArgumentNullException.ThrowIfNull(version);
+
         app.UseSwagger();
         app.UseSwaggerUI(options =>
         {
-            options.SwaggerEndpoint("/swagger/v1/swagger.json", "Integration API v1");
+            options.SwaggerEndpoint("/swagger/v1/swagger.json", name: string.Concat(apiName, " ", version));
         });
-
-        return app;
     }
 }

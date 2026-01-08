@@ -7,12 +7,12 @@ using Microsoft.Extensions.DependencyInjection;
 namespace InfraLib.Minio;
 
 /// <summary>
-/// minio startup
+/// Minio startup
 /// </summary>
 public static class MinioStartUp
 {
     /// <summary>
-    /// Миньо extension
+    /// Minio extension
     /// </summary>
     public static void AddMinioStorage(this IServiceCollection services)
     {

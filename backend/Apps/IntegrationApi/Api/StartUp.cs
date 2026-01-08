@@ -52,7 +52,7 @@ public class Startup
         if (Environment.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
-            app.UseSwaggerDocumentation();
+            app.UseSwaggerDocumentation("Integration Api", "v1");
         }
 
         app.UseRouting();
