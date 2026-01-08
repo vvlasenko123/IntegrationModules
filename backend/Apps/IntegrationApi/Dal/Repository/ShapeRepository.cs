@@ -182,7 +182,7 @@ WHERE id = @Id;
         }
         
         const string sql = @"
-DELETE FROM shapes
+DELETE FROM board_shapes
 WHERE id = @Id;
 ";
 
