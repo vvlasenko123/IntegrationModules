@@ -182,8 +182,6 @@ WHERE id = @Id;
         }
         
         const string sql = @"
-SELECT id,
-       shape_id AS ShapeId
 DELETE FROM shapes
 WHERE id = @Id;
 ";
