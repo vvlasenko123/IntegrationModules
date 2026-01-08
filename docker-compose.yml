@@ -51,6 +51,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
       - PostgresOptions__ConnectionString=Host=postgres;Port=5432;Username=postgres;Password=postgres;Database=integration-api;Include Error Detail=true
+      - PostgresOptions__AutoMigration=true
       - MinioOptions__Endpoint=minio:9000
       - MinioOptions__AccessKey=minio
       - MinioOptions__SecretKey=minio123
