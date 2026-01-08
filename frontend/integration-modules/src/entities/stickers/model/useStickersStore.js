@@ -211,5 +211,29 @@ export const useStickersStore = create((set, get) => ({
 
     selectSticker: (id) => {
         set({ selectedId: id })
-    }
+    },
+    removeStickerByShapeId: (shapeId) => {
+        set((state) => {
+            const idsToRemove = state.stickers
+                .filter(s => String(s.shapeId) === String(shapeId))
+                .map(s => String(s.id))
+
+            const filteredStickers = state.stickers.filter(
+                s => String(s.shapeId) !== String(shapeId)
+            )
+
+            return {
+                stickers: filteredStickers,
+                edges: state.edges.filter(
+                    e =>
+                        !idsToRemove.includes(String(e.source)) &&
+                        !idsToRemove.includes(String(e.target))
+                ),
+                topZ: filteredStickers.reduce(
+                    (acc, x) => Math.max(acc, x.zIndex ?? 1),
+                    1
+                )
+            }
+        })
+    },
 }))

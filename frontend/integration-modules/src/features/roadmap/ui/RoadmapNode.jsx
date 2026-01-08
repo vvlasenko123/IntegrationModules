@@ -184,15 +184,16 @@ export const RoadmapNode = ({ data, selected }) => {
                 </button>
             </div>
 
-            <textarea
-                className={`textContent ${isCompleted ? 'textCompleted' : isCancelled ? 'textCancelled' : ''}`}
-                placeholder="type here..."
-                value={sticker.text || ''}
-                onChange={e => updateSticker(sticker.id, { text: e.target.value })}
-                onBlur={handleTextBlur}
-                onPointerDown={e => e.stopPropagation()}
-                rows={6}
-            />
+            <div className="textWrapper">
+                <textarea
+                    className={`textContent ${isCompleted ? 'textCompleted' : isCancelled ? 'textCancelled' : ''}`}
+                    placeholder="type here..."
+                    value={sticker.text || ''}
+                    onChange={e => updateSticker(sticker.id, { text: e.target.value })}
+                    onBlur={handleTextBlur}
+                    onPointerDown={e => e.stopPropagation()}
+                />
+            </div>
 
             {hasDate && (
                 <div className="dateFooter">

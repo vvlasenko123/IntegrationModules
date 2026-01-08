@@ -8,12 +8,16 @@ import { drag } from 'd3-drag'
 import { shapesApi } from '../../../shared/api/shapesApi'
 
 export const ShapeNode = ({ id, data, style }) => {
-    const sticker = useStickersStore(s => s.stickers.find(st => st.id === data.stickerId))
+    const sticker = useStickersStore(s =>
+        s.stickers.find(st => st.id === data.stickerId)
+    )
+
     const updateSticker = useStickersStore(s => s.updateSticker)
     const bringToFront = useStickersStore(s => s.bringToFront)
     const selectSticker = useStickersStore(s => s.selectSticker)
     const selectedId = useStickersStore(s => s.selectedId)
     const removeSticker = useStickersStore(s => s.removeSticker)
+
     const { setNodes } = useReactFlow()
 
     const rotateControlRef = useRef(null)
@@ -23,14 +27,16 @@ export const ShapeNode = ({ id, data, style }) => {
     const [rotation, setRotation] = useState(0)
     const [localSize, setLocalSize] = useState({ width: 140, height: 140 })
     const [menuVisible, setMenuVisible] = useState(false)
-    const [menuPos, setMenuPos] = useState({ x: 0, y: 0 })
     const [isRotating, setIsRotating] = useState(false)
 
     const isSelected = selectedId === sticker?.id
 
-    if (!sticker) return null
-
+    /**
+     * Синхронизация размеров и поворота из store
+     */
     useEffect(() => {
+        if (!sticker) return
+
         const w = Number(sticker.width) || 140
         const h = Number(sticker.height) || 140
         const r = Number(sticker.rotation) || 0
@@ -40,14 +46,21 @@ export const ShapeNode = ({ id, data, style }) => {
 
         rotationRef.current = r
         setRotation(r)
-    }, [sticker.width, sticker.height, sticker.rotation])
+    }, [sticker])
 
+    /**
+     * Синхронизация ref поворота
+     */
     useEffect(() => {
         rotationRef.current = rotation
     }, [rotation])
 
+    /**
+     * Drag для поворота
+     */
     useEffect(() => {
-        if (!isSelected) return
+        if (!sticker || !isSelected) return
+
         const el = rotateControlRef.current
         if (!el) return
 
@@ -65,6 +78,7 @@ export const ShapeNode = ({ id, data, style }) => {
                 const rect = parent.getBoundingClientRect()
                 const cx = rect.left + rect.width / 2
                 const cy = rect.top + rect.height / 2
+
                 const dx = evt.sourceEvent.clientX - cx
                 const dy = evt.sourceEvent.clientY - cy
 
@@ -76,6 +90,7 @@ export const ShapeNode = ({ id, data, style }) => {
             })
             .on('end', async () => {
                 setIsRotating(false)
+
                 const width = Math.max(1, Math.round(sizeRef.current.width))
                 const height = Math.max(1, Math.round(sizeRef.current.height))
                 const rot = Number(rotationRef.current) || 0
@@ -92,15 +107,22 @@ export const ShapeNode = ({ id, data, style }) => {
         selection.call(dragHandler)
 
         return () => selection.on('.drag', null)
-    }, [isSelected, id, sticker.id, updateSticker])
+    }, [isSelected, sticker, id, updateSticker])
 
+    /**
+     * Рендер фигуры
+     */
     const renderShape = useMemo(() => {
+        if (!sticker) return null
+
         const fn = shapes[sticker.shapeId]
         return fn ? fn(sticker) : shapes.square(sticker)
-    }, [sticker.shapeId, sticker])
+    }, [sticker])
 
     const handleClick = e => {
         e.stopPropagation()
+        if (!sticker) return
+
         bringToFront(sticker.id)
         selectSticker(sticker.id)
     }
@@ -108,16 +130,14 @@ export const ShapeNode = ({ id, data, style }) => {
     const handleContextMenu = e => {
         e.preventDefault()
         e.stopPropagation()
-        let x = e.clientX
-        let y = e.clientY
-        if (x + 140 > window.innerWidth) x = window.innerWidth - 148
-        if (y + 40 > window.innerHeight) y = window.innerHeight - 48
-        setMenuPos({ x, y })
         setMenuVisible(true)
     }
 
     const handleDelete = async () => {
+        if (!sticker) return
+
         setMenuVisible(false)
+
         try {
             await shapesApi.delete(sticker.id)
             removeSticker(sticker.id)
@@ -126,6 +146,8 @@ export const ShapeNode = ({ id, data, style }) => {
             alert('Не удалось удалить фигуру')
         }
     }
+
+    if (!sticker) return null
 
     return (
         <>
@@ -156,6 +178,7 @@ export const ShapeNode = ({ id, data, style }) => {
                     onResize={(_, params) => {
                         const w = Number(params.width) || 1
                         const h = Number(params.height) || 1
+
                         setLocalSize({ width: w, height: h })
                         sizeRef.current = { width: w, height: h }
                     }}

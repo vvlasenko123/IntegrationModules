@@ -163,7 +163,7 @@ export const StickerBoardWidget = () => {
                             id: `e-${r.parentId}-${r.id}`,
                             source: String(r.parentId),
                             target: String(r.id),
-                            type: 'bezier',
+                            type: 'default',
                             animated: false,
                         })
                     }
