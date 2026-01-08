@@ -212,22 +212,38 @@ export const useStickersStore = create((set, get) => ({
     selectSticker: (id) => {
         set({ selectedId: id })
     },
-    removeStickerByShapeId: (shapeId) => {
+    getDescendants: (parentId) => {
+        const { stickers } = get()
+        const result = []
+
+        const walk = (id) => {
+            const children = stickers.filter(
+                s => String(s.parentId) === String(id)
+            )
+
+            for (const child of children) {
+                result.push(child)
+                walk(child.id)
+            }
+        }
+
+        walk(parentId)
+        return result
+    },
+    removeStickersBulk: (ids) => {
         set((state) => {
-            const idsToRemove = state.stickers
-                .filter(s => String(s.shapeId) === String(shapeId))
-                .map(s => String(s.id))
+            const idSet = new Set(ids.map(String))
 
             const filteredStickers = state.stickers.filter(
-                s => String(s.shapeId) !== String(shapeId)
+                s => !idSet.has(String(s.id))
             )
 
             return {
                 stickers: filteredStickers,
                 edges: state.edges.filter(
                     e =>
-                        !idsToRemove.includes(String(e.source)) &&
-                        !idsToRemove.includes(String(e.target))
+                        !idSet.has(String(e.source)) &&
+                        !idSet.has(String(e.target))
                 ),
                 topZ: filteredStickers.reduce(
                     (acc, x) => Math.max(acc, x.zIndex ?? 1),
@@ -235,5 +251,14 @@ export const useStickersStore = create((set, get) => ({
                 )
             }
         })
+    },
+    detachChildren: (parentId) => {
+        set((state) => ({
+            stickers: state.stickers.map(s =>
+                String(s.parentId) === String(parentId)
+                    ? { ...s, parentId: null }
+                    : s
+            )
+        }))
     },
 }))

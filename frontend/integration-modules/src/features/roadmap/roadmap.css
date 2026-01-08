@@ -189,6 +189,22 @@
 }
 
 
-.textContent {
-
+.animate-fadeInUp {
+    animation: fadeInUp 0.3s ease-out forwards;
 }
+.deleteMenu{
+    border-radius: 10px;
+    background: #ffffff;
+    opacity: 80;
+    padding: 5px;
+    font-size: 12px;
+    border: 1px solid #c5c5c5;
+}
+.deleteMenu button{
+    background: #ffffff;
+    border: 1px solid #dcdcdc;
+    border-radius: 5px;
+    margin-top: 3px;
+    font-size: 11px;
+}
+

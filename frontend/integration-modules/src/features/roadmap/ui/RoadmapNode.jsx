@@ -19,7 +19,10 @@ export const RoadmapNode = ({ data, selected }) => {
     const updateSticker = useStickersStore(s => s.updateSticker)
     const removeSticker = useStickersStore(s => s.removeSticker)
     const bringToFront = useStickersStore(s => s.bringToFront)
-
+    const getDescendants = useStickersStore(s => s.getDescendants)
+    const removeStickersBulk = useStickersStore(s => s.removeStickersBulk)
+    const detachChildren = useStickersStore(s => s.detachChildren)
+    const [showDeleteChoice, setShowDeleteChoice] = useState(false)
     const menuRef = useRef(null)
     const [showMenu, setShowMenu] = useState(false)
     const [showCalendar, setShowCalendar] = useState(false)
@@ -57,13 +60,51 @@ export const RoadmapNode = ({ data, selected }) => {
     const handleDelete = async (e) => {
         e.stopPropagation()
 
+        const children = getDescendants(sticker.id)
+
+        if (children.length === 0) {
+            try {
+                await roadmapApi.delete(sticker.id)
+                removeSticker(sticker.id)
+            } catch {
+                alert('Не удалось удалить элемент roadmap')
+            }
+            return
+        }
+
+        setShowDeleteChoice(true)
+    }
+    const deleteOnlyParent = async () => {
+        const children = getDescendants(sticker.id)
+
         try {
             await roadmapApi.delete(sticker.id)
+
+            detachChildren(sticker.id)
             removeSticker(sticker.id)
         } catch {
             alert('Не удалось удалить элемент roadmap')
+        } finally {
+            setShowDeleteChoice(false)
         }
     }
+    const deleteWithChildren = async () => {
+        const children = getDescendants(sticker.id)
+        const ids = [sticker.id, ...children.map(c => c.id)]
+
+        try {
+            for (const id of ids) {
+                await roadmapApi.delete(id)
+            }
+
+            removeStickersBulk(ids)
+        } catch {
+            alert('Не удалось удалить ветку roadmap')
+        } finally {
+            setShowDeleteChoice(false)
+        }
+    }
+
 
     const handleToggleCancelled = async (e) => {
         e.stopPropagation()
@@ -221,6 +262,52 @@ export const RoadmapNode = ({ data, selected }) => {
             >
                 +
             </button>
+            {showDeleteChoice && (
+                <div
+                    ref={menuRef}
+                    className="deleteMenu absolute left-full top-1/7 -translate-y-1/2 ml-4 z-50
+                   bg-white rounded-3xl shadow-xl border border-gray-200
+                   w-[180px] p-5 flex flex-col gap-4
+                   animate-fadeInUp"
+                    onPointerDown={e => e.stopPropagation()}
+                >
+                    <div className="text-xs text-gray-500 leading-relaxed bg-white ">
+                        Выберите, что хотите удалить:
+                    </div>
+
+                    <div className="flex flex-col gap-3 pt-2">
+                        <button
+                            onClick={deleteOnlyParent}
+                            className="w-full px-5 py-3 rounded-xl border border-gray-300
+                           text-gray-800 font-medium text-sm
+                           hover:border-gray-400 hover:bg-gray-50
+                           transition-all duration-200"
+                        >
+                            Только этот элемент
+                        </button>
+
+                        <button
+                            onClick={deleteWithChildren}
+                            className="w-full px-5 py-3 rounded-xl border border-red-300
+                           text-red-600 font-medium text-sm
+                           hover:border-red-400 hover:bg-red-50
+                           transition-all duration-200"
+                        >
+                            Элемент и все дочерние
+                        </button>
+                    </div>
+
+                    <button
+                        onClick={() => setShowDeleteChoice(false)}
+                        className="mt-2 text-sm text-gray-400 hover:text-gray-600
+                       transition-colors font-medium"
+                    >
+                        Отмена
+                    </button>
+                </div>
+            )}
+
+
 
             {showMenu && (
                 <div
