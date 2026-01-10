@@ -8,6 +8,7 @@ import { NOTE_W, NOTE_H, EMOJI_W, EMOJI_H } from '../features/board/constants'
 import { shapesApi } from '../shared/api/shapesApi.js'
 import { markdownApi } from '../shared/api/markdownApi'
 import { roadmapApi} from "../shared/api/roadmapApi.js";
+import {EMOJI_CATALOG, EMOJI_MAP} from "../features/emoji-sticker/stickers.js";
 
 const SafeFallbackWidget = ({ children }) => <div>{children}</div>
 
@@ -19,6 +20,23 @@ export const StickerBoardWidget = () => {
     const boardRef = useRef(null)
     const [WidgetComp, setWidgetComp] = useState(() => SafeFallbackWidget)
 
+    async function getEmojiUrlForStickerId(stickerId) {
+        if (EMOJI_MAP && EMOJI_MAP[stickerId]) {
+            return EMOJI_MAP[stickerId]
+        }
+
+        try {
+            const info = await stickersApi.getById(stickerId) // { id, name }
+            if (info?.name) {
+                const local = EMOJI_CATALOG.find(e => e.name === info.name)
+                if (local) return local.url
+            }
+        } catch (err) {
+            console.warn('getEmojiUrlForStickerId: backend lookup failed', err)
+        }
+
+        return ''
+    }
     useEffect(() => {
         const loadBoard = async () => {
             try {
@@ -70,6 +88,17 @@ export const StickerBoardWidget = () => {
                     const w = e.width ?? EMOJI_W
                     const h = e.height ?? EMOJI_H
 
+                    let imageUrl = EMOJI_MAP?.[String(e.stickerId)] ?? ''
+
+                    if (!imageUrl) {
+                        try {
+                            imageUrl = await getEmojiUrlForStickerId(e.stickerId)
+                        } catch (err) {
+                            console.warn('Ошибка при получении локального url для stickerId', e.stickerId, err)
+                            imageUrl = ''
+                        }
+                    }
+
                     items.push({
                         id: e.id,
                         x,
@@ -79,8 +108,8 @@ export const StickerBoardWidget = () => {
                         height: h,
                         text: '',
                         zIndex: 1,
-                        imageUrl: e.url,
-                        stickerId: e.stickerId
+                        stickerId: e.stickerId,
+                        imageUrl
                     })
 
                     x += 24

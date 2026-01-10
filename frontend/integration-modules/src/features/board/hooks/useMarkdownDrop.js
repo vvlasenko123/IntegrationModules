@@ -6,15 +6,12 @@ export const useMarkdownDrop = () => {
     const addElement = useStickersStore(s => s.addSticker)
     const topZ = useStickersStore(s => s.topZ)
 
-    return async (e, scrollLeft, scrollTop, rect) => {
+    return async (e, scrollLeft, scrollTop, rect, user, board) => {
         const dataRaw = e.dataTransfer.getData(DND_MARKDOWN)
-        if (!dataRaw) {
-            return
-        }
+        if (!dataRaw) return
 
         const x = Math.round(scrollLeft + (e.clientX - rect.left))
         const y = Math.round(scrollTop + (e.clientY - rect.top))
-
         const width = 600
         const height = 400
         const content = '# Начало работы с Markdown'
@@ -22,6 +19,7 @@ export const useMarkdownDrop = () => {
         try {
             const created = await markdownApi.create(content, width, height)
             const boardItem = await markdownApi.addToBoard(created.id, width, height)
+
 
             addElement({
                 id: boardItem.id,
@@ -34,6 +32,7 @@ export const useMarkdownDrop = () => {
                 text: boardItem.content,
                 zIndex: (topZ || 1) + 1,
             })
+
         } catch (err) {
             console.warn('Не удалось сохранить markdown:', err)
         }

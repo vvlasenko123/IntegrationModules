@@ -1,6 +1,7 @@
 import React, {useState} from 'react'
 import { ColorPalette } from './ColorPalette.jsx'
 import { SHAPES } from '../features/shape/constants.jsx'
+import { EMOJI_CATALOG } from '../features/emoji-sticker/stickers.js'
 import '../styles/stickerPalette.css'
 import noteAdd from '../assets/note_add.svg'
 import noteAddActive from '../assets/note_add_active.svg'
@@ -15,7 +16,6 @@ import { DND_SHAPE, DND_EMOJI, DND_MARKDOWN, DND_ROADMAP } from '../features/boa
 import { SHAPE_ICONS } from "./shapeIcons.jsx";
 import markdownAdd from '../assets/markdown_add.svg'
 import markdownAddActive from '../assets/markdown_add_active.svg'
-import { StickerUploadButton } from './StickerUploadButton.jsx';
 
 export const LeftToolbar = ({ onPick }) => {
     const [open, setOpen] = React.useState(false)
@@ -49,47 +49,26 @@ export const LeftToolbar = ({ onPick }) => {
 
     React.useEffect(() => {
         if (!emojiOpen) return
+
         let cancelled = false
         ;(async () => {
-            try {
-                const items = await stickersApi.getAll()
-                if (!cancelled) setEmojiItems(Array.isArray(items) ? items : [])
-            } catch (e) {
-                console.warn('Не удалось загрузить эмодзи:', e)
-                if (!cancelled) setEmojiItems([])
-            }
+            const stickers = await stickersApi.getAll()
+            if (cancelled) return
+
+            setEmojiItems(
+                stickers
+                    .map(s => {
+                        const local = EMOJI_CATALOG.find(e => e.name === s.name)
+                        return local ? { ...s, url: local.url } : null
+                    })
+                    .filter(Boolean)
+            )
         })()
+
         return () => { cancelled = true }
     }, [emojiOpen])
 
 
-    React.useEffect(() => {
-        if (!emojiOpen) return
-        let cancelled = false ;
-        (async () => {
-            try {
-                const items = await stickersApi.getAll()
-                if (!cancelled) setEmojiItems(Array.isArray(items) ? items : [])
-            } catch (e) {
-                console.warn('Не удалось загрузить стикеры:', e)
-                if (!cancelled) setEmojiItems([])
-            }
-        })()
-        return () => { cancelled = true }
-    }, [emojiOpen])
-
-    // Обновление списка после загрузки
-    const handleStickerUploaded = async () => {
-        // Перезагружаем список только если панель открыта
-        if (emojiOpen) {
-            try {
-                const items = await stickersApi.getAll()
-                setEmojiItems(Array.isArray(items) ? items : [])
-            } catch (e) {
-                console.warn('Не удалось обновить список стикеров:', e)
-            }
-        }
-    }
 
     React.useEffect(() => {
         if (!open && !emojiOpen && !shapeOpen) return
@@ -106,8 +85,15 @@ export const LeftToolbar = ({ onPick }) => {
 
     const onEmojiDragStart = (item) => (e) => {
         e.stopPropagation()
-        const payload = { url: item.url, storagePath: item.storagePath, id: item.id }
-        e.dataTransfer.setData(DND_EMOJI, JSON.stringify(payload))
+
+        e.dataTransfer.setData(
+            DND_EMOJI,
+            JSON.stringify({
+                stickerId: item.id,
+                name: item.name
+            })
+        )
+
         e.dataTransfer.effectAllowed = 'copy'
     }
 
@@ -203,21 +189,20 @@ export const LeftToolbar = ({ onPick }) => {
 
             {emojiOpen && (
                 <div className="palette-wrapper" onClick={e => e.stopPropagation()}>
-                    <div className="emoji-panel" style={{ width: '300px', height: '500px' }}>
-                        {/* Хедер с кнопкой "+" */}
+                    <div className="emoji-panel" style={{ width: 300, height: 500 }}>
                         <div className="emoji-panel-header">
-                            <StickerUploadButton
-                                onStickerUploaded={handleStickerUploaded}
-                                className="emoji-add-btn"
-                            />
-                            <span className="emoji-header-title">Мои стикеры</span>
+                            <span className="emoji-header-title">Стикеры</span>
                         </div>
 
-                        {/* Сетка стикеров */}
                         <div className="emoji-grid">
-                            {emojiItems.map((x) => (
-                                <button key={`${x.id}-${x.storagePath}`} className="emoji-item" draggable onDragStart={onEmojiDragStart(x)}>
-                                    <img src={x.url} alt="" className="emoji-img" draggable={false} />
+                            {emojiItems.map(item => (
+                                <button
+                                    key={item.id}
+                                    draggable
+                                    onDragStart={onEmojiDragStart(item)}
+                                    className="emoji-item"
+                                >
+                                    <img src={item.url} draggable={false} />
                                 </button>
                             ))}
                         </div>

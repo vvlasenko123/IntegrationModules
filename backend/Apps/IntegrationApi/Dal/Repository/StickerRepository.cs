@@ -145,7 +145,7 @@ WHERE id = @Id;
         const string sql = @"
 UPDATE board_stickers
 SET width = @Width,
-    height = @Height,
+    height = @Height
 WHERE id = @Id;
 
 SELECT id,

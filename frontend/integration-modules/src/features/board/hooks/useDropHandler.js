@@ -5,7 +5,7 @@ import { useMarkdownDrop } from './useMarkdownDrop.js'
 import { useRoadmapDrop } from './useRoadmapDrop'
 import { DND_EMOJI, DND_SHAPE, DND_NOTE, DND_MARKDOWN,DND_ROADMAP } from '../constants'
 
-export const useDropHandler = (boardRef) => {
+export const useDropHandler = () => {
     const handleEmoji = useEmojiDrop()
     const handleShape = useShapeDrop()
     const handleNote = useNoteDrop()

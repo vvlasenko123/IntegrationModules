@@ -6,7 +6,7 @@ export const useNoteDrop = () => {
     const addSticker = useStickersStore(s => s.addSticker)
     const topZ = useStickersStore(s => s.topZ)
 
-    return async (e, scrollLeft, scrollTop, rect) => {
+    return async (e, scrollLeft, scrollTop, rect, user, board) => {
         const rawNote = e.dataTransfer.getData('application/x-integration-note')
         if (!rawNote) return
 
@@ -29,6 +29,7 @@ export const useNoteDrop = () => {
 
         try {
             const created = await notesApi.create(color, NOTE_W, NOTE_H)
+
             addSticker({
                 id: created.id,
                 x,

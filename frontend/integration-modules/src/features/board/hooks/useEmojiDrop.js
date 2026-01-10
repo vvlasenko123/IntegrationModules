@@ -1,21 +1,28 @@
+import { useStickersStore } from '../../../entities/stickers/model/useStickersStore'
+import { EMOJI_W, EMOJI_H, DND_EMOJI, BOARD_SAFE_PAD } from '../constants'
 import { stickersApi } from '../../../shared/api/stickerApi'
-import { useStickersStore } from '../../../entities/stickers/model/useStickersStore.js'
-import { EMOJI_W, EMOJI_H, BOARD_SAFE_PAD } from '../constants'
+import { EMOJI_MAP } from '../../emoji-sticker/stickers.js'
 
 export const useEmojiDrop = () => {
     const addSticker = useStickersStore(s => s.addSticker)
     const topZ = useStickersStore(s => s.topZ)
 
-    return async (e, scrollLeft, scrollTop, rect) => {
-        const rawEmoji = e.dataTransfer.getData('application/x-integration-emoji')
-        if (!rawEmoji) return
+    return async (e, scrollLeft, scrollTop, rect, user, board) => {
+        const raw = e.dataTransfer.getData(DND_EMOJI)
+        if (!raw) return
 
         let payload
         try {
-            payload = JSON.parse(rawEmoji)
-        } catch {}
+            payload = JSON.parse(raw)
+        } catch {
+            console.warn('DND_EMOJI: bad payload')
+            return
+        }
 
-        if (!payload?.id) return
+        if (!payload?.stickerId) {
+            console.warn('DND_EMOJI: payload missing stickerId', payload)
+            return
+        }
 
         const x = Math.max(
             0,
@@ -29,33 +36,24 @@ export const useEmojiDrop = () => {
         const nextZ = (topZ || 1) + 1
 
         try {
-            const saved = await stickersApi.addToBoard(payload.id, 40, 40)
+            const saved = await stickersApi.addToBoard(payload.stickerId)
+
+
             addSticker({
                 id: saved.id,
-                stickerId: saved.stickerId,
+                stickerId: payload.stickerId,
+                type: 'emoji',
                 x,
                 y,
-                color: 'transparent',
                 width: EMOJI_W,
                 height: EMOJI_H,
-                text: '',
                 zIndex: nextZ,
-                imageUrl: saved.url,
+                color: 'transparent',
+                text: '',
+                imageUrl: EMOJI_MAP[payload.stickerId] || '',
             })
         } catch (err) {
-            console.warn('Не удалось сохранить эмодзи на доске:', err)
-            addSticker({
-                id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-                stickerId: payload.id,
-                x,
-                y,
-                color: 'transparent',
-                width: EMOJI_W,
-                height: EMOJI_H,
-                text: '',
-                zIndex: nextZ,
-                imageUrl: payload.url,
-            })
+            console.warn('Не удалось создать Emoji на доске:', err)
         }
     }
 }

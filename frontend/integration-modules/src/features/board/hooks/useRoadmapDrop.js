@@ -6,11 +6,9 @@ export const useRoadmapDrop = () => {
     const addSticker = useStickersStore(s => s.addSticker)
     const topZ = useStickersStore(s => s.topZ)
 
-    return async (e, scrollLeft, scrollTop, rect) => {
+    return async (e, scrollLeft, scrollTop, rect, user, board) => {
         const raw = e.dataTransfer.getData(DND_ROADMAP)
-        if (!raw) {
-            return
-        }
+        if (!raw) return
 
         const x = Math.round(scrollLeft + (e.clientX - rect.left))
         const y = Math.round(scrollTop + (e.clientY - rect.top))
@@ -28,6 +26,7 @@ export const useRoadmapDrop = () => {
                 height: 50,
                 parentId: null
             })
+
 
             addSticker({
                 id: created.id,
