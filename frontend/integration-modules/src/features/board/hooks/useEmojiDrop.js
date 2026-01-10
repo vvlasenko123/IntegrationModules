@@ -2,7 +2,6 @@ import { useStickersStore } from '../../../entities/stickers/model/useStickersSt
 import { EMOJI_W, EMOJI_H, DND_EMOJI, BOARD_SAFE_PAD } from '../constants'
 import { stickersApi } from '../../../shared/api/stickerApi'
 import { EMOJI_MAP } from '../../emoji-sticker/stickers.js'
-import { getInfo } from '../../../shared/utils/getInfo'
 
 export const useEmojiDrop = () => {
     const addSticker = useStickersStore(s => s.addSticker)
@@ -39,13 +38,6 @@ export const useEmojiDrop = () => {
         try {
             const saved = await stickersApi.addToBoard(payload.stickerId)
 
-            const info = getInfo({
-                widgetId: saved.id,
-                userId: user.id,
-                role: user.role,
-                board,
-                extraConfig: { type: 'emoji', stickerId: payload.stickerId }
-            })
 
             addSticker({
                 id: saved.id,
@@ -59,7 +51,6 @@ export const useEmojiDrop = () => {
                 color: 'transparent',
                 text: '',
                 imageUrl: EMOJI_MAP[payload.stickerId] || '',
-                config: info,
             })
         } catch (err) {
             console.warn('Не удалось создать Emoji на доске:', err)

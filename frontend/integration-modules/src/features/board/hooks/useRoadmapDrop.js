@@ -1,7 +1,6 @@
 import { useStickersStore } from '../../../entities/stickers/model/useStickersStore'
 import { DND_ROADMAP } from '../constants'
 import { roadmapApi } from '../../../shared/api/roadmapApi.js'
-import { getInfo } from '../../../shared/utils/getInfo'
 
 export const useRoadmapDrop = () => {
     const addSticker = useStickersStore(s => s.addSticker)
@@ -28,13 +27,6 @@ export const useRoadmapDrop = () => {
                 parentId: null
             })
 
-            const info = getInfo({
-                widgetId: created.id,
-                userId: user.id,
-                role: user.role,
-                board,
-                extraConfig: { type: 'roadmap' }
-            })
 
             addSticker({
                 id: created.id,
@@ -50,7 +42,6 @@ export const useRoadmapDrop = () => {
                 cancelled: created.cancelled ?? false,
                 parentId: created.parentId ?? null,
                 zIndex: created.zIndex ?? nextZ,
-                config: info,
             })
         } catch (err) {
             console.warn('Не удалось создать roadmap при дропе:', err)

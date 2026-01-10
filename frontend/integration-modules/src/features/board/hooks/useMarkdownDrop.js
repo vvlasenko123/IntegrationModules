@@ -1,7 +1,6 @@
 import { useStickersStore } from '../../../entities/stickers/model/useStickersStore'
 import { DND_MARKDOWN } from '../constants'
 import { markdownApi } from '../../../shared/api/markdownApi'
-import { getInfo } from '../../../shared/utils/getInfo'
 
 export const useMarkdownDrop = () => {
     const addElement = useStickersStore(s => s.addSticker)
@@ -21,13 +20,6 @@ export const useMarkdownDrop = () => {
             const created = await markdownApi.create(content, width, height)
             const boardItem = await markdownApi.addToBoard(created.id, width, height)
 
-            const info = getInfo({
-                widgetId: boardItem.id,
-                userId: user.id,
-                role: user.role,
-                board,
-                extraConfig: { type: 'markdown', defaultContent: content }
-            })
 
             addElement({
                 id: boardItem.id,
@@ -39,7 +31,6 @@ export const useMarkdownDrop = () => {
                 height: boardItem.height,
                 text: boardItem.content,
                 zIndex: (topZ || 1) + 1,
-                config: info,
             })
 
         } catch (err) {

@@ -2,7 +2,6 @@ import { useStickersStore } from '../../../entities/stickers/model/useStickersSt
 import { SHAPES } from '../../shape/constants.jsx'
 import { DND_SHAPE } from '../constants'
 import { shapesApi } from '../../../shared/api/shapesApi.js'
-import { getInfo } from '../../../shared/utils/getInfo'
 
 let cachedShapes = null
 
@@ -37,7 +36,7 @@ export const useShapeDrop = () => {
         const allShapes = await getShapesCached()
         const backendShape = allShapes.find(x => x.shapeId === shapeKey)
         if (!backendShape?.id) {
-            console.warn('DND_SHAPE: на бэке нет shapeId =', shapeKey)
+            console.warn('DND_SHAPE: на бэке нет shapeId =', shapeKey, 'getAll:', allShapes)
             return
         }
 
@@ -51,13 +50,6 @@ export const useShapeDrop = () => {
         try {
             const created = await shapesApi.addToBoard(backendShape.id, w, h, rotation)
 
-            const info = getInfo({
-                widgetId: created.id,
-                userId: user.id,
-                role: user.role,
-                board,
-                extraConfig: { type: 'shape', shapeId: shapeKey }
-            })
 
             addSticker({
                 id: created.id,
@@ -73,10 +65,11 @@ export const useShapeDrop = () => {
                 zIndex: nextZ,
                 fill: 'transparent',
                 stroke: '#000',
-                config: info,
+
             })
         } catch (err) {
             console.warn('Не удалось сохранить фигуру на доске:', err)
         }
+
     }
 }

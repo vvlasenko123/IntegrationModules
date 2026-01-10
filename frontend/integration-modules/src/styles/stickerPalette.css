@@ -180,8 +180,8 @@
 }
 
 .emoji-item {
-    width: 91px;
-    height: 84px;
+    width: 80px;
+    height: 80px;
     box-sizing: border-box;
     background: rgba(255,255,255,0.6);
     border: 1px solid rgba(0,0,0,0.06);

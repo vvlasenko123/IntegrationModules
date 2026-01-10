@@ -1,7 +1,6 @@
 import { notesApi } from '../../../shared/api/notesApi'
 import { useStickersStore } from '../../../entities/stickers/model/useStickersStore.js'
 import { NOTE_W, NOTE_H, BOARD_SAFE_PAD } from '../constants'
-import { getInfo } from '../../../shared/utils/getInfo'
 
 export const useNoteDrop = () => {
     const addSticker = useStickersStore(s => s.addSticker)
@@ -31,15 +30,6 @@ export const useNoteDrop = () => {
         try {
             const created = await notesApi.create(color, NOTE_W, NOTE_H)
 
-
-            const info = getInfo({
-                widgetId: created.id,
-                userId: user.id,
-                role: user.role,
-                board,
-                extraConfig: { type: 'note', defaultColor: color }
-            })
-
             addSticker({
                 id: created.id,
                 x,
@@ -49,7 +39,6 @@ export const useNoteDrop = () => {
                 height: created.height ?? NOTE_H,
                 text: created.content ?? '',
                 zIndex: nextZ,
-                config: info,
             })
         } catch (err) {
             console.warn('Не удалось создать заметку при дропе:', err)
