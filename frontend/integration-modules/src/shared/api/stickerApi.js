@@ -1,116 +1,77 @@
-    async function parseError(res) {
-        const text = await res.text()
-        return text || `HTTP ${res.status}`
-    }
+async function parseError(res) {
+    const text = await res.text()
+    return text || `HTTP ${res.status}`
+}
 
-    function normalizeStickerUrl(url) {
-        if (!url) {
-            return url
+export const stickersApi = {
+    // справочник стикеров
+    async getAll() {
+        const res = await fetch('/api/v1/stickers/get-all')
+        if (!res.ok) {
+            throw new Error(await parseError(res))
         }
 
-        try {
-            const u = new URL(url)
+        const items = await res.json()
+        return Array.isArray(items) ? items : []
+    },
 
-            if (u.hostname === 'minio') {
-                u.hostname = window.location.hostname
-                u.port = '9000'
-            }
+    async getById(id) {
+        const res = await fetch(`/api/v1/stickers/${id}`)
+        if (!res.ok) {
+            throw new Error(await parseError(res))
+        }
+        return await res.json()
+    },
 
-            return u.toString()
-        } catch (e) {
-            return url
+    // placement
+    async addToBoard(stickerId, width = 80, height = 80) {
+        const res = await fetch('/api/v1/stickers/board', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ stickerId, width, height })
+        })
+
+        if (!res.ok) {
+            throw new Error(await parseError(res))
+        }
+
+        return await res.json()
+    },
+
+    async getBoard() {
+        const res = await fetch('/api/v1/stickers/board')
+        if (!res.ok) {
+            throw new Error('Не удалось загрузить стикеры с доски')
+        }
+
+        return await res.json()
+    },
+
+    async getBoardById(id) {
+        const res = await fetch(`/api/v1/stickers/board/${id}`)
+        if (!res.ok) {
+            throw new Error(await parseError(res))
+        }
+        return await res.json()
+    },
+
+    async updateTransform(id, width, height) {
+        const res = await fetch(`/api/v1/stickers/board/${id}/transform`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ width, height })
+        })
+        if (!res.ok) throw new Error(await res.text())
+        return await res.json()
+    },
+
+    async removeFromBoard(id) {
+        const res = await fetch(`/api/v1/stickers/${id}`, {
+            method: 'DELETE'
+        })
+
+        if (!res.ok) {
+            throw new Error(await parseError(res))
         }
     }
-
-    export const stickersApi = {
-        async getAll() {
-            const res = await fetch('/api/v1/stickers/get-all')
-            if (!res.ok) {
-                throw new Error(await parseError(res))
-            }
-
-            const items = await res.json()
-            if (!Array.isArray(items)) {
-                return []
-            }
-
-            return items.map((x) => ({
-                ...x,
-                url: normalizeStickerUrl(x.url)
-            }))
-        },
-
-        async addToBoard(stickerId, width, height) {
-            width=80;
-            height=80;
-            const r = await fetch('/api/v1/stickers/board', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ stickerId, width, height })
-
-            })
-
-            if (!r.ok) {
-                throw new Error(await parseError(r))
-            }
-
-            const saved = await r.json()
-            return { ...saved, url: normalizeStickerUrl(saved.url) }
-        },
-
-        async getBoard() {
-            const r = await fetch('/api/v1/stickers/board')
-            if (!r.ok) {
-                throw new Error('Не удалось загрузить эмодзи с доски')
-            }
-
-            return await r.json()
-        },
-        async removeFromBoard(placementId) {
-            const res = await fetch(`/api/v1/stickers/${placementId}`, {
-                method: 'DELETE',
-                headers: { 'accept': '*/*' },
-            })
-            if (!res.ok) {
-                const text = await res.text()
-                throw new Error(text || 'Не удалось удалить стикер с доски')
-            }
-
-            return res.status === 204 ? null : await res.json()
-        },
-        async upload(file) {
-            const formData = new FormData()
-            formData.append('files', file)
-
-            const res = await fetch('/api/v1/stickers/upload', {
-                method: 'POST',
-                body: formData,
-            })
-
-            if (!res.ok) {
-                throw new Error(await parseError(res))
-            }
-
-            const contentType = res.headers.get('content-type')
-            if (contentType && contentType.includes('application/json')) {
-                return await res.json()
-            }
-
-            return true
-        },
-
-        async updateBoardSize(placementId, width, height) {
-            const res = await fetch(`/api/v1/stickers/board/${placementId}/size`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ width, height })
-            })
-
-            if (!res.ok) {
-                throw new Error(await parseError(res))
-            }
-
-            const updated = await res.json()
-            return { ...updated, url: normalizeStickerUrl(updated.url) }
-        }
-    }
+}

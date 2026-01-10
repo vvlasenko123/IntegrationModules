@@ -8,6 +8,7 @@ import { NOTE_W, NOTE_H, EMOJI_W, EMOJI_H } from '../features/board/constants'
 import { shapesApi } from '../shared/api/shapesApi.js'
 import { markdownApi } from '../shared/api/markdownApi'
 import { roadmapApi} from "../shared/api/roadmapApi.js";
+import {EMOJI_CATALOG, EMOJI_MAP} from "../features/emoji-sticker/stickers.js";
 
 const SafeFallbackWidget = ({ children }) => <div>{children}</div>
 
@@ -18,7 +19,26 @@ export const StickerBoardWidget = () => {
 
     const boardRef = useRef(null)
     const [WidgetComp, setWidgetComp] = useState(() => SafeFallbackWidget)
+    async function getEmojiUrlForStickerId(stickerId) {
+        // быстрый синхронный lookup по локальной карте
+        if (EMOJI_MAP && EMOJI_MAP[stickerId]) {
+            return EMOJI_MAP[stickerId]
+        }
 
+        // fallback: попробуем запросить справочник стикеров у бекенда и найти name -> url в EMOJI_CATALOG
+        try {
+            const info = await stickersApi.getById(stickerId) // { id, name }
+            if (info?.name) {
+                const local = EMOJI_CATALOG.find(e => e.name === info.name)
+                if (local) return local.url
+            }
+        } catch (err) {
+            // ignore — вернём пустую строку ниже
+            console.warn('getEmojiUrlForStickerId: backend lookup failed', err)
+        }
+
+        return '' // ничего не найдено
+    }
     useEffect(() => {
         const loadBoard = async () => {
             try {
@@ -70,6 +90,19 @@ export const StickerBoardWidget = () => {
                     const w = e.width ?? EMOJI_W
                     const h = e.height ?? EMOJI_H
 
+                    // сначала попытка синхронного получения из EMOJI_MAP
+                    let imageUrl = EMOJI_MAP?.[String(e.stickerId)] ?? ''
+
+                    // если не найден — пусть помощник сделает запрос (может вернуть через name -> EMOJI_CATALOG)
+                    if (!imageUrl) {
+                        try {
+                            imageUrl = await getEmojiUrlForStickerId(e.stickerId)
+                        } catch (err) {
+                            console.warn('Ошибка при получении локального url для stickerId', e.stickerId, err)
+                            imageUrl = ''
+                        }
+                    }
+
                     items.push({
                         id: e.id,
                         x,
@@ -79,8 +112,8 @@ export const StickerBoardWidget = () => {
                         height: h,
                         text: '',
                         zIndex: 1,
-                        imageUrl: e.url,
-                        stickerId: e.stickerId
+                        stickerId: e.stickerId,
+                        imageUrl // теперь заполняется
                     })
 
                     x += 24

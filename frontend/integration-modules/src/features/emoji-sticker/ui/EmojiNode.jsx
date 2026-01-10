@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react'
 import { NodeResizer, Handle, Position } from '@xyflow/react'
 import { useStickersStore } from '../../../entities/stickers/model/useStickersStore.js'
 import { stickersApi } from '../../../shared/api/stickerApi'
+import { EMOJI_CATALOG } from '../stickers.js'
 import '../../../styles/sticker.css'
 
 export const EmojiNode = ({ id, selected }) => {
@@ -12,7 +13,7 @@ export const EmojiNode = ({ id, selected }) => {
     const updateSticker = useStickersStore(s => s.updateSticker)
     const removeSticker = useStickersStore(s => s.removeSticker)
     const bringToFront = useStickersStore(s => s.bringToFront)
-
+    const emoji = sticker.imageUrl
     const [menuVisible, setMenuVisible] = useState(false)
     const [menuPos, setMenuPos] = useState({ x: 0, y: 0 })
 
@@ -51,9 +52,7 @@ export const EmojiNode = ({ id, selected }) => {
         return () => document.removeEventListener('click', handleClose)
     }, [])
 
-    if (!sticker || !sticker.imageUrl) {
-        return null
-    }
+    if (!sticker || !emoji) return null
 
     return (
         <>
@@ -68,7 +67,7 @@ export const EmojiNode = ({ id, selected }) => {
                     updateSticker(id, { width: w, height: h })
 
                     try {
-                        await stickersApi.updateBoardSize(id, w, h)
+                        await stickersApi.updateTransform(id, w, h)
                     } catch (e) {
                         console.warn('Не удалось сохранить размер эмодзи', e)
                     }
@@ -79,16 +78,11 @@ export const EmojiNode = ({ id, selected }) => {
             <Handle type="source" position={Position.Right} />
 
             <div
-                style={{ width: '100%', height: '100%', position: 'relative' }}
-                onPointerDown={() => { bringToFront(id) }}
+                style={{ width: sticker.width, height: sticker.height, position: 'relative' }}
+                onPointerDown={() => bringToFront(id)}
                 onContextMenu={onContextMenu}
             >
-                <img
-                    src={sticker.imageUrl}
-                    alt=""
-                    style={{ width: '100%', height: '100%', display: 'block', pointerEvents: 'none' }}
-                    draggable={false}
-                />
+                <img src={sticker.imageUrl} draggable={false} style={{ width: '100%', height: '100%' }} />
             </div>
 
             {menuVisible && (
