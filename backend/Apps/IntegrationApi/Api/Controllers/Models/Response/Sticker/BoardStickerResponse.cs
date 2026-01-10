@@ -14,11 +14,6 @@ public sealed class BoardStickerResponse
     /// айди стикеры
     /// </summary>
     public Guid StickerId { get; init; }
-    
-    /// <summary>
-    /// url
-    /// </summary>
-    public string Url { get; init; } = string.Empty;
 
     /// <summary>
     /// Длина

@@ -6,17 +6,17 @@ namespace Dal.Models.Stickers;
 public sealed class BoardSticker
 {
     /// <summary>
-    /// айди доски
+    /// Айди элемента
     /// </summary>
-    public Guid Id { get; init; }
-    
-    /// <summary>
-    /// айди стикера
-    /// </summary>
-    public Guid StickerId { get; init; }
+    public Guid Id { get; set; }
 
     /// <summary>
-    /// Длина
+    /// Айди стикера
+    /// </summary>
+    public Guid StickerId { get; set; }
+
+    /// <summary>
+    /// Ширина
     /// </summary>
     public int Width { get; set; }
 

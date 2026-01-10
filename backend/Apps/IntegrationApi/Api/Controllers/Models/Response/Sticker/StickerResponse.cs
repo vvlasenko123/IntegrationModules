@@ -11,22 +11,7 @@ public sealed class StickerResponse
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Путь до объекта в Minio
+    /// Имя стикера
     /// </summary>
-    public string StoragePath { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Ссылка на скачивание стикера
-    /// </summary>
-    public string Url { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Длина
-    /// </summary>
-    public int Width { get; set; }
-
-    /// <summary>
-    /// Высота
-    /// </summary>
-    public int Height { get; set; }
+    public string Name { get; set; } = string.Empty;
 }

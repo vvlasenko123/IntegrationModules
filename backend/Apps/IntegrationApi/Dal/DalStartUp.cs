@@ -31,6 +31,8 @@ public static class DalStartUp
         services.AddTransient<IDatabaseMigration, MarkdownCreateTablesMigration>();
         services.AddTransient<IDatabaseMigration, MarkdownBoardAddEditorStateMigration>();
         services.AddTransient<IDatabaseMigration, RoadmapCreateTableMigration>();
+        services.AddTransient<IDatabaseMigration, StickersUpdateSchemaMigration>();
+        services.AddTransient<IDatabaseMigration, StickersSeedInitialMigration>();
         #endregion
         
         services.AddTransient<IStickerRepository, StickerRepository>();

@@ -10,32 +10,37 @@ namespace Dal.Repository.interfaces;
 public interface IStickerRepository
 {
     /// <summary>
-    /// Загрузка стикеров и сохранение путей в базе
+    /// Получение всех стикеров
     /// </summary>
-    Task<IReadOnlyCollection<Stickers>> UploadAsync(IReadOnlyList<IFormFile> files, MinioImageStorage storage, CancellationToken token);
+    Task<IReadOnlyCollection<Sticker>> GetAllAsync(CancellationToken token);
 
     /// <summary>
-    /// Получение списка стикеров
+    /// Получение стикера по id
     /// </summary>
-    Task<IReadOnlyCollection<Stickers>> GetAllAsync(CancellationToken token);
-    
-    /// <summary>
-    /// удаление по айди
-    /// </summary>
-    Task<int> DeleteByIdAsync(Guid id, CancellationToken token);
+    Task<Sticker?> GetByIdAsync(Guid id, CancellationToken token);
 
     /// <summary>
-    /// добавление на доску стикера
+    /// Добавление стикера на доску
     /// </summary>
     Task<BoardSticker> AddToBoardAsync(Guid stickerId, int width, int height, CancellationToken token);
-    
+
     /// <summary>
-    /// получение инфы с доски
+    /// Получение доски
     /// </summary>
     Task<IReadOnlyCollection<BoardSticker>> GetBoardAsync(CancellationToken token);
 
     /// <summary>
-    /// Обновление размеров стикеров
+    /// Получение доски по айди
     /// </summary>
-    Task<BoardSticker?> UpdateBoardSizeAsync(Guid id, int width, int height, CancellationToken token);
+    Task<BoardSticker?> GetBoardByIdAsync(Guid id, CancellationToken token);
+
+    /// <summary>
+    /// Изменение стикера на доске
+    /// </summary>
+    Task<BoardSticker?> UpdateBoardTransformAsync(Guid id, int width, int height, CancellationToken token);
+
+    /// <summary>
+    /// Удаление стикера
+    /// </summary>
+    Task<bool> DeleteAsync(Guid id, CancellationToken token);
 }
