@@ -1,6 +1,4 @@
 using Dal.Models.Stickers;
-using InfraLib.MinIO.Storage;
-using Microsoft.AspNetCore.Http;
 
 namespace Dal.Repository.interfaces;
 
