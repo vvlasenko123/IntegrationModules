@@ -31,7 +31,8 @@ export const useStickersStore = create((set, get) => ({
                 type: payload.type,
                 shapeId: payload.shapeId,
                 shapeData: payload.shapeData,
-                imageUrl: payload.imageUrl
+                imageUrl: payload.imageUrl,
+                info: payload.info ?? null
             }
 
             return {

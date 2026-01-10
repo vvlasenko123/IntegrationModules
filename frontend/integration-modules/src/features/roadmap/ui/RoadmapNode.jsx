@@ -9,7 +9,6 @@ import '../roadmap.css'
 import DateIcon from '../../../assets/icons/date.svg?react'
 import CancelIcon from '../../../assets/icons/cancel_btn.svg?react'
 import CancelActiveIcon from '../../../assets/icons/cancel_btn_active.svg?react'
-import DeleteIcon from '../../../assets/icons/delete_btn.svg?react'
 import Calendar from '../../../assets/icons/calendar.svg?react'
 import { roadmapApi } from '../../../shared/api/roadmapApi.js'
 
@@ -17,130 +16,57 @@ export const RoadmapNode = ({ data, selected }) => {
     const sticker = useStickersStore(s => s.stickers.find(x => x.id === data.stickerId))
     const addRoadmapBranch = useStickersStore(s => s.addRoadmapBranch)
     const updateSticker = useStickersStore(s => s.updateSticker)
-    const removeSticker = useStickersStore(s => s.removeSticker)
     const bringToFront = useStickersStore(s => s.bringToFront)
-    const getDescendants = useStickersStore(s => s.getDescendants)
-    const removeStickersBulk = useStickersStore(s => s.removeStickersBulk)
-    const detachChildren = useStickersStore(s => s.detachChildren)
-    const [showDeleteChoice, setShowDeleteChoice] = useState(false)
-    const menuRef = useRef(null)
     const [showMenu, setShowMenu] = useState(false)
     const [showCalendar, setShowCalendar] = useState(false)
+    const menuRef = useRef(null)
 
     useEffect(() => {
-        if (!showMenu) {
-            return
-        }
+        if (!showMenu) return
 
         const handlePointerDown = (e) => {
-            if (
-                menuRef.current &&
-                !menuRef.current.contains(e.target)
-            ) {
+            if (menuRef.current && !menuRef.current.contains(e.target)) {
                 setShowMenu(false)
                 setShowCalendar(false)
             }
         }
 
         document.addEventListener('pointerdown', handlePointerDown)
-
-        return () => {
-            document.removeEventListener('pointerdown', handlePointerDown)
-        }
+        return () => document.removeEventListener('pointerdown', handlePointerDown)
     }, [showMenu])
 
-    if (!sticker) {
-        return null
-    }
+    if (!sticker) return null
 
     const isCompleted = sticker.completed
     const isCancelled = sticker.cancelled
     const hasDate = !!sticker.date
 
-    const handleDelete = async (e) => {
-        e.stopPropagation()
-
-        const children = getDescendants(sticker.id)
-
-        if (children.length === 0) {
-            try {
-                await roadmapApi.delete(sticker.id)
-                removeSticker(sticker.id)
-            } catch {
-                alert('Не удалось удалить элемент roadmap')
-            }
-            return
-        }
-
-        setShowDeleteChoice(true)
-    }
-    const deleteOnlyParent = async () => {
-        const children = getDescendants(sticker.id)
-
-        try {
-            await roadmapApi.delete(sticker.id)
-
-            detachChildren(sticker.id)
-            removeSticker(sticker.id)
-        } catch {
-            alert('Не удалось удалить элемент roadmap')
-        } finally {
-            setShowDeleteChoice(false)
-        }
-    }
-    const deleteWithChildren = async () => {
-        const children = getDescendants(sticker.id)
-        const ids = [sticker.id, ...children.map(c => c.id)]
-
-        try {
-            for (const id of ids) {
-                await roadmapApi.delete(id)
-            }
-
-            removeStickersBulk(ids)
-        } catch {
-            alert('Не удалось удалить ветку roadmap')
-        } finally {
-            setShowDeleteChoice(false)
-        }
-    }
-
-
     const handleToggleCancelled = async (e) => {
         e.stopPropagation()
-
-        const prev = sticker.cancelled
-        const next = !prev
-
+        const next = !sticker.cancelled
         updateSticker(sticker.id, { cancelled: next })
-
         try {
             await roadmapApi.updateCancelled(sticker.id, next)
         } catch (err) {
-            updateSticker(sticker.id, { cancelled: prev })
+            updateSticker(sticker.id, { cancelled: sticker.cancelled })
             console.warn('Не удалось сохранить cancelled', err)
         }
     }
 
     const handleToggleCompleted = async (e) => {
         e.stopPropagation()
-
-        const prev = sticker.completed
-        const next = !prev
-
+        const next = !sticker.completed
         updateSticker(sticker.id, { completed: next })
-
         try {
             await roadmapApi.updateCompleted(sticker.id, next)
         } catch (err) {
-            updateSticker(sticker.id, { completed: prev })
+            updateSticker(sticker.id, { completed: sticker.completed })
             console.warn('Не удалось сохранить completed', err)
         }
     }
 
     const handleTextBlur = async (e) => {
         const value = e.currentTarget.value ?? ''
-
         try {
             await roadmapApi.updateText(sticker.id, value)
         } catch (err) {
@@ -150,7 +76,6 @@ export const RoadmapNode = ({ data, selected }) => {
 
     const handleDescriptionBlur = async (e) => {
         const value = e.currentTarget.value ?? ''
-
         try {
             await roadmapApi.updateDescription(sticker.id, value)
         } catch (err) {
@@ -160,9 +85,7 @@ export const RoadmapNode = ({ data, selected }) => {
 
     const handleDateChange = async (date) => {
         const iso = date ? date.toISOString() : null
-
         updateSticker(sticker.id, { date: iso, completed: false })
-
         try {
             await roadmapApi.updateDate(sticker.id, iso, false)
         } catch (err) {
@@ -172,9 +95,7 @@ export const RoadmapNode = ({ data, selected }) => {
 
     const handleDateClear = async (e) => {
         e.stopPropagation()
-
         updateSticker(sticker.id, { date: null, completed: false })
-
         try {
             await roadmapApi.updateDate(sticker.id, null, false)
         } catch (err) {
@@ -185,12 +106,10 @@ export const RoadmapNode = ({ data, selected }) => {
     return (
         <div
             onPointerDown={() => bringToFront(sticker.id)}
-            className={`
-        group node relative overflow-visible
-        ${isCompleted ? 'nodeCompleted' : ''}
-        ${isCancelled ? 'nodeCancelled' : ''}
-        ${selected ? 'nodeSelected' : ''}
-      `}
+            className={`group node relative overflow-visible
+                ${isCompleted ? 'nodeCompleted' : ''}
+                ${isCancelled ? 'nodeCancelled' : ''}
+                ${selected ? 'nodeSelected' : ''}`}
             style={{ zIndex: sticker.zIndex }}
         >
             <Handle type="target" position={Position.Left} className="!bg-gray-400 !w-3 !h-3 !left-[-6px] !border-2 !border-white" />
@@ -204,24 +123,12 @@ export const RoadmapNode = ({ data, selected }) => {
                 }}
                 className="dropdownArrow iconButton"
             >
-                <DateIcon
-                    className={`w-5 h-5 transition-transform duration-200 ${showMenu ? 'rotate-180' : ''}`}
-                />
+                <DateIcon className={`w-5 h-5 transition-transform duration-200 ${showMenu ? 'rotate-180' : ''}`} />
             </button>
 
             <div className="actionButtons">
-                <button
-                    onClick={handleToggleCancelled}
-                    className="iconButton"
-                >
+                <button onClick={handleToggleCancelled} className="iconButton">
                     {isCancelled ? <CancelActiveIcon className="w-6 h-6" /> : <CancelIcon className="w-6 h-6" />}
-                </button>
-
-                <button
-                    onClick={handleDelete}
-                    className="iconButton"
-                >
-                    <DeleteIcon className="w-6 h-6" />
                 </button>
             </div>
 
@@ -253,66 +160,18 @@ export const RoadmapNode = ({ data, selected }) => {
             <button
                 onClick={(e) => {
                     e.stopPropagation()
-                    if (!isCancelled) {
-                        void addRoadmapBranch(sticker.id)
-                    }
+                    if (!isCancelled) void addRoadmapBranch(sticker.id)
                 }}
                 disabled={isCancelled}
                 className={`plusButton ${isCancelled ? 'plusButtonDisabled' : ''}`}
             >
                 +
             </button>
-            {showDeleteChoice && (
-                <div
-                    ref={menuRef}
-                    className="deleteMenu absolute left-full top-1/7 -translate-y-1/2 ml-4 z-50
-                   bg-white rounded-3xl shadow-xl border border-gray-200
-                   w-[180px] p-5 flex flex-col gap-4
-                   animate-fadeInUp"
-                    onPointerDown={e => e.stopPropagation()}
-                >
-                    <div className="text-xs text-gray-500 leading-relaxed bg-white ">
-                        Выберите, что хотите удалить:
-                    </div>
-
-                    <div className="flex flex-col gap-3 pt-2">
-                        <button
-                            onClick={deleteOnlyParent}
-                            className="w-full px-5 py-3 rounded-xl border border-gray-300
-                           text-gray-800 font-medium text-sm
-                           hover:border-gray-400 hover:bg-gray-50
-                           transition-all duration-200"
-                        >
-                            Только этот элемент
-                        </button>
-
-                        <button
-                            onClick={deleteWithChildren}
-                            className="w-full px-5 py-3 rounded-xl border border-red-300
-                           text-red-600 font-medium text-sm
-                           hover:border-red-400 hover:bg-red-50
-                           transition-all duration-200"
-                        >
-                            Элемент и все дочерние
-                        </button>
-                    </div>
-
-                    <button
-                        onClick={() => setShowDeleteChoice(false)}
-                        className="mt-2 text-sm text-gray-400 hover:text-gray-600
-                       transition-colors font-medium"
-                    >
-                        Отмена
-                    </button>
-                </div>
-            )}
-
-
 
             {showMenu && (
                 <div
                     ref={menuRef}
-                    className=" detailMenu absolute left-1/2 top-full mt-2 -translate-x-1/2 w-[200px] border shadow-[0_8px_24px_rgba(0,0,0,0.06)] z-50"
+                    className="detailMenu absolute left-1/2 top-full mt-2 -translate-x-1/2 w-[200px] border shadow-[0_8px_24px_rgba(0,0,0,0.06)] z-50"
                     onPointerDown={e => e.stopPropagation()}
                 >
                     <div className="px-5 pt-4 pb-5 space-y-4 rounded-3xl">
@@ -322,20 +181,19 @@ export const RoadmapNode = ({ data, selected }) => {
                                     e.stopPropagation()
                                     setShowCalendar(prev => !prev)
                                 }}
-                                className=" dateButton w-full flex items-center justify-between px-4 py-3 text-[15px] font-medium text-gray-800 bg-gray-10 hover:bg-gray-50 transition"
+                                className="dateButton w-full flex items-center justify-between px-4 py-3 text-[15px] font-medium text-gray-800 bg-gray-10 hover:bg-gray-50 transition"
                             >
                                 <span className="font-mono text-[13px] tracking-tight text-gray-700">
                                     {sticker.date
                                         ? format(new Date(sticker.date), 'd MMM yyyy', { locale: ru })
                                         : 'Выбрать дату'}
                                 </span>
-
                                 <Calendar className="w-3 h-3 text-gray-500" />
                             </button>
 
                             {showCalendar && (
                                 <div
-                                    className=" absolute top-1/2 -translate-y-1/2 right-full mr-2 z-50 scale-95 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden"
+                                    className="absolute top-1/2 -translate-y-1/2 right-full mr-2 z-50 scale-95 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden"
                                     onPointerDown={e => e.stopPropagation()}
                                 >
                                     <DatePicker
@@ -348,7 +206,6 @@ export const RoadmapNode = ({ data, selected }) => {
                                         locale={ru}
                                         calendarClassName="border-0 shadow-none"
                                     />
-
                                     <button
                                         onPointerDown={e => {
                                             e.stopPropagation()
@@ -368,7 +225,7 @@ export const RoadmapNode = ({ data, selected }) => {
                         </div>
 
                         <textarea
-                            className=" textPlace w-full min-h-[120px] box-border px-4 py-3 rounded-xl bg-gray-20 text-[15px] text-gray-800 resize-none outline-none placeholder-gray-400 focus:bg-white focus:ring-1 focus:ring-gray-300 transition"
+                            className="textPlace w-full min-h-[120px] box-border px-4 py-3 rounded-xl bg-gray-20 text-[15px] text-gray-800 resize-none outline-none placeholder-gray-400 focus:bg-white focus:ring-1 focus:ring-gray-300 transition"
                             placeholder="Текст..."
                             spellCheck={false}
                             value={sticker.description || ''}
@@ -388,7 +245,6 @@ export const RoadmapNode = ({ data, selected }) => {
                         const h = Math.max(1, Math.round(params.height))
 
                         updateSticker(sticker.id, { width: w, height: h })
-
                         try {
                             await roadmapApi.updateSize(sticker.id, w, h)
                         } catch (err) {

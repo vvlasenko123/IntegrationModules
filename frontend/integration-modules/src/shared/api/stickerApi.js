@@ -4,7 +4,6 @@ async function parseError(res) {
 }
 
 export const stickersApi = {
-    // справочник стикеров
     async getAll() {
         const res = await fetch('/api/v1/stickers/get-all')
         if (!res.ok) {
@@ -23,7 +22,7 @@ export const stickersApi = {
         return await res.json()
     },
 
-    // placement
+
     async addToBoard(stickerId, width = 80, height = 80) {
         const res = await fetch('/api/v1/stickers/board', {
             method: 'POST',

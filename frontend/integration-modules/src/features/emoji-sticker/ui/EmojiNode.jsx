@@ -1,58 +1,18 @@
-import React, {useEffect, useState} from 'react'
+import React from 'react'
 import { NodeResizer, Handle, Position } from '@xyflow/react'
 import { useStickersStore } from '../../../entities/stickers/model/useStickersStore.js'
-import { stickersApi } from '../../../shared/api/stickerApi'
-import { EMOJI_CATALOG } from '../stickers.js'
 import '../../../styles/sticker.css'
+import {stickersApi} from "../../../shared/api/stickerApi.js";
 
 export const EmojiNode = ({ id, selected }) => {
     const sticker = useStickersStore(s =>
         s.stickers.find(x => String(x.id) === String(id))
     )
 
-    const updateSticker = useStickersStore(s => s.updateSticker)
-    const removeSticker = useStickersStore(s => s.removeSticker)
     const bringToFront = useStickersStore(s => s.bringToFront)
-    const emoji = sticker.imageUrl
-    const [menuVisible, setMenuVisible] = useState(false)
-    const [menuPos, setMenuPos] = useState({ x: 0, y: 0 })
+    const updateSticker = useStickersStore(s => s.updateSticker)
 
-    const onContextMenu = (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-
-        let x = e.clientX
-        let y = e.clientY
-
-        if (x + 140 > window.innerWidth) {
-            x = window.innerWidth - 148
-        }
-        if (y + 40 > window.innerHeight) {
-            y = window.innerHeight - 48
-        }
-
-        setMenuPos({ x, y })
-        setMenuVisible(true)
-    }
-
-    const handleDelete = async () => {
-        setMenuVisible(false)
-
-        try {
-            await stickersApi.removeFromBoard(id)
-            removeSticker(id)
-        } catch {
-            alert('Не удалось удалить эмодзи')
-        }
-    }
-
-    useEffect(() => {
-        const handleClose = () => setMenuVisible(false)
-        document.addEventListener('click', handleClose)
-        return () => document.removeEventListener('click', handleClose)
-    }, [])
-
-    if (!sticker || !emoji) return null
+    if (!sticker || !sticker.imageUrl) return null
 
     return (
         <>
@@ -80,42 +40,13 @@ export const EmojiNode = ({ id, selected }) => {
             <div
                 style={{ width: sticker.width, height: sticker.height, position: 'relative' }}
                 onPointerDown={() => bringToFront(id)}
-                onContextMenu={onContextMenu}
             >
-                <img src={sticker.imageUrl} draggable={false} style={{ width: '100%', height: '100%' }} />
+                <img
+                    src={sticker.imageUrl}
+                    draggable={false}
+                    style={{ width: '100%', height: '100%' }}
+                />
             </div>
-
-            {menuVisible && (
-                <div
-                    style={{
-                        position: 'absolute',
-                        top: 4,
-                        right: 4,
-                        background: '#fff',
-                        border: '1px solid #ccc',
-                        borderRadius: 6,
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                        padding: 2,
-                        zIndex: 1000,
-                        display: 'flex',
-                        alignItems: 'center'
-                    }}
-                >
-                    <button
-                        style={{
-                            border: 'none',
-                            background: 'none',
-                            padding: '3px 7px',
-                            cursor: 'pointer',
-                            fontSize: 12,
-                            color: '#3c3c3c'
-                        }}
-                        onClick={handleDelete}
-                    >
-                        Удалить
-                    </button>
-                </div>
-            )}
         </>
     )
 }

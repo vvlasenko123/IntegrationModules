@@ -11,15 +11,11 @@ export const NoteNode = ({ id, selected }) => {
     )
 
     const updateSticker = useStickersStore(s => s.updateSticker)
-    const { setText, bringToFront, removeSticker } = useStickersStore()
+    const { setText, bringToFront } = useStickersStore()
 
     const [localText, setLocalText] = useState('')
     const contentRef = useRef(null)
     const [editing, setEditing] = useState(false)
-
-    const [menuVisible, setMenuVisible] = useState(false)
-    const [menuPos, setMenuPos] = useState({ x: 0, y: 0 })
-
 
     const fitText = () => {
         const el = contentRef.current
@@ -55,10 +51,8 @@ export const NoteNode = ({ id, selected }) => {
         if (!sticker || editing) return
         const el = contentRef.current
         if (!el) return
-
         const current = el.innerText.replace(/\u200B/g, '')
-        const newText = localText // используем localText, а не sticker.text
-
+        const newText = localText
         if (current !== newText) el.innerText = newText
     }, [localText, editing])
 
@@ -66,7 +60,6 @@ export const NoteNode = ({ id, selected }) => {
         if (!sticker) return
         setLocalText(sticker.text || '')
     }, [sticker?.id])
-
 
     const notifyTouched = () => {
         window.dispatchEvent(
@@ -81,12 +74,11 @@ export const NoteNode = ({ id, selected }) => {
 
     const onBlur = async () => {
         setEditing(false)
-        setText(id, localText) // сохраняем в Zustand
+        setText(id, localText)
         try {
-            await notesApi.updateContent(id, localText) // сохраняем на сервере
+            await notesApi.updateContent(id, localText)
         } catch {}
     }
-
 
     const onPaste = (e) => {
         e.preventDefault()
@@ -94,29 +86,8 @@ export const NoteNode = ({ id, selected }) => {
         document.execCommand('insertText', false, text)
     }
 
-    const handleContextMenu = (e) => {
-        e.preventDefault()
-        bringToFront(id)
-        setMenuVisible(true)
-        setMenuPos({ x: e.clientX, y: e.clientY })
-    }
-
-    const handleDelete = async () => {
-        setMenuVisible(false)
-        try {
-            await notesApi.delete(id)
-            removeSticker(id)
-        } catch {
-            alert('Не удалось удалить заметку')
-        }
-    }
-
-    useEffect(() => {
-        const handleClickOutside = () => setMenuVisible(false)
-        window.addEventListener('click', handleClickOutside)
-        return () => window.removeEventListener('click', handleClickOutside)
-    }, [])
     if (!sticker) return null
+
     return (
         <div
             className={`resizable-sticker-wrapper ${selected ? 'resizable-sticker-wrapper--active' : ''}`}
@@ -126,7 +97,6 @@ export const NoteNode = ({ id, selected }) => {
                 bringToFront(id)
                 notifyTouched()
             }}
-            onContextMenu={handleContextMenu} // ПКМ
         >
             <div
                 className={`sticker-root ${editing ? 'sticker-root--editing' : ''}`}
@@ -151,8 +121,6 @@ export const NoteNode = ({ id, selected }) => {
                         notifyTouched()
 
                         if (!editing) return
-
-
                         contentRef.current?.focus()
                         const range = document.caretRangeFromPoint
                             ? document.caretRangeFromPoint(e.clientX, e.clientY)
@@ -210,39 +178,6 @@ export const NoteNode = ({ id, selected }) => {
                     }}
                 />
             </div>
-
-            {menuVisible && (
-                <div
-                    style={{
-                        position: 'absolute',
-                        top: 4,
-                        right: 4,
-                        background: '#fff',
-                        border: '1px solid #ccc',
-                        borderRadius: 6,
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                        padding: 2,
-                        zIndex: 1000,
-                        display: 'flex',
-                        alignItems: 'center'
-                    }}
-                >
-                    <button
-                        style={{
-                            border: 'none',
-                            background: 'none',
-                            padding: '3px 7px',
-                            cursor: 'pointer',
-                            fontSize: 12,
-                            color: '#3c3c3c'
-                        }}
-                        onClick={handleDelete}
-                    >
-                        Удалить
-                    </button>
-                </div>
-            )}
-
         </div>
     )
 }

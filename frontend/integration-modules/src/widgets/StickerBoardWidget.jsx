@@ -19,13 +19,12 @@ export const StickerBoardWidget = () => {
 
     const boardRef = useRef(null)
     const [WidgetComp, setWidgetComp] = useState(() => SafeFallbackWidget)
+
     async function getEmojiUrlForStickerId(stickerId) {
-        // быстрый синхронный lookup по локальной карте
         if (EMOJI_MAP && EMOJI_MAP[stickerId]) {
             return EMOJI_MAP[stickerId]
         }
 
-        // fallback: попробуем запросить справочник стикеров у бекенда и найти name -> url в EMOJI_CATALOG
         try {
             const info = await stickersApi.getById(stickerId) // { id, name }
             if (info?.name) {
@@ -33,11 +32,10 @@ export const StickerBoardWidget = () => {
                 if (local) return local.url
             }
         } catch (err) {
-            // ignore — вернём пустую строку ниже
             console.warn('getEmojiUrlForStickerId: backend lookup failed', err)
         }
 
-        return '' // ничего не найдено
+        return ''
     }
     useEffect(() => {
         const loadBoard = async () => {
@@ -90,10 +88,8 @@ export const StickerBoardWidget = () => {
                     const w = e.width ?? EMOJI_W
                     const h = e.height ?? EMOJI_H
 
-                    // сначала попытка синхронного получения из EMOJI_MAP
                     let imageUrl = EMOJI_MAP?.[String(e.stickerId)] ?? ''
 
-                    // если не найден — пусть помощник сделает запрос (может вернуть через name -> EMOJI_CATALOG)
                     if (!imageUrl) {
                         try {
                             imageUrl = await getEmojiUrlForStickerId(e.stickerId)
@@ -113,7 +109,7 @@ export const StickerBoardWidget = () => {
                         text: '',
                         zIndex: 1,
                         stickerId: e.stickerId,
-                        imageUrl // теперь заполняется
+                        imageUrl
                     })
 
                     x += 24

@@ -16,27 +16,18 @@ export const ShapeNode = ({ id, data, style }) => {
     const bringToFront = useStickersStore(s => s.bringToFront)
     const selectSticker = useStickersStore(s => s.selectSticker)
     const selectedId = useStickersStore(s => s.selectedId)
-    const removeSticker = useStickersStore(s => s.removeSticker)
-
     const { setNodes } = useReactFlow()
-
     const rotateControlRef = useRef(null)
     const rotationRef = useRef(0)
     const sizeRef = useRef({ width: 0, height: 0 })
-
     const [rotation, setRotation] = useState(0)
     const [localSize, setLocalSize] = useState({ width: 140, height: 140 })
-    const [menuVisible, setMenuVisible] = useState(false)
     const [isRotating, setIsRotating] = useState(false)
 
     const isSelected = selectedId === sticker?.id
 
-    /**
-     * Синхронизация размеров и поворота из store
-     */
     useEffect(() => {
         if (!sticker) return
-
         const w = Number(sticker.width) || 140
         const h = Number(sticker.height) || 140
         const r = Number(sticker.rotation) || 0
@@ -48,16 +39,10 @@ export const ShapeNode = ({ id, data, style }) => {
         setRotation(r)
     }, [sticker])
 
-    /**
-     * Синхронизация ref поворота
-     */
     useEffect(() => {
         rotationRef.current = rotation
     }, [rotation])
 
-    /**
-     * Drag для поворота
-     */
     useEffect(() => {
         if (!sticker || !isSelected) return
 
@@ -88,33 +73,19 @@ export const ShapeNode = ({ id, data, style }) => {
                 rotationRef.current = deg
                 setRotation(deg)
             })
-            .on('end', async () => {
+            .on('end', () => {
                 setIsRotating(false)
-
-                const width = Math.max(1, Math.round(sizeRef.current.width))
-                const height = Math.max(1, Math.round(sizeRef.current.height))
                 const rot = Number(rotationRef.current) || 0
-
                 updateSticker(sticker.id, { rotation: rot })
-
-                try {
-                    await shapesApi.updateBoardTransform(id, width, height, rot)
-                } catch (e) {
-                    console.warn('Не удалось сохранить поворот фигуры', e)
-                }
             })
 
         selection.call(dragHandler)
 
         return () => selection.on('.drag', null)
-    }, [isSelected, sticker, id, updateSticker])
+    }, [isSelected, sticker, updateSticker])
 
-    /**
-     * Рендер фигуры
-     */
     const renderShape = useMemo(() => {
         if (!sticker) return null
-
         const fn = shapes[sticker.shapeId]
         return fn ? fn(sticker) : shapes.square(sticker)
     }, [sticker])
@@ -122,29 +93,8 @@ export const ShapeNode = ({ id, data, style }) => {
     const handleClick = e => {
         e.stopPropagation()
         if (!sticker) return
-
         bringToFront(sticker.id)
         selectSticker(sticker.id)
-    }
-
-    const handleContextMenu = e => {
-        e.preventDefault()
-        e.stopPropagation()
-        setMenuVisible(true)
-    }
-
-    const handleDelete = async () => {
-        if (!sticker) return
-
-        setMenuVisible(false)
-
-        try {
-            await shapesApi.delete(sticker.id)
-            removeSticker(sticker.id)
-        } catch (err) {
-            console.warn('Не удалось удалить фигуру', err)
-            alert('Не удалось удалить фигуру')
-        }
     }
 
     if (!sticker) return null
@@ -153,7 +103,6 @@ export const ShapeNode = ({ id, data, style }) => {
         <>
             <div
                 onClick={handleClick}
-                onContextMenu={handleContextMenu}
                 style={{
                     ...style,
                     position: 'relative',
@@ -234,38 +183,6 @@ export const ShapeNode = ({ id, data, style }) => {
                 <Handle type="target" position={Position.Left} className="z-100000" />
                 <Handle type="source" position={Position.Right} className="z-100000" />
             </div>
-
-            {menuVisible && (
-                <div
-                    className="sticker-context-menu"
-                    style={{
-                        position: 'absolute',
-                        top: 4,
-                        right: 4,
-                        background: '#fff',
-                        border: '1px solid #ccc',
-                        borderRadius: 6,
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                        padding: 2,
-                        zIndex: 1000,
-                        display: 'flex',
-                        alignItems: 'center'
-                    }}>
-                    <button
-                        style={{
-                            border: 'none',
-                            background: 'none',
-                            padding: '3px 7px',
-                            cursor: 'pointer',
-                            fontSize: 12,
-                            color: '#3c3c3c'
-                        }}
-                        onClick={handleDelete}
-                    >
-                        Удалить
-                    </button>
-                </div>
-            )}
         </>
     )
 }

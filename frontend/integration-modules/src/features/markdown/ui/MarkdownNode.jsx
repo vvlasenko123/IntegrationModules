@@ -6,14 +6,13 @@ import { useStickersStore } from '../../../entities/stickers/model/useStickersSt
 import { markdownApi } from '../../../shared/api/markdownApi'
 import '../markdown.css'
 
-export const MarkdownNode = ({ data}) => {
+export const MarkdownNode = ({ data }) => {
     const sticker = useStickersStore(s =>
         s.stickers.find(x => x.id === data.stickerId)
     )
 
-    const [localSize, setLocalSize] = useState({ width: 600, height: 400 });
-    const { updateSticker, removeSticker, bringToFront, topZ, selectedId } =
-        useStickersStore()
+    const [localSize, setLocalSize] = useState({ width: 600, height: 400 })
+    const { updateSticker, bringToFront, topZ, selectedId } = useStickersStore()
 
     const [draft, setDraft] = useState(sticker?.text || '')
     const [isEditorVisible, setIsEditorVisible] = useState(sticker?.isEditorVisible ?? true)
@@ -24,10 +23,7 @@ export const MarkdownNode = ({ data}) => {
     const markdownIdRef = useRef(sticker?.stickerId)
 
     useEffect(() => {
-        if (!sticker) {
-            return
-        }
-
+        if (!sticker) return
         setDraft(sticker.text || '')
         setIsEditorVisible(sticker.isEditorVisible ?? true)
     }, [sticker?.id])
@@ -54,36 +50,20 @@ export const MarkdownNode = ({ data}) => {
     const getMarkdownId = () => markdownIdRef.current
 
     const onPointerDown = (e) => {
-        if (!sticker) {
-            return
-        }
-
-        if (e.target?.closest?.('.react-flow__resize-control')) {
-            return
-        }
-
+        if (!sticker) return
+        if (e.target?.closest?.('.react-flow__resize-control')) return
         if (sticker.zIndex !== (topZ || 0) + 1) {
             updateSticker(sticker.id, { zIndex: (topZ || 1) + 1 })
         }
-
         bringToFront(sticker.id)
     }
+
     if (!sticker) return null
 
     const flushPendingContent = async () => {
-        if (!pendingSaveRef.current) {
-            return
-        }
-
+        if (!pendingSaveRef.current) return
         const markdownId = getMarkdownId()
-        if (!markdownId) {
-            return
-        }
-
-        if (savingRef.current) {
-            return
-        }
-
+        if (!markdownId || savingRef.current) return
         savingRef.current = true
         pendingSaveRef.current = false
 
@@ -96,15 +76,9 @@ export const MarkdownNode = ({ data}) => {
         }
     }
 
-
-
     const saveContent = async () => {
-        if (!sticker) {
-            return
-        }
-
+        if (!sticker) return
         updateSticker(sticker.id, { text: draft })
-
         const markdownId = getMarkdownId()
         if (!markdownId) {
             pendingSaveRef.current = true
@@ -121,12 +95,8 @@ export const MarkdownNode = ({ data}) => {
     }
 
     const saveSize = async (w, h) => {
-        if (!sticker) {
-            return
-        }
-
+        if (!sticker) return
         updateSticker(sticker.id, { width: w, height: h })
-
         try {
             await markdownApi.updateBoardSize(sticker.id, w, h)
         } catch (err) {
@@ -135,41 +105,16 @@ export const MarkdownNode = ({ data}) => {
     }
 
     const toggleEditor = async () => {
-        if (!sticker) {
-            return
-        }
-
+        if (!sticker) return
         const next = !isEditorVisible
-
         setIsEditorVisible(next)
         updateSticker(sticker.id, { isEditorVisible: next })
-
         try {
             await markdownApi.updateBoardEditorState(sticker.id, next)
         } catch (err) {
             console.warn('Не удалось сохранить состояние редактора markdown:', err)
         }
     }
-
-    const deleteItem = async () => {
-        if (!sticker) return
-
-        const markdownId = getMarkdownId()
-
-        try {
-            await markdownApi.deleteBoard(sticker.id)
-
-            if (markdownId) {
-                await markdownApi.deleteById(markdownId)
-            }
-        } catch (err) {
-            console.warn('Не удалось удалить markdown:', err)
-        } finally {
-            removeSticker(sticker.id)
-        }
-    }
-
-
 
     return (
         <div
@@ -183,13 +128,13 @@ export const MarkdownNode = ({ data}) => {
                 minWidth={300}
                 minHeight={200}
                 onResize={(_, params) => {
-                    setLocalSize({ width: params.width, height: params.height });
+                    setLocalSize({ width: params.width, height: params.height })
                 }}
                 onResizeEnd={async (_, params) => {
-                    const w = Math.max(1, Math.round(Number(params.width) || 1));
-                    const h = Math.max(1, Math.round(Number(params.height) || 1));
-                    updateSticker(sticker.id, { width: w, height: h });
-                    await saveSize(w, h);
+                    const w = Math.max(1, Math.round(Number(params.width) || 1))
+                    const h = Math.max(1, Math.round(Number(params.height) || 1))
+                    updateSticker(sticker.id, { width: w, height: h })
+                    await saveSize(w, h)
                 }}
             />
 
@@ -198,7 +143,6 @@ export const MarkdownNode = ({ data}) => {
 
             <div className="cb-header cb-drag-handle">
                 <span className="cb-title">Markdown</span>
-
                 <div className="cb-header-actions">
                     <div className="cb-help">
                         ?
@@ -224,19 +168,7 @@ export const MarkdownNode = ({ data}) => {
                     >
                         {isEditorVisible ? 'Скрыть редактор' : 'Показать редактор'}
                     </button>
-
-                    <button
-                        className="cb-close"
-                        onClick={async (e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            await deleteItem()
-                        }}
-                    >
-                        ✕
-                    </button>
                 </div>
-
             </div>
 
             <div className="cb-body nodrag nopan">
@@ -245,12 +177,8 @@ export const MarkdownNode = ({ data}) => {
                         <textarea
                             className="cb-textarea"
                             value={draft}
-                            onChange={(e) => {
-                                setDraft(e.target.value)
-                            }}
-                            onBlur={async () => {
-                                await saveContent()
-                            }}
+                            onChange={(e) => setDraft(e.target.value)}
+                            onBlur={async () => saveContent()}
                             placeholder="Type markdown..."
                         />
                     </div>

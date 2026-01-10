@@ -16,7 +16,6 @@ import { DND_SHAPE, DND_EMOJI, DND_MARKDOWN, DND_ROADMAP } from '../features/boa
 import { SHAPE_ICONS } from "./shapeIcons.jsx";
 import markdownAdd from '../assets/markdown_add.svg'
 import markdownAddActive from '../assets/markdown_add_active.svg'
-import { StickerUploadButton } from './StickerUploadButton.jsx';
 
 export const LeftToolbar = ({ onPick }) => {
     const [open, setOpen] = React.useState(false)
