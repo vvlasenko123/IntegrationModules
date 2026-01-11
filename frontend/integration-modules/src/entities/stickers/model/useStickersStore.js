@@ -128,28 +128,11 @@ export const useStickersStore = create((set, get) => ({
         }))
     },
 
-    addStickers: (items) => {
-        set((state) => {
-            const existingIds = new Set(state.stickers.map(s => String(s.id)))
-
-            const next = items.filter(
-                s => !existingIds.has(String(s.id))
-            )
-
-            if (next.length === 0) {
-                return state
-            }
-
-            const maxZ = next.reduce(
-                (acc, x) => Math.max(acc, x.zIndex ?? 1),
-                state.topZ || 1
-            )
-
-            return {
-                stickers: [...state.stickers, ...next],
-                topZ: Math.max(state.topZ || 1, maxZ)
-            }
-        })
+    setStickers: (stickers) => {
+        set(() => ({
+            stickers,
+            topZ: stickers.reduce((acc, x) => Math.max(acc, x.zIndex ?? 1), 1)
+        }))
     },
 
     setEdges: (edges) => {
@@ -230,5 +213,53 @@ export const useStickersStore = create((set, get) => ({
     selectSticker: (id) => {
         set({ selectedId: id })
     },
+    getDescendants: (parentId) => {
+        const { stickers } = get()
+        const result = []
 
+        const walk = (id) => {
+            const children = stickers.filter(
+                s => String(s.parentId) === String(id)
+            )
+
+            for (const child of children) {
+                result.push(child)
+                walk(child.id)
+            }
+        }
+
+        walk(parentId)
+        return result
+    },
+    removeStickersBulk: (ids) => {
+        set((state) => {
+            const idSet = new Set(ids.map(String))
+
+            const filteredStickers = state.stickers.filter(
+                s => !idSet.has(String(s.id))
+            )
+
+            return {
+                stickers: filteredStickers,
+                edges: state.edges.filter(
+                    e =>
+                        !idSet.has(String(e.source)) &&
+                        !idSet.has(String(e.target))
+                ),
+                topZ: filteredStickers.reduce(
+                    (acc, x) => Math.max(acc, x.zIndex ?? 1),
+                    1
+                )
+            }
+        })
+    },
+    detachChildren: (parentId) => {
+        set((state) => ({
+            stickers: state.stickers.map(s =>
+                String(s.parentId) === String(parentId)
+                    ? { ...s, parentId: null }
+                    : s
+            )
+        }))
+    },
 }))
