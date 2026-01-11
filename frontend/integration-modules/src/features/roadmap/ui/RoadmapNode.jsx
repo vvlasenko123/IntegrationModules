@@ -106,7 +106,7 @@ export const RoadmapNode = ({ data, selected }) => {
     return (
         <div
             onPointerDown={() => bringToFront(sticker.id)}
-            className={`group node relative overflow-visible
+            className={`group node relative overflow-visible dragHandle__custom
                 ${isCompleted ? 'nodeCompleted' : ''}
                 ${isCancelled ? 'nodeCancelled' : ''}
                 ${selected ? 'nodeSelected' : ''}`}

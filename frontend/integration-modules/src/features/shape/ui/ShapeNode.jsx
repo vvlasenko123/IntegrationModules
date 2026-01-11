@@ -4,6 +4,7 @@ import { useStickersStore } from '../../../entities/stickers/model/useStickersSt
 import { shapes } from './shapes.jsx'
 import '@xyflow/react/dist/style.css'
 import { select } from 'd3-selection'
+import revertIcon from '../../../assets/revert.svg'
 import { drag } from 'd3-drag'
 import { shapesApi } from '../../../shared/api/shapesApi'
 
@@ -103,11 +104,12 @@ export const ShapeNode = ({ id, data, style }) => {
         <>
             <div
                 onClick={handleClick}
+                className="dragHandle__custom"
                 style={{
                     ...style,
                     position: 'relative',
                     zIndex: sticker.zIndex,
-                    cursor: isRotating ? 'grabbing' : 'pointer',
+                    cursor: isRotating ? 'grabbing' : 'grab',
                     width: localSize.width,
                     height: localSize.height,
                     transform: `rotate(${rotation}deg)`,
@@ -168,16 +170,28 @@ export const ShapeNode = ({ id, data, style }) => {
                         className="nodrag nopan"
                         style={{
                             position: 'absolute',
-                            width: 16,
-                            height: 16,
-                            borderRadius: '50%',
-                            background: 'blue',
-                            top: -8,
+                            width: 15,
+                            height: 15,
+                            top: -24,
                             right: -8,
                             cursor: 'grab',
                             zIndex: 1000,
+                            pointerEvents: 'auto',
+                            transform: `translateX(-50%) rotate(${rotation}deg)`,
+                            transition: isRotating ? 'none' : 'transform 0.15s ease-out',
                         }}
-                    />
+                    >
+                        <img
+                            src={revertIcon}
+                            alt="Rotate"
+                            draggable={false}
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain',
+                            }}
+                        />
+                    </div>
                 )}
 
                 <Handle type="target" position={Position.Left} className="z-100000" />

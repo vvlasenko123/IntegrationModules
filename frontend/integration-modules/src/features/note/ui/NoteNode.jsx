@@ -99,7 +99,7 @@ export const NoteNode = ({ id, selected }) => {
             }}
         >
             <div
-                className={`sticker-root ${editing ? 'sticker-root--editing' : ''}`}
+                className={`sticker-root ${editing ? 'sticker-root--editing' : ''} dragHandle__custom`}
                 style={{
                     width: '100%',
                     height: '100%',

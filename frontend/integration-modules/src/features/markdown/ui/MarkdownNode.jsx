@@ -141,7 +141,7 @@ export const MarkdownNode = ({ data }) => {
             <Handle type="target" position={Position.Left} />
             <Handle type="source" position={Position.Right} />
 
-            <div className="cb-header cb-drag-handle">
+            <div className="cb-header dragHandle__custom cb-drag-handle">
                 <span className="cb-title">Markdown</span>
                 <div className="cb-header-actions">
                     <div className="cb-help">

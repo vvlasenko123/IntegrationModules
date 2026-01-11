@@ -1,7 +1,7 @@
 {
   "name": "integration-modules",
   "private": false,
-  "version": "0.0.0",
+  "version": "0.0.4",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
@@ -12,7 +12,12 @@
     ".": {
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
-    }
+    },
+    "./note":    "./dist/widgets/NoteBoardWidget.js",
+    "./emoji":   "./dist/widgets/EmojiBoardWidget.js",
+    "./shape":   "./dist/widgets/ShapeBoardWidget.js",
+    "./markdown": "./dist/widgets/MarkdownBoardWidget.js",
+    "./roadmap": "./dist/widgets/RoadmapBoardWidget.js"
   },
   "sideEffects": [
     "*.css"

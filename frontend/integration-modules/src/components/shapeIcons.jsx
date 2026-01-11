@@ -82,7 +82,7 @@ export const SHAPE_ICONS = {
     ),
 
     chevron: (
-        <svg width="100%" height="60%" viewBox="0 0 100 100">
+        <svg width="40" height="40" viewBox="0 0 100 100">
             <polyline
                 points="0,0 50,100 100,0"
                 fill="none"

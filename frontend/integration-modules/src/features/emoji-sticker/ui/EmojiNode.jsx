@@ -38,6 +38,7 @@ export const EmojiNode = ({ id, selected }) => {
             <Handle type="source" position={Position.Right} />
 
             <div
+                className="dragHandle__custom"
                 style={{ width: sticker.width, height: sticker.height, position: 'relative' }}
                 onPointerDown={() => bringToFront(id)}
             >

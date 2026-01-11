@@ -1,4 +1,10 @@
+import "./styles/stickerPalette.css";
+import "./styles/sticker.css";
 import "./index.css";
 
-export { StickerBoardWidget } from "./widgets/StickerBoardWidget.jsx";
-export { StickerBoardWidget as default } from "./widgets/StickerBoardWidget.jsx";
+export { NoteBoardWidget } from './widgets/NoteBoardWidget.jsx';
+export { EmojiBoardWidget } from './widgets/EmojiBoardWidget.jsx';
+export { ShapeBoardWidget } from './widgets/ShapeBoardWidget.jsx';
+export { MarkdownBoardWidget } from './widgets/MarkdownBoardWidget.jsx';
+export { RoadmapBoardWidget } from './widgets/RoadmapBoardWidget.jsx';
+
